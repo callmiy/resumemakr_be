@@ -1,5 +1,5 @@
 # Since configuration is shared in umbrella projects, this file
-# should only configure the :resume_builder_web application itself
+# should only configure the :web application itself
 # and only for organization purposes. All other config goes to
 # the umbrella root.
 use Mix.Config
@@ -10,8 +10,8 @@ use Mix.Config
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
-config :resume_builder_web, ResumeBuilderWeb.Endpoint,
-  http: [port: System.get_env('PHOENIX_RESUME_BUILDER_PORT') || 4000],
+config :web, Web.Endpoint,
+  http: [port: System.get_env("PHOENIX_RESUME_BUILDER_PORT") || 4000],
   debug_errors: true,
   code_reloader: false,
   check_origin: false,

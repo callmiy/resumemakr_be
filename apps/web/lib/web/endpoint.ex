@@ -1,7 +1,7 @@
-defmodule ResumeBuilderWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :resume_builder_web
+defmodule Web.Endpoint do
+  use Phoenix.Endpoint, otp_app: :web
 
-  socket "/socket", ResumeBuilderWeb.UserSocket,
+  socket "/socket", Web.UserSocket,
     websocket: true,
     longpoll: false
 
@@ -11,7 +11,7 @@ defmodule ResumeBuilderWeb.Endpoint do
   # when deploying your static files in production.
   plug Plug.Static,
     at: "/",
-    from: :resume_builder_web,
+    from: :web,
     gzip: false,
     only: ~w(css fonts images js favicon.ico robots.txt)
 
@@ -37,8 +37,8 @@ defmodule ResumeBuilderWeb.Endpoint do
   # Set :encryption_salt if you would also like to encrypt it.
   plug Plug.Session,
     store: :cookie,
-    key: "_resume_builder_web_key",
+    key: "_web_key",
     signing_salt: "KjTyxcww"
 
-  plug ResumeBuilderWeb.Router
+  plug Web.Router
 end

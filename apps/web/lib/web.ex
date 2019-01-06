@@ -1,12 +1,12 @@
-defmodule ResumeBuilderWeb do
+defmodule Web do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
 
   This can be used in your application as:
 
-      use ResumeBuilderWeb, :controller
-      use ResumeBuilderWeb, :view
+      use Web, :controller
+      use Web, :view
 
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
@@ -19,25 +19,25 @@ defmodule ResumeBuilderWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: ResumeBuilderWeb
+      use Phoenix.Controller, namespace: Web
       import Plug.Conn
-      import ResumeBuilderWeb.Gettext
-      alias ResumeBuilderWeb.Router.Helpers, as: Routes
+      import Web.Gettext
+      alias Web.Router.Helpers, as: Routes
     end
   end
 
   def view do
     quote do
       use Phoenix.View,
-        root: "lib/resume_builder_web/templates",
-        namespace: ResumeBuilderWeb
+        root: "lib/web/templates",
+        namespace: Web
 
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_flash: 1, get_flash: 2, view_module: 1]
 
-      import ResumeBuilderWeb.ErrorHelpers
-      import ResumeBuilderWeb.Gettext
-      alias ResumeBuilderWeb.Router.Helpers, as: Routes
+      import Web.ErrorHelpers
+      import Web.Gettext
+      alias Web.Router.Helpers, as: Routes
     end
   end
 
@@ -52,7 +52,7 @@ defmodule ResumeBuilderWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import ResumeBuilderWeb.Gettext
+      import Web.Gettext
     end
   end
 

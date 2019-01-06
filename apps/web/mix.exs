@@ -1,9 +1,9 @@
-defmodule ResumeBuilderWeb.MixProject do
+defmodule Web.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :resume_builder_web,
+      app: :web,
       version: "0.1.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -23,7 +23,7 @@ defmodule ResumeBuilderWeb.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {ResumeBuilderWeb.Application, []},
+      mod: {Web.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end

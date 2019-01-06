@@ -1,4 +1,4 @@
-defmodule ResumeBuilderWeb.ConnCase do
+defmodule Web.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -19,10 +19,10 @@ defmodule ResumeBuilderWeb.ConnCase do
     quote do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
-      alias ResumeBuilderWeb.Router.Helpers, as: Routes
+      alias Web.Router.Helpers, as: Routes
 
       # The default endpoint for testing
-      @endpoint ResumeBuilderWeb.Endpoint
+      @endpoint Web.Endpoint
     end
   end
 
