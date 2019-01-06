@@ -8,6 +8,6 @@ use Mix.Config
 config :data, Data.Repo,
   username: "postgres",
   password: "postgres",
-  database: "data_test",
+  database: "resume_builder_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox

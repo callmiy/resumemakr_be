@@ -11,7 +11,7 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :web, Web.Endpoint,
-  http: [port: System.get_env("PHOENIX_RESUME_BUILDER_PORT") || 4000],
+  http: [port: System.get_env("PHOENIX_RESUME_BUILDER_PORT") || 4025],
   debug_errors: true,
   code_reloader: false,
   check_origin: false,

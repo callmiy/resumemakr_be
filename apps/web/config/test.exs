@@ -1,11 +1,15 @@
-# Since configuration is shared in umbrella projects, this file
-# should only configure the :web application itself
-# and only for organization purposes. All other config goes to
-# the umbrella root.
 use Mix.Config
 
-# We don't run a server during test. If one is required,
-# you can enable the server option below.
+app_port = System.get_env("RESUME_BUILDER_PHOENIX_TEST_PORT") || 4026
+
 config :web, Web.Endpoint,
-  http: [port: 4002],
-  server: false
+  http: [port: app_port],
+  server: true
+
+config :data, Data.Repo,
+  username: "postgres",
+  password: "postgres",
+  database: "resume_builder_test",
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox,
+  timeout: 60_000

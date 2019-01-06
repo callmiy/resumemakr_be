@@ -29,7 +29,8 @@ defmodule Web.MixProject do
   end
 
   # Specifies which paths to compile per environment.
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:dev), do: ["lib", "lib_dev"]
+  defp elixirc_paths(:test), do: ["lib", "lib_dev", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   # Specifies your project dependencies.
@@ -39,11 +40,18 @@ defmodule Web.MixProject do
     [
       {:phoenix, "~> 1.4.0"},
       {:phoenix_pubsub, "~> 1.1"},
-      {:phoenix_ecto, "~> 4.0"},
+      {:phoenix_ecto, "~> 4.0", override: true},
       {:gettext, "~> 0.11"},
       {:data, in_umbrella: true},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:absinthe, "~> 1.4"},
+      {:dataloader, "~> 1.0"},
+      {:absinthe_plug, "~> 1.4"},
+      {:absinthe_phoenix, "~> 1.4.0"},
+      {:corsica, "~> 1.1"},
+      {:mox, "~> 0.4.0", only: :test},
+      {:guardian, "~> 1.1"}
     ]
   end
 

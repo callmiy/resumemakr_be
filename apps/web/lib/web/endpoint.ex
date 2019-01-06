@@ -25,7 +25,7 @@ defmodule Web.Endpoint do
   plug Plug.Logger
 
   plug Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json],
+    parsers: [:urlencoded, :multipart, :json, Absinthe.Plug.Parser],
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
 
@@ -39,6 +39,10 @@ defmodule Web.Endpoint do
     store: :cookie,
     key: "_web_key",
     signing_salt: "KjTyxcww"
+
+  plug Corsica,
+    origins: "*",
+    allow_headers: ~w(Accept Content-Type Authorization Origin)
 
   plug Web.Router
 end

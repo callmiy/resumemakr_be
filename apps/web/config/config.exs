@@ -4,18 +4,24 @@
 # the umbrella root.
 use Mix.Config
 
-# General application configuration
 config :web,
   ecto_repos: [Data.Repo],
   generators: [context_app: :data]
 
-# Configures the endpoint
 config :web, Web.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "budqoOVXUpYLGI54gqJR5x0l/RNrkUvLXq5N6YYm+71Lqws3WvBuGw08IXUFepTn",
+  secret_key_base: "FcgHpcgHf7DWlPXNO/RWQnpfGOqmHUaHIMjNYUTthcLdq4TOIfquw7r6AzVoAY2W",
   render_errors: [view: Web.ErrorView, accepts: ~w(json)],
   pubsub: [name: Web.PubSub, adapter: Phoenix.PubSub.PG2]
 
-# Import environment specific config. This must remain at the bottom
-# of this file so it overrides the configuration defined above.
+config :phoenix, :json_library, Jason
+
+config :web, Web.Guardian,
+  issuer: "resume_builder",
+  secret_key: "zsnX+gxvw+s3pqc0kXSjMFKgQRIwe14WPF4nQ0M9aDTkQJ+gfAwb36fdhQAmPCh9"
+
+config :web, Web.Plug.Guardian.Pipeline,
+  module: Web.Guardian,
+  error_handler: Web.Plug.Guardian.Pipeline
+
 import_config "#{Mix.env()}.exs"

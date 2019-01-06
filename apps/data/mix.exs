@@ -27,8 +27,8 @@ defmodule Data.MixProject do
     ]
   end
 
-  # Specifies which paths to compile per environment.
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:dev), do: ["lib", "lib_dev"]
+  defp elixirc_paths(:test), do: elixirc_paths(:dev) ++ ["test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   # Specifies your project dependencies.
@@ -37,7 +37,14 @@ defmodule Data.MixProject do
   defp deps do
     [
       {:ecto_sql, "~> 3.0"},
-      {:postgrex, ">= 0.0.0"}
+      {:postgrex, ">= 0.0.0"},
+      {:bcrypt_elixir, "~> 1.1"},
+      {:comeonin, "~> 4.1"},
+      {:mox, "~> 0.4.0", only: :test},
+      {:constantizer, "~> 0.2.0"},
+      {:faker, "~> 0.11.2", only: [:dev, :test]},
+      {:sequence, github: "samba6/sequence", only: [:dev, :test]},
+      {:timex, "~> 3.4"}
     ]
   end
 
