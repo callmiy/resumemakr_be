@@ -1,8 +1,8 @@
-defmodule Web.ResolverUser do
+defmodule Data.ResolverUser do
   alias Data.Accounts
   alias Data.Accounts.User
-  alias Web.Resolver
-  alias Web.Guardian
+  alias Data.Resolver
+  alias Data.Guardian
 
   def create(_root, %{registration: params}, _info) do
     with {:ok, user} <- Accounts.register(params),

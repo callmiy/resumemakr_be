@@ -1,4 +1,4 @@
-defmodule Web.SchemaTypes do
+defmodule Data.SchemaTypes do
   @moduledoc """
   Custom types (scalars, objects and input types) shared among schema types
   """

@@ -1,6 +1,6 @@
-defmodule Web.QueryRegistration do
-  alias Web.QueryCredential
-  alias Web.QueryUser
+defmodule Data.QueryRegistration do
+  alias Data.QueryCredential
+  alias Data.QueryUser
 
   @doc "Register"
   def register do

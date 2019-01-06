@@ -1,4 +1,4 @@
-defmodule Web.SchemaCredential do
+defmodule Data.SchemaCredential do
   use Absinthe.Schema.Notation
 
   @desc "User credential"

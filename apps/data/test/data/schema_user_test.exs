@@ -1,12 +1,12 @@
-defmodule Web.SchemaUserTest do
-  use Web.DataCase
+defmodule Data.SchemaUserTest do
+  use Data.DataCase
 
-  alias Web.Schema
-  alias Web.QueryRegistration, as: RegQuery
+  alias Data.Schema
+  alias Data.QueryRegistration, as: RegQuery
   alias Data.FactoryRegistration, as: RegFactory
-  alias Web.QueryUser, as: Query
+  alias Data.QueryUser, as: Query
   alias Data.FactoryUser, as: Factory
-  alias Web.Guardian
+  alias Data.Guardian
 
   @moduletag :db
 

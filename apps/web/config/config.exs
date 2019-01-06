@@ -16,12 +16,8 @@ config :web, Web.Endpoint,
 
 config :phoenix, :json_library, Jason
 
-config :web, Web.Guardian,
-  issuer: "resume_builder",
-  secret_key: "zsnX+gxvw+s3pqc0kXSjMFKgQRIwe14WPF4nQ0M9aDTkQJ+gfAwb36fdhQAmPCh9"
-
 config :web, Web.Plug.Guardian.Pipeline,
-  module: Web.Guardian,
+  module: Data.Guardian,
   error_handler: Web.Plug.Guardian.Pipeline
 
 import_config "#{Mix.env()}.exs"

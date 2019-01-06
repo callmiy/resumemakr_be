@@ -1,4 +1,4 @@
-defmodule Web.Resolver do
+defmodule Data.Resolver do
   @moduledoc """
   Helper utilities for resolvers
   """

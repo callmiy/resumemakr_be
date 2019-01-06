@@ -7,4 +7,8 @@ use Mix.Config
 config :data,
   ecto_repos: [Data.Repo]
 
+config :data, Data.Guardian,
+  issuer: "resume_builder",
+  secret_key: "zsnX+gxvw+s3pqc0kXSjMFKgQRIwe14WPF4nQ0M9aDTkQJ+gfAwb36fdhQAmPCh9"
+
 import_config "#{Mix.env()}.exs"

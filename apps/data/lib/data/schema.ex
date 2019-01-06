@@ -1,10 +1,10 @@
-defmodule Web.Schema do
+defmodule Data.Schema do
   use Absinthe.Schema
 
   import_types(Absinthe.Type.Custom)
-  import_types(Web.SchemaTypes)
-  import_types(Web.SchemaCredential)
-  import_types(Web.SchemaUser)
+  import_types(Data.SchemaTypes)
+  import_types(Data.SchemaCredential)
+  import_types(Data.SchemaUser)
 
   query do
     import_fields(:user_query)

@@ -1,0 +1,69 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "mix test file",
+      "type": "shell",
+      "command": "mix test ${file}",
+      "problemMatcher": [
+        "mixCompileError",
+        "mixCompileWarning",
+        "mixTestFailure"
+      ]
+    },
+
+    {
+      "label": "mix test file db",
+      "type": "shell",
+      "command": "mix test --include db ${file}",
+      "problemMatcher": [
+        "mixCompileError",
+        "mixCompileWarning",
+        "mixTestFailure"
+      ]
+    },
+
+    {
+      "label": "mix test",
+      "type": "shell",
+      "command": "mix test",
+      "problemMatcher": [
+        "mixCompileError",
+        "mixCompileWarning",
+        "mixTestFailure"
+      ]
+    },
+    {
+      "label": "mix test coverage",
+      "type": "shell",
+      "command": "mix test  --include db --cover",
+      "problemMatcher": [
+        "mixCompileError",
+        "mixCompileWarning",
+        "mixTestFailure"
+      ]
+    },
+    {
+      "label": "iex -S mix",
+      "type": "shell",
+      "command": "iex --werl -S mix",
+      "problemMatcher": [
+        "mixCompileError",
+        "mixCompileWarning",
+        "mixTestFailure"
+      ]
+    },
+    {
+      "label": "iex -S mix phx.server",
+      "type": "shell",
+      "command": "iex --werl -S mix phx.server",
+      "problemMatcher": [
+        "mixCompileError",
+        "mixCompileWarning",
+        "mixTestFailure"
+      ]
+    }
+  ]
+}

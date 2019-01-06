@@ -1,14 +1,14 @@
 defmodule Web.Plug.AbsintheContext do
   @behaviour Plug
 
-  alias Web.Guardian, as: GuardianApp
+  alias Data.Guardian
 
   @doc false
   def init(opts), do: opts
 
   @doc false
   def call(conn, _) do
-    case GuardianApp.Plug.current_resource(conn) do
+    case Guardian.Plug.current_resource(conn) do
       nil ->
         conn
 

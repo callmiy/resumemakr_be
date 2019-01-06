@@ -1,7 +1,7 @@
-defmodule Web.SchemaUser do
+defmodule Data.SchemaUser do
   use Absinthe.Schema.Notation
 
-  alias Web.ResolverUser, as: Resolver
+  alias Data.ResolverUser, as: Resolver
 
   @desc "A User"
   object :user do

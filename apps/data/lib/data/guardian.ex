@@ -1,5 +1,5 @@
-defmodule Web.Guardian do
-  use Guardian, otp_app: :web
+defmodule Data.Guardian do
+  use Guardian, otp_app: :data
 
   alias Data.Accounts
 

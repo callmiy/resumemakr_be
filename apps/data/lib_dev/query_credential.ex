@@ -1,4 +1,4 @@
-defmodule Web.QueryCredential do
+defmodule Data.QueryCredential do
   def all_fields_fragment do
     name = "CredentialAllFieldsFragment"
 

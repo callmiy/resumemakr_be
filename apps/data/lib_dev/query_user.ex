@@ -1,4 +1,4 @@
-defmodule Web.QueryUser do
+defmodule Data.QueryUser do
   @frag_name "UserAllFieldsFragment"
 
   def all_fields_fragment do

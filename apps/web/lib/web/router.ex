@@ -10,22 +10,22 @@ defmodule Web.Router do
   scope "/" do
     pipe_through(:api)
 
+    forward(
+      "/api",
+      Absinthe.Plug,
+      schema: Data.Schema,
+      context: %{pubsub: Web.Endpoint},
+      json_codec: Jason
+    )
+
     if Mix.env() == :dev do
       forward(
         "/graphql",
         Absinthe.Plug.GraphiQL,
-        schema: Web.Schema,
+        schema: Data.Schema,
         context: %{pubsub: Web.Endpoint},
         json_codec: Jason
       )
     end
-
-    forward(
-      "/",
-      Absinthe.Plug,
-      schema: Web.Schema,
-      context: %{pubsub: Web.Endpoint},
-      json_codec: Jason
-    )
   end
 end
