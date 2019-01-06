@@ -1,4 +1,4 @@
-defmodule ResumeBuilder.Umbrella.MixProject do
+defmodule Data.Umbrella.MixProject do
   use Mix.Project
 
   def project do

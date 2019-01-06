@@ -23,7 +23,7 @@ config :web, Web.Endpoint,
 # To get SSL working, you will need to add the `https` key
 # to the previous section and set your `:url` port to 443:
 #
-#     config :resume_builder, Web.Endpoint,
+#     config :data, Web.Endpoint,
 #       ...
 #       url: [host: "example.com", port: 443],
 #       https: [
@@ -47,7 +47,7 @@ config :web, Web.Endpoint,
 # We also recommend setting `force_ssl` in your endpoint, ensuring
 # no data is ever sent via http, always redirecting to https:
 #
-#     config :resume_builder, Web.Endpoint,
+#     config :data, Web.Endpoint,
 #       force_ssl: [hsts: true]
 #
 # Check `Plug.SSL` for all available options in `force_ssl`.
@@ -62,7 +62,7 @@ config :web, Web.Endpoint,
 # Alternatively, you can configure exactly which server to
 # start per endpoint:
 #
-#     config :resume_builder, Web.Endpoint, server: true
+#     config :data, Web.Endpoint, server: true
 #
 # Note you can't rely on `System.get_env/1` when using releases.
 # See the releases documentation accordingly.

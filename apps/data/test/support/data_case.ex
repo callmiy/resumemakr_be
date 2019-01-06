@@ -1,4 +1,4 @@
-defmodule ResumeBuilder.DataCase do
+defmodule Data.DataCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -16,20 +16,20 @@ defmodule ResumeBuilder.DataCase do
 
   using do
     quote do
-      alias ResumeBuilder.Repo
+      alias Data.Repo
 
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import ResumeBuilder.DataCase
+      import Data.DataCase
     end
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(ResumeBuilder.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Data.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(ResumeBuilder.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(Data.Repo, {:shared, self()})
     end
 
     :ok

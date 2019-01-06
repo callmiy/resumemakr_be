@@ -41,7 +41,7 @@ defmodule Web.MixProject do
       {:phoenix_pubsub, "~> 1.1"},
       {:phoenix_ecto, "~> 4.0"},
       {:gettext, "~> 0.11"},
-      {:resume_builder, in_umbrella: true},
+      {:data, in_umbrella: true},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"}
     ]

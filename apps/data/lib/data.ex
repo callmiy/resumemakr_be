@@ -1,6 +1,6 @@
-defmodule ResumeBuilder do
+defmodule Data do
   @moduledoc """
-  ResumeBuilder keeps the contexts that define your domain
+  Data keeps the contexts that define your domain
   and business logic.
 
   Contexts are also responsible for managing your data, regardless

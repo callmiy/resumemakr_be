@@ -6,8 +6,8 @@ use Mix.Config
 
 # General application configuration
 config :web,
-  ecto_repos: [ResumeBuilder.Repo],
-  generators: [context_app: :resume_builder]
+  ecto_repos: [Data.Repo],
+  generators: [context_app: :data]
 
 # Configures the endpoint
 config :web, Web.Endpoint,

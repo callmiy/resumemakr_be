@@ -1,3 +1,0 @@
-# ResumeBuilder
-
-**TODO: Add description**

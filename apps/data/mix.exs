@@ -1,9 +1,9 @@
-defmodule ResumeBuilder.MixProject do
+defmodule Data.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :resume_builder,
+      app: :data,
       version: "0.1.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -22,7 +22,7 @@ defmodule ResumeBuilder.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {ResumeBuilder.Application, []},
+      mod: {Data.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
