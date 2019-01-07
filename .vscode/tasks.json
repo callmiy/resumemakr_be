@@ -26,6 +26,17 @@
     },
 
     {
+      "label": "mix test all db",
+      "type": "shell",
+      "command": "mix test --include db",
+      "problemMatcher": [
+        "mixCompileError",
+        "mixCompileWarning",
+        "mixTestFailure"
+      ]
+    },
+
+    {
       "label": "mix test",
       "type": "shell",
       "command": "mix test",

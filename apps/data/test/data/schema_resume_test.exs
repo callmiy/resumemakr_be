@@ -1,4 +1,4 @@
-defmodule Data.SchemaUserTest do
+defmodule Data.SchemaResumeTest do
   use Data.DataCase
 
   alias Data.Schema
