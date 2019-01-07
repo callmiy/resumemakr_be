@@ -1,8 +1,10 @@
 defmodule Data.FactoryResume do
   use Data.Factory
 
-  # alias Data.Factory
+  alias Data.Factory
+
   @one_nil [1, nil]
+  # @simple_attrs [:user_id, :title, :description]
 
   @doc false
   def insert(_), do: nil
@@ -16,7 +18,8 @@ defmodule Data.FactoryResume do
       experiences: experiences(Enum.random(@one_nil), seq),
       personal_info: personal_info(Enum.random(@one_nil), seq),
       education: education(Enum.random(@one_nil), seq),
-      additional_skills: additional_skills(Enum.random(@one_nil), seq)
+      additional_skills: additional_skills(Enum.random(@one_nil), seq),
+      languages: languages(Enum.random(@one_nil), seq)
     }
     |> Map.merge(attrs)
   end
@@ -74,13 +77,49 @@ defmodule Data.FactoryResume do
   defp additional_skills(_, seq) do
     [
       %{
-        first_name: Faker.Name.first_name(),
-        last_name: Faker.Name.last_name(),
-        address: Faker.Address.street_address(),
-        email: Faker.Internet.email(),
-        phone: Faker.Phone.EnUs.phone(),
-        profession: "Profession " <> seq
+        description: "Additional Skill " <> seq,
+        level: Enum.random(1..5) |> to_string()
       }
     ]
   end
+
+  defp languages(nil, _), do: nil
+
+  defp languages(_, seq) do
+    [
+      %{
+        description: "Language " <> seq,
+        level: Enum.random(1..5) |> to_string()
+      }
+    ]
+  end
+
+  def stringify(%{} = params) do
+    params
+    |> Factory.reject_attrs()
+    |> Enum.map(fn
+      {k, v} ->
+        {Factory.to_camel_key(k), stringifyp(v)}
+    end)
+    |> Enum.into(%{})
+  end
+
+  defp stringifyp(attrs) when is_list(attrs) do
+    Enum.map(attrs, &stringifyp/1)
+  end
+
+  defp stringifyp(%{} = attrs) do
+    attrs
+    |> Factory.reject_attrs()
+    |> Enum.map(fn
+      {k, v} when is_list(v) ->
+        {Factory.to_camel_key(k), stringifyp(v)}
+
+      {k, v} ->
+        {Factory.to_camel_key(k), v}
+    end)
+    |> Enum.into(%{})
+  end
+
+  defp stringifyp(val), do: val
 end

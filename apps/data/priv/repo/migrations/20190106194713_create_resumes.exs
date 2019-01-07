@@ -26,8 +26,8 @@ defmodule Data.Repo.Migrations.CreateResumeTitles do
     |> unique_index([:user_id, :title])
     |> create()
 
-    execute "CREATE INDEX resumes_field_defs ON resumes USING GIN (languages);"
+    execute "CREATE INDEX resumes_languages ON resumes USING GIN (languages);"
 
-    execute "CREATE INDEX resumes_field_defs ON resumes USING GIN (additional_skills);"
+    execute "CREATE INDEX resumes_additional_skills ON resumes USING GIN (additional_skills);"
   end
 end

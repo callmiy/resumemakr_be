@@ -5,7 +5,7 @@ defmodule Data.Resumes.Rated do
   @primary_key false
   embedded_schema do
     field :description, :string
-    field :level, :integer
+    field :level, :string
   end
 
   def changeset(%__MODULE__{} = schema, attrs) do

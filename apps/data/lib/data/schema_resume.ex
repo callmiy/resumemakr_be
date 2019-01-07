@@ -6,7 +6,7 @@ defmodule Data.SchemaResume do
   @desc "An object with a rating"
   object :rated do
     field :description, non_null(:string)
-    field :level, :integer
+    field :level, :string
   end
 
   @desc "A resume experience"
@@ -57,7 +57,7 @@ defmodule Data.SchemaResume do
   @desc "Variables for creating an object with a rating"
   input_object :rated_input do
     field :description, non_null(:string)
-    field :level, :integer
+    field :level, :string
   end
 
   @desc "Variables for creating resume education"
