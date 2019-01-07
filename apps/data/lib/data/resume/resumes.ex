@@ -71,22 +71,28 @@ defmodule Data.Resumes do
       :insert_personal_info,
       [Map.get(attrs, :personal_info)]
     )
-    |> Multi.run(
-      :experiences,
-      __MODULE__,
-      :insert_experiences,
-      [Map.get(attrs, :experiences)]
-    )
-    |> Multi.run(
-      :education,
-      __MODULE__,
-      :insert_education,
-      [Map.get(attrs, :education)]
-    )
+    |> insert_experiences(Map.get(attrs, :experiences))
+    |> insert_education(Map.get(attrs, :education))
     |> Repo.transaction()
     |> case do
-      {:ok, successes} ->
-        {:ok, successes}
+      {:ok,
+       %{
+         resume: resume
+       } = successes} ->
+        {experiences, education} =
+          Enum.reduce(
+            successes,
+            {[], []},
+            &unwrap_trxn/2
+          )
+
+        {:ok,
+         %Resume{
+           resume
+           | personal_info: successes[:personal_info],
+             experiences: experiences,
+             education: education
+         }}
 
       {:error, failed_operations, changeset, _successes} ->
         {:error, failed_operations, changeset}
@@ -99,23 +105,24 @@ defmodule Data.Resumes do
 
     case changes.valid? do
       true ->
-        %{data: %{title: title, user_id: user_id}} = changes
+        %{changes: %{title: title, user_id: user_id}} = changes
 
-        case get_resume_by(title: title, user_id: user_id) do
-          nil ->
-            {:ok, changes}
+        changes_with_uniqie_title =
+          case get_resume_by(title: title, user_id: user_id) do
+            nil ->
+              changes
 
-          _ ->
-            # title already exists, so we append current time to make it unique
-            {
-              :ok,
+            _ ->
+              # title already exists, so we append current time to make it unique
+
               Changeset.put_change(
                 changes,
                 :title,
                 "#{title}_#{System.os_time()}"
               )
-            }
-        end
+          end
+
+        Repo.insert(changes_with_uniqie_title)
 
       _ ->
         {:error, Changeset.apply_action(changes, :insert)}
@@ -133,32 +140,46 @@ defmodule Data.Resumes do
     |> Repo.insert()
   end
 
-  @doc false
-  def insert_experiences(_, changes, nil), do: {:ok, changes}
+  defp insert_experiences(multi, nil), do: multi
 
-  def insert_experiences(_repo, %{resume: resume}, attrs) when is_list(attrs) do
-    exp_assoc = Ecto.build_assoc(resume, :experiences)
-
-    Ecto.Multi.insert_all(
-      Multi.new(),
-      :all_experiences,
-      Experience,
-      Enum.map(attrs, &Experience.changeset(exp_assoc, &1))
-    )
+  defp insert_experiences(multi, attrs) when is_list(attrs) do
+    Multi.merge(multi, fn %{resume: resume} ->
+      attrs
+      |> Enum.map(&Ecto.build_assoc(resume, :experiences, &1))
+      |> Enum.with_index(1)
+      |> Enum.reduce(Multi.new(), fn {changeset, index}, multi_ ->
+        Multi.run(multi_, {:experience, index}, fn _repo, _changes ->
+          Repo.insert(changeset)
+        end)
+      end)
+    end)
   end
 
-  @doc false
-  def insert_education(_, changes, nil), do: {:ok, changes}
+  defp insert_education(multi, nil), do: multi
 
-  def insert_education(_repo, %{resume: resume}, attrs) when is_list(attrs) do
-    exp_assoc = Ecto.build_assoc(resume, :education)
+  defp insert_education(multi, attrs) when is_list(attrs) do
+    Multi.merge(multi, fn %{resume: resume} ->
+      attrs
+      |> Enum.map(&Ecto.build_assoc(resume, :education, &1))
+      |> Enum.with_index(1)
+      |> Enum.reduce(Multi.new(), fn {changeset, index}, multi_ ->
+        Multi.run(multi_, {:education, index}, fn _repo, _changes ->
+          Repo.insert(changeset)
+        end)
+      end)
+    end)
+  end
 
-    Ecto.Multi.insert_all(
-      Multi.new(),
-      :all_education,
-      Experience,
-      Enum.map(attrs, &Education.changeset(exp_assoc, &1))
-    )
+  defp unwrap_trxn({{:experience, _}, val}, {a, b}) do
+    {[val | a], b}
+  end
+
+  defp unwrap_trxn({{:education, _}, val}, {a, b}) do
+    {a, [val | b]}
+  end
+
+  defp unwrap_trxn(_, acc) do
+    acc
   end
 
   @doc """

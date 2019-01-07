@@ -62,12 +62,11 @@ defmodule Data.FactoryResume do
   defp education(_, seq) do
     [
       %{
-        first_name: Faker.Name.first_name(),
-        last_name: Faker.Name.last_name(),
-        address: Faker.Address.street_address(),
-        email: Faker.Internet.email(),
-        phone: Faker.Phone.EnUs.phone(),
-        profession: "Profession " <> seq
+        achievements: ["Education achievement " <> seq],
+        course: "Course " <> seq,
+        from_date: "03/2000",
+        school: "School " <> seq,
+        to_date: "04/2004"
       }
     ]
   end
