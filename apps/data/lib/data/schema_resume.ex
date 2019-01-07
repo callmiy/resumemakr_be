@@ -11,21 +11,21 @@ defmodule Data.SchemaResume do
 
   @desc "A resume experience"
   object :resume_experience do
-    field :course, :string
-    field :from_date, :string
-    field :school, :string
-    field :to_date, :string
     field :achievements, list_of(:string)
+    field :company_name, :string |> non_null()
+    field :from_date, :string |> non_null()
+    field :position, :string |> non_null()
+    field :to_date, :string
   end
 
   @desc "A Personal Info"
   object :personal_info do
     field :first_name, non_null(:string)
     field :last_name, non_null(:string)
-    field :address, non_null(:string)
-    field :email, non_null(:string)
-    field :phone, non_null(:string)
-    field :profession, non_null(:string)
+    field :address, :string
+    field :email, :string
+    field :phone, :string
+    field :profession, :string
     field :date_of_birth, :date
     field :photo, :string
   end
@@ -83,11 +83,11 @@ defmodule Data.SchemaResume do
 
   @desc "Variables for creating resume experience"
   input_object :resume_experience_input do
-    field :course, :string
-    field :from_date, :string
-    field :school, :string
-    field :to_date, :string
     field :achievements, list_of(:string)
+    field :company_name, :string |> non_null()
+    field :from_date, :string |> non_null()
+    field :position, :string |> non_null()
+    field :to_date, :string
   end
 
   @desc "Variables for creating Resume"

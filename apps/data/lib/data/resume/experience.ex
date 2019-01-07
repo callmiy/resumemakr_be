@@ -27,8 +27,7 @@ defmodule Data.Resumes.Experience do
       :resume_id,
       :position,
       :company_name,
-      :from_date,
-      :achievements
+      :from_date
     ])
   end
 end

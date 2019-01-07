@@ -32,11 +32,7 @@ defmodule Data.Resumes.PersonalInfo do
     |> validate_required([
       :resume_id,
       :first_name,
-      :last_name,
-      :profession,
-      :phone,
-      :address,
-      :email
+      :last_name
     ])
     |> assoc_constraint(:resume)
   end
