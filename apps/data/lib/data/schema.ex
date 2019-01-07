@@ -5,6 +5,7 @@ defmodule Data.Schema do
   import_types(Data.SchemaTypes)
   import_types(Data.SchemaCredential)
   import_types(Data.SchemaUser)
+  import_types(Data.SchemaResume)
 
   query do
     import_fields(:user_query)
