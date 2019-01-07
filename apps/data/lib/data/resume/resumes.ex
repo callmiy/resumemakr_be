@@ -50,10 +50,10 @@ defmodule Data.Resumes do
 
   ## Examples
 
-      iex> create_resume(%{field: value})
+      iex> create_resume_full(%{field: value})
       {:ok, %Resume{}}
 
-      iex> create_resume(%{field: bad_value})
+      iex> create_resume_full(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
@@ -79,20 +79,7 @@ defmodule Data.Resumes do
        %{
          resume: resume
        } = successes} ->
-        {experiences, education} =
-          Enum.reduce(
-            successes,
-            {[], []},
-            &unwrap_trxn/2
-          )
-
-        {:ok,
-         %Resume{
-           resume
-           | personal_info: successes[:personal_info],
-             experiences: experiences,
-             education: education
-         }}
+        {:ok, unwrap_trxn(successes) |> Map.merge(resume)}
 
       {:error, failed_operations, changeset, _successes} ->
         {:error, failed_operations, changeset}
@@ -118,7 +105,7 @@ defmodule Data.Resumes do
               Changeset.put_change(
                 changes,
                 :title,
-                "#{title}_#{System.os_time()}"
+                "#{title}_#{System.os_time(:seconds)}"
               )
           end
 
@@ -130,7 +117,7 @@ defmodule Data.Resumes do
   end
 
   @doc false
-  def insert_personal_info(_, changes, nil), do: {:ok, changes}
+  def insert_personal_info(_, _changes, nil), do: {:ok, nil}
 
   @doc false
   def insert_personal_info(_, %{resume: resume}, attrs) do
@@ -170,6 +157,20 @@ defmodule Data.Resumes do
     end)
   end
 
+  defp unwrap_trxn(trxn) do
+    {experiences, education} =
+      Enum.reduce(
+        trxn,
+        {[], []},
+        &unwrap_trxn/2
+      )
+
+    %Resume{}
+    |> unwrap_trxn(:experiences, experiences)
+    |> unwrap_trxn(:education, education)
+    |> unwrap_trxn(:personal_info, trxn.personal_info)
+  end
+
   defp unwrap_trxn({{:experience, _}, val}, {a, b}) do
     {[val | a], b}
   end
@@ -181,6 +182,12 @@ defmodule Data.Resumes do
   defp unwrap_trxn(_, acc) do
     acc
   end
+
+  defp unwrap_trxn(acc, _key, []), do: acc
+  defp unwrap_trxn(acc, _key, nil), do: acc
+  defp unwrap_trxn(acc, key, values), do: Map.put(acc, key, values)
+
+  ########################## RESUME ONLY #####################################
 
   @doc """
   Updates a Resume.
