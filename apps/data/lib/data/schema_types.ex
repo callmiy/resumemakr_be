@@ -3,7 +3,40 @@ defmodule Data.SchemaTypes do
   Custom types (scalars, objects and input types) shared among schema types
   """
   use Absinthe.Schema.Notation
+  use Absinthe.Relay.Schema.Notation, :modern
   use Timex
+
+  alias Data.Accounts.User
+  alias Data.Resumes.Resume
+  alias Data.Resumes.Skill
+  alias Data.Resumes.Experience
+  alias Data.Resumes.PersonalInfo
+  alias Data.Resumes.Education
+
+  node interface do
+    resolve_type(fn
+      %User{}, _ ->
+        :user
+
+      %Resume{}, _ ->
+        :resume
+
+      %Skill{}, _ ->
+        :skill
+
+      %Experience{}, _ ->
+        :resume_experience
+
+      %PersonalInfo{}, _ ->
+        :personal_info
+
+      %Education{}, _ ->
+        :education
+
+      _, _ ->
+        nil
+    end)
+  end
 
   @iso_extended_format "{ISO:Extended:Z}"
 

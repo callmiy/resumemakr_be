@@ -44,7 +44,10 @@ defmodule Data.MixProject do
       {:constantizer, "~> 0.2.0"},
       {:faker, "~> 0.11.2", only: [:dev, :test]},
       {:sequence, github: "samba6/sequence", only: [:dev, :test]},
-      {:timex, "~> 3.4"}
+      {:timex, "~> 3.4"},
+      {:absinthe_relay, "~> 1.4"},
+      {:absinthe, "~> 1.4"},
+      {:dataloader, "~> 1.0"}
     ]
   end
 

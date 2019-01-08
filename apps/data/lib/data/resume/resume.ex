@@ -27,8 +27,8 @@ defmodule Data.Resumes.Resume do
   def changeset(%__MODULE__{} = schema, attrs \\ %{}) do
     schema
     |> cast(attrs, [:title, :user_id])
-    |> cast_embed(:languages)
-    |> cast_embed(:additional_skills)
+    |> cast_embed(:languages, required: false)
+    |> cast_embed(:additional_skills, required: false)
     |> validate_required([:title, :user_id])
     |> assoc_constraint(:user)
   end

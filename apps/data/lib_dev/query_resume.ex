@@ -8,6 +8,7 @@ defmodule Data.QueryResume do
   @frag """
     fragment #{@frag_name} on Resume {
       id
+      _id
       title
       description
       insertedAt
@@ -57,28 +58,30 @@ defmodule Data.QueryResume do
 
   def create_resume do
     """
-      mutation CreateAResume($resume:  ResumeInput!) {
-        resume(resume: $resume) {
-          ...#{@frag_name}
+      mutation CreateAResume($input:  ResumeInput!) {
+        resume(input: $input) {
+          resume {
+            ...#{@frag_name}
 
-          additionalSkills {
-            ...#{@frag_name_rated}
-          }
+            additionalSkills {
+              ...#{@frag_name_rated}
+            }
 
-          languages {
-            ...#{@frag_name_rated}
-          }
+            languages {
+              ...#{@frag_name_rated}
+            }
 
-          education {
-            ...#{@frag_name_education}
-          }
+            education {
+              ...#{@frag_name_education}
+            }
 
-          experiences {
-            ...#{@frag_name_experience}
-          }
+            experiences {
+              ...#{@frag_name_experience}
+            }
 
-          personalInfo {
-            ...#{@frag_name_personal_info}
+            personalInfo {
+              ...#{@frag_name_personal_info}
+            }
           }
         }
       }
@@ -88,6 +91,28 @@ defmodule Data.QueryResume do
       #{@frag_education}
       #{@frag_experience}
       #{@frag_personal_info}
+    """
+  end
+
+  def resumes do
+    """
+      query GetUserResumes($first: Int!) {
+        resumes(first: $first) {
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+          }
+
+          edges {
+            cursor
+            node {
+              ...#{@frag_name}
+            }
+          }
+        }
+      }
+
+      #{@frag}
     """
   end
 end

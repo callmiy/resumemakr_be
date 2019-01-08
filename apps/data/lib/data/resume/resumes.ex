@@ -13,16 +13,42 @@ defmodule Data.Resumes do
   alias Data.Resumes.Education
 
   @doc """
-  Returns the list of resumes.
+  Returns the list of resumes for a user.
 
   ## Examples
 
-      iex> list_resumes()
+      iex> list_resumes(12345)
       [%Resume{}, ...]
 
   """
-  def list_resumes do
-    Repo.all(Resume)
+
+  def list_resumes(user_id) do
+    Resume
+    |> where([r], r.user_id == ^user_id)
+    |> Repo.all()
+  end
+
+  @spec list_resumes(any(), %{
+          after: nil | integer(),
+          before: nil | integer(),
+          first: nil | integer(),
+          last: nil | integer()
+        }) ::
+          {:error, <<_::64, _::_*8>>}
+          | {:ok,
+             %{
+               edges: [map()],
+               page_info: %{
+                 end_cursor: binary(),
+                 has_next_page: boolean(),
+                 has_previous_page: boolean(),
+                 start_cursor: binary()
+               }
+             }}
+  def list_resumes(user_id, pagination_args) do
+    Resume
+    |> where([r], r.user_id == ^user_id)
+    |> Absinthe.Relay.Connection.from_query(&Repo.all/1, pagination_args)
   end
 
   @doc """

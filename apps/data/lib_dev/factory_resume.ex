@@ -2,12 +2,17 @@ defmodule Data.FactoryResume do
   use Data.Factory
 
   alias Data.Factory
+  alias Data.Resumes
 
   @one_nil [1, nil]
   # @simple_attrs [:user_id, :title, :description]
 
   @doc false
-  def insert(_), do: nil
+  def insert(attrs) do
+    attrs = params(attrs)
+    {:ok, resume} = Resumes.create_resume(attrs)
+    resume
+  end
 
   def params(%{} = attrs) do
     seq = Sequence.next("")
@@ -22,6 +27,7 @@ defmodule Data.FactoryResume do
       languages: languages(Enum.random(@one_nil), seq)
     }
     |> Map.merge(attrs)
+    |> Factory.reject_attrs()
   end
 
   defp experiences(nil, _) do

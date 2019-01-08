@@ -1,5 +1,6 @@
 defmodule Data.SchemaResume do
   use Absinthe.Schema.Notation
+  use Absinthe.Relay.Schema.Notation, :modern
 
   alias Data.ResolverResume, as: Resolver
 
@@ -40,8 +41,8 @@ defmodule Data.SchemaResume do
   end
 
   @desc "A Resume"
-  object :resume do
-    field :id, non_null(:id)
+  node object(:resume) do
+    field :_id, non_null(:id), resolve: fn %{id: id}, _, _ -> {:ok, id} end
     field :title, non_null(:string)
     field :description, :string
     field :personal_info, :personal_info
@@ -90,17 +91,6 @@ defmodule Data.SchemaResume do
     field :to_date, :string
   end
 
-  @desc "Variables for creating Resume"
-  input_object :resume_input do
-    field :title, non_null(:string)
-    field :description, :string
-    field :personal_info, :personal_info_input
-    field :education, list_of(:education_input)
-    field :experiences, list_of(:resume_experience_input)
-    field :languages, list_of(:rated_input)
-    field :additional_skills, list_of(:rated_input)
-  end
-
   @desc "Variables for getting a Resume"
   input_object :get_resume do
     field :title, non_null(:id)
@@ -109,19 +99,32 @@ defmodule Data.SchemaResume do
   @desc "Mutations allowed on Resume object"
   object :resume_mutation do
     @doc "Create a resume"
-    field :resume, :resume do
-      arg(:resume, non_null(:resume_input))
+    payload field :resume do
+      input do
+        field :title, non_null(:string)
+        field :description, :string
+        field :personal_info, :personal_info_input
+        field :education, list_of(:education_input)
+        field :experiences, list_of(:resume_experience_input)
+        field :languages, list_of(:rated_input)
+        field :additional_skills, list_of(:rated_input)
+      end
+
+      output do
+        field :resume, :resume
+      end
 
       resolve(&Resolver.create/3)
     end
   end
 
-  # @desc "Queries allowed on Resume object"
-  # object :resume_query do
-  #   @desc "query a resume "
-  #   field :resume, :resume do
-  #     arg(:resume, non_null(:get_resume))
-  #     resolve(&Resolver.field/3)
-  #   end
-  # end
+  @desc "Queries allowed on Resume object"
+  object :resume_query do
+    @desc "query a resume "
+    connection field :resumes, node_type: :resume do
+      resolve(&Resolver.resumes/2)
+    end
+  end
+
+  connection(node_type: :resume)
 end

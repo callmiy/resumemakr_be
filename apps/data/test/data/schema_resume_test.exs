@@ -18,18 +18,20 @@ defmodule Data.SchemaResumeTest do
         |> Factory.stringify()
 
       variables = %{
-        "resume" => attrs
+        "input" => attrs
       }
 
       assert {:ok,
               %{
                 data: %{
                   "resume" => %{
-                    "title" => _,
-                    "description" => _,
-                    "personalInfo" => _,
-                    "experiences" => _,
-                    "education" => _
+                    "resume" => %{
+                      "title" => _,
+                      "description" => _,
+                      "personalInfo" => _,
+                      "experiences" => _,
+                      "education" => _
+                    }
                   }
                 }
               }} =
@@ -51,14 +53,16 @@ defmodule Data.SchemaResumeTest do
              } = Resumes.create_resume(%{title: title, user_id: user.id})
 
       variables = %{
-        "resume" => %{"title" => title}
+        "input" => %{"title" => title}
       }
 
       assert {:ok,
               %{
                 data: %{
                   "resume" => %{
-                    "title" => title_from_db
+                    "resume" => %{
+                      "title" => title_from_db
+                    }
                   }
                 }
               }} =
@@ -70,6 +74,43 @@ defmodule Data.SchemaResumeTest do
                )
 
       assert Regex.compile!("^#{title}_\\d{10}$") |> Regex.match?(title_from_db)
+    end
+  end
+
+  describe "query" do
+    test "get all resumes for user" do
+      user = RegFactory.insert()
+      Factory.insert(user_id: user.id)
+
+      variables = %{
+        "first" => 1
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "resumes" => %{
+                    "pageInfo" => %{
+                      "hasNextPage" => false
+                    },
+                    "edges" => [
+                      %{
+                        "cursor" => _,
+                        "node" => %{
+                          "id" => _,
+                          "_id" => _
+                        }
+                      }
+                    ]
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.resumes(),
+                 Schema,
+                 variables: variables,
+                 context: context(user)
+               )
     end
   end
 

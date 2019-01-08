@@ -1,5 +1,6 @@
 defmodule Data.Schema do
   use Absinthe.Schema
+  use Absinthe.Relay.Schema, :modern
 
   import_types(Absinthe.Type.Custom)
   import_types(Data.SchemaTypes)
@@ -9,6 +10,7 @@ defmodule Data.Schema do
 
   query do
     import_fields(:user_query)
+    import_fields(:resume_query)
   end
 
   mutation do

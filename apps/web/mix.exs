@@ -43,8 +43,6 @@ defmodule Web.MixProject do
       {:data, in_umbrella: true},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:absinthe, "~> 1.4"},
-      {:dataloader, "~> 1.0"},
       {:absinthe_plug, "~> 1.4"},
       {:absinthe_phoenix, "~> 1.4.0"},
       {:corsica, "~> 1.1"},
