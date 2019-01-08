@@ -16,11 +16,6 @@ defmodule Data.SchemaUser do
     field(:updated_at, non_null(:iso_datetime))
   end
 
-  @desc "Input variables for refreshing user"
-  input_object :refresh_input do
-    field(:jwt, non_null(:string))
-  end
-
   @desc "Mutations allowed on User object"
   object :user_mutation do
     @doc "Create a user and her credential"
@@ -55,7 +50,7 @@ defmodule Data.SchemaUser do
     end
 
     @doc "Update a user"
-    payload field :update do
+    payload field :update_user do
       input do
         field :jwt, non_null(:string)
         field :name, :string
@@ -73,8 +68,8 @@ defmodule Data.SchemaUser do
   @desc "Queries allowed on User object"
   object :user_query do
     @desc "Refresh a user session"
-    field :refresh, :user do
-      arg(:refresh, non_null(:refresh_input))
+    field :refresh_user, :user do
+      arg(:jwt, non_null(:string))
       resolve(&Resolver.refresh/3)
     end
   end

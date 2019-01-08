@@ -7,15 +7,18 @@ defmodule Data.QueryRegistration do
     {user_frag_name, user_frag} = QueryUser.all_fields_fragment()
 
     {
-      credential_frag_name, credential_frag
-      } = QueryCredential.all_fields_fragment()
+      credential_frag_name,
+      credential_frag
+    } = QueryCredential.all_fields_fragment()
 
     query = """
-        registration(registration: $registration) {
-          ...#{user_frag_name}
+        registration(input: $input) {
+          user {
+            ...#{user_frag_name}
 
-          credential {
-            ...#{credential_frag_name}
+            credential {
+              ...#{credential_frag_name}
+            }
           }
         }
     """
@@ -23,7 +26,7 @@ defmodule Data.QueryRegistration do
     %{
       query: query,
       fragments: ~s( #{credential_frag} #{user_frag} ),
-      parameters: "$registration: Registration!"
+      parameters: "$input: RegistrationInput!"
     }
   end
 end

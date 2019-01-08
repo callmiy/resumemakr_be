@@ -21,15 +21,17 @@ defmodule Data.QueryUser do
     {user_frag_name, user_frag} = all_fields_fragment()
 
     query = """
-        update(user: $user) {
-          ...#{user_frag_name}
+        updateUser(input: $input) {
+          user {
+            ...#{user_frag_name}
+          }
         }
     """
 
     %{
       query: query,
       fragments: ~s( #{user_frag} ),
-      parameters: "$user: UpdateUser!"
+      parameters: "$input: UpdateUserInput!"
     }
   end
 
@@ -38,7 +40,7 @@ defmodule Data.QueryUser do
     {user_frag_name, user_frag} = all_fields_fragment()
 
     query = """
-        refresh(refresh: $refresh) {
+        refreshUser(jwt: $jwt) {
           ...#{user_frag_name}
         }
     """
@@ -46,7 +48,7 @@ defmodule Data.QueryUser do
     %{
       query: query,
       fragments: ~s( #{user_frag} ),
-      parameters: "$refresh: RefreshInput!"
+      parameters: "$jwt: String!"
     }
   end
 
@@ -55,15 +57,17 @@ defmodule Data.QueryUser do
     {_, user_frag} = all_fields_fragment()
 
     query = """
-        login(login: $login) {
-          ...#{@frag_name}
+        login(input: $input) {
+          user {
+            ...#{@frag_name}
+          }
         }
     """
 
     %{
       query: query,
       fragments: ~s(  #{user_frag} ),
-      parameters: "$login: LoginUser!"
+      parameters: "$input: LoginInput!"
     }
   end
 end

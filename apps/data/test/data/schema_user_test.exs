@@ -35,19 +35,21 @@ defmodule Data.SchemaUserTest do
               %{
                 data: %{
                   "registration" => %{
-                    "id" => _,
-                    "name" => ^name,
-                    "email" => ^email,
-                    "jwt" => _jwt,
-                    "credential" => %{
-                      "id" => _
+                    "user" => %{
+                      "id" => _,
+                      "name" => ^name,
+                      "email" => ^email,
+                      "jwt" => _jwt,
+                      "credential" => %{
+                        "id" => _
+                      }
                     }
                   }
                 }
               }} =
                Absinthe.run(query, Schema,
                  variables: %{
-                   "registration" => attrs
+                   "input" => attrs
                  }
                )
     end
@@ -67,6 +69,10 @@ defmodule Data.SchemaUserTest do
         #{queryMap.fragments}
       """
 
+      variables = %{
+        "input" => RegFactory.stringify(attrs)
+      }
+
       error =
         %{
           errors: %{
@@ -84,12 +90,7 @@ defmodule Data.SchemaUserTest do
                     path: ["registration"]
                   }
                 ]
-              }} =
-               Absinthe.run(query, Schema,
-                 variables: %{
-                   "registration" => RegFactory.stringify(attrs)
-                 }
-               )
+              }} = Absinthe.run(query, Schema, variables: variables)
     end
 
     # @tag :skip
@@ -111,21 +112,28 @@ defmodule Data.SchemaUserTest do
         #{queryMap.fragments}
       """
 
+      variables = %{
+        "input" => attrs
+      }
+
       assert {:ok,
               %{
                 data: %{
-                  "update" => %{
-                    "id" => _,
-                    "name" => name,
-                    "email" => email,
-                    "jwt" => _jwt
+                  "updateUser" => %{
+                    "user" => %{
+                      "id" => _,
+                      "name" => name,
+                      "email" => email,
+                      "jwt" => _jwt
+                    }
                   }
                 }
               }} =
-               Absinthe.run(query, Schema,
-                 variables: %{
-                   "user" => attrs
-                 }
+               Absinthe.run(
+                 query,
+                 Schema,
+                 variables: variables,
+                 context: context(user)
                )
 
       refute user.name == name
@@ -147,7 +155,7 @@ defmodule Data.SchemaUserTest do
       """
 
       variables = %{
-        "login" => %{
+        "input" => %{
           "email" => email,
           "password" => password
         }
@@ -157,10 +165,12 @@ defmodule Data.SchemaUserTest do
               %{
                 data: %{
                   "login" => %{
-                    "id" => _,
-                    "name" => name,
-                    "email" => ^email,
-                    "jwt" => _jwt
+                    "user" => %{
+                      "id" => _,
+                      "name" => name,
+                      "email" => ^email,
+                      "jwt" => _jwt
+                    }
                   }
                 }
               }} = Absinthe.run(query, Schema, variables: variables)
@@ -189,7 +199,7 @@ defmodule Data.SchemaUserTest do
               }} =
                Absinthe.run(query, Schema,
                  variables: %{
-                   "login" => %{
+                   "input" => %{
                      "email" => email,
                      "password" => password
                    }
@@ -201,7 +211,6 @@ defmodule Data.SchemaUserTest do
   describe "query" do
     test "refreshes user succeeds with ok jwt" do
       user = RegFactory.insert()
-      user_id = Integer.to_string(user.id)
       {:ok, jwt, _claims} = Guardian.encode_and_sign(user)
 
       queryMap = Query.refresh()
@@ -217,14 +226,9 @@ defmodule Data.SchemaUserTest do
       assert {:ok,
               %{
                 data: %{
-                  "refresh" => %{"id" => ^user_id, "jwt" => new_jwt}
+                  "refreshUser" => %{"id" => _, "jwt" => new_jwt}
                 }
-              }} =
-               Absinthe.run(query, Schema,
-                 variables: %{
-                   "refresh" => %{"jwt" => jwt}
-                 }
-               )
+              }} = Absinthe.run(query, Schema, variables: %{"jwt" => jwt})
 
       refute jwt == new_jwt
     end
@@ -245,20 +249,18 @@ defmodule Data.SchemaUserTest do
 
       assert {:ok,
               %{
-                data: %{"refresh" => nil},
+                data: %{"refreshUser" => nil},
                 errors: [
                   %{
-                    locations: [%{column: 0, line: 2}],
                     message: "{\"error\":\"invalid_token\"}",
-                    path: ["refresh"]
+                    path: ["refreshUser"]
                   }
                 ]
-              }} =
-               Absinthe.run(query, Schema,
-                 variables: %{
-                   "refresh" => %{"jwt" => jwt <> "9"}
-                 }
-               )
+              }} = Absinthe.run(query, Schema, variables: %{"jwt" => jwt <> "9"})
     end
+  end
+
+  defp context(user) do
+    %{current_user: user}
   end
 end
