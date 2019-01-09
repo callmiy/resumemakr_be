@@ -54,7 +54,7 @@ defmodule Data.ResolverResume do
 
     case Resumes.get_resume_by(id: id, user_id: user_id) do
       nil ->
-        {:error, "Resume does not exist"}
+        {:error, "Resume you are updating does not exist"}
 
       resume ->
         case Resumes.update_resume(

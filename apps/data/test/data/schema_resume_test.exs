@@ -150,6 +150,38 @@ defmodule Data.SchemaResumeTest do
       assert_assoc(skills, augmented_attrs_str["skills"] || [])
       assert_assoc(additional_skills, augmented_attrs_str["additionalSkills"] || [])
     end
+
+    test "update resume fails for unknown user" do
+      user = RegFactory.insert()
+      context = context(user)
+      Factory.insert(user_id: user.id)
+      bogus_user_id = 0
+
+      update_attrs =
+        Factory.params(id: Absinthe.Relay.Node.to_global_id(:resume, bogus_user_id, Schema))
+
+      updated_resume_str = Factory.stringify(update_attrs)
+
+      variables = %{
+        "input" => updated_resume_str
+      }
+
+      assert {:ok,
+              %{
+                errors: [
+                  %{
+                    message: "Resume you are updating does not exist",
+                    path: ["updateResume"]
+                  }
+                ]
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+    end
   end
 
   describe "query" do
