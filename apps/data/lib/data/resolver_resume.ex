@@ -63,6 +63,14 @@ defmodule Data.ResolverResume do
              ) do
           {:ok, updated_resume} ->
             {:ok, wrapped(updated_resume)}
+
+          {:error, changeset} ->
+            {
+              :error,
+              changeset.errors
+              |> Resolver.errors_to_map()
+              |> Jason.encode!()
+            }
         end
     end
   end

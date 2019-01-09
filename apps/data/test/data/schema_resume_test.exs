@@ -182,6 +182,42 @@ defmodule Data.SchemaResumeTest do
                  context: context
                )
     end
+
+    test "update resume fails on attempt to set title to null" do
+      user = RegFactory.insert()
+      context = context(user)
+      resume = Factory.insert(user_id: user.id)
+
+      update_attrs =
+        Factory.params(id: Absinthe.Relay.Node.to_global_id(:resume, resume.id, Schema))
+
+      updated_resume_str =
+        update_attrs
+        |> Factory.stringify()
+        |> Map.put("title", nil)
+
+      variables = %{
+        "input" => updated_resume_str
+      }
+
+      message = Jason.encode!(%{title: "can't be blank"})
+
+      assert {:ok,
+              %{
+                errors: [
+                  %{
+                    message: ^message,
+                    path: ["updateResume"]
+                  }
+                ]
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+    end
   end
 
   describe "query" do

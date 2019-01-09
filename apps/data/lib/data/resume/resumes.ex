@@ -88,6 +88,8 @@ defmodule Data.Resumes do
     |> Repo.insert()
   end
 
+  defp unique_title(%{title: nil} = attrs), do: attrs
+
   defp unique_title(%{title: title, user_id: user_id} = attrs) do
     case get_resume_by(title: title, user_id: user_id) do
       nil ->
