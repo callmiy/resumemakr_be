@@ -24,6 +24,7 @@ defmodule Data.Resumes.Education do
       :to_date,
       :achievements
     ])
-    |> validate_required([:resume_id, :school, :course, :from_date])
+    |> validate_required([:school, :course, :from_date])
+    |> assoc_constraint(:resume)
   end
 end

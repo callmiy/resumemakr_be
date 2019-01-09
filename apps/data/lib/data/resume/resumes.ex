@@ -5,8 +5,6 @@ defmodule Data.Resumes do
 
   import Ecto.Query, warn: false
   alias Data.Repo
-  alias Ecto.Changeset
-  alias Ecto.Multi
   alias Data.Resumes.PersonalInfo
   alias Data.Resumes.Resume
   alias Data.Resumes.Experience
@@ -84,136 +82,22 @@ defmodule Data.Resumes do
 
   """
   def create_resume(attrs) do
-    Ecto.Multi.new()
-    |> Multi.run(
-      :resume,
-      __MODULE__,
-      :insert_resume,
-      [Map.take(attrs, Resume.my_fields())]
-    )
-    |> Multi.run(
-      :personal_info,
-      __MODULE__,
-      :insert_personal_info,
-      [Map.get(attrs, :personal_info)]
-    )
-    |> insert_experiences(Map.get(attrs, :experiences))
-    |> insert_education(Map.get(attrs, :education))
-    |> Repo.transaction()
-    |> case do
-      {:ok,
-       %{
-         resume: resume
-       } = successes} ->
-        {:ok, unwrap_trxn(successes) |> Map.merge(resume)}
-
-      {:error, failed_operations, changeset, _successes} ->
-        {:error, failed_operations, changeset}
-    end
-  end
-
-  @doc false
-  def insert_resume(_repo, _changes, %{} = attrs) do
-    changes = Resume.changeset(%Resume{}, attrs)
-
-    case changes.valid? do
-      true ->
-        %{changes: %{title: title, user_id: user_id}} = changes
-
-        changes_with_uniqie_title =
-          case get_resume_by(title: title, user_id: user_id) do
-            nil ->
-              changes
-
-            _ ->
-              # title already exists, so we append current time to make it unique
-
-              Changeset.put_change(
-                changes,
-                :title,
-                "#{title}_#{System.os_time(:seconds)}"
-              )
-          end
-
-        Repo.insert(changes_with_uniqie_title)
-
-      _ ->
-        {:error, Changeset.apply_action(changes, :insert)}
-    end
-  end
-
-  @doc false
-  def insert_personal_info(_, _changes, nil), do: {:ok, nil}
-
-  @doc false
-  def insert_personal_info(_, %{resume: resume}, attrs) do
-    resume
-    |> Ecto.build_assoc(:personal_info)
-    |> PersonalInfo.changeset(attrs)
+    %Resume{}
+    |> Resume.changeset(unique_title(attrs))
     |> Repo.insert()
   end
 
-  defp insert_experiences(multi, nil), do: multi
+  defp unique_title(%{title: title, user_id: user_id} = attrs) do
+    case get_resume_by(title: title, user_id: user_id) do
+      nil ->
+        attrs
 
-  defp insert_experiences(multi, attrs) when is_list(attrs) do
-    Multi.merge(multi, fn %{resume: resume} ->
-      attrs
-      |> Enum.map(&Ecto.build_assoc(resume, :experiences, &1))
-      |> Enum.with_index(1)
-      |> Enum.reduce(Multi.new(), fn {changeset, index}, multi_ ->
-        Multi.run(multi_, {:experience, index}, fn _repo, _changes ->
-          Repo.insert(changeset)
-        end)
-      end)
-    end)
+      _ ->
+        Map.put(attrs, :title, "#{title}_#{System.os_time(:seconds)}")
+    end
   end
 
-  defp insert_education(multi, nil), do: multi
-
-  defp insert_education(multi, attrs) when is_list(attrs) do
-    Multi.merge(multi, fn %{resume: resume} ->
-      attrs
-      |> Enum.map(&Ecto.build_assoc(resume, :education, &1))
-      |> Enum.with_index(1)
-      |> Enum.reduce(Multi.new(), fn {changeset, index}, multi_ ->
-        Multi.run(multi_, {:education, index}, fn _repo, _changes ->
-          Repo.insert(changeset)
-        end)
-      end)
-    end)
-  end
-
-  defp unwrap_trxn(trxn) do
-    {experiences, education} =
-      Enum.reduce(
-        trxn,
-        {[], []},
-        &unwrap_trxn/2
-      )
-
-    %Resume{}
-    |> unwrap_trxn(:experiences, experiences)
-    |> unwrap_trxn(:education, education)
-    |> unwrap_trxn(:personal_info, trxn.personal_info)
-  end
-
-  defp unwrap_trxn({{:experience, _}, val}, {a, b}) do
-    {[val | a], b}
-  end
-
-  defp unwrap_trxn({{:education, _}, val}, {a, b}) do
-    {a, [val | b]}
-  end
-
-  defp unwrap_trxn(_, acc) do
-    acc
-  end
-
-  defp unwrap_trxn(acc, _key, []), do: acc
-  defp unwrap_trxn(acc, _key, nil), do: acc
-  defp unwrap_trxn(acc, key, values), do: Map.put(acc, key, values)
-
-  ########################## RESUME ONLY #####################################
+  defp unique_title(attrs), do: attrs
 
   @doc """
   Updates a Resume.

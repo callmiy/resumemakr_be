@@ -24,10 +24,10 @@ defmodule Data.Resumes.Experience do
       :achievements
     ])
     |> validate_required([
-      :resume_id,
       :position,
       :company_name,
       :from_date
     ])
+    |> assoc_constraint(:resume)
   end
 end

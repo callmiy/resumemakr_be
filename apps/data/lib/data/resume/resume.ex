@@ -26,9 +26,13 @@ defmodule Data.Resumes.Resume do
 
   def changeset(%__MODULE__{} = schema, attrs \\ %{}) do
     schema
-    |> cast(attrs, [:title, :user_id])
+    |> cast(attrs, [:title, :user_id, :description])
     |> cast_embed(:languages, required: false)
     |> cast_embed(:additional_skills, required: false)
+    |> cast_assoc(:personal_info, with: &PersonalInfo.changeset/2)
+    |> cast_assoc(:experiences, with: &Experience.changeset/2)
+    |> cast_assoc(:education, with: &Education.changeset/2)
+    |> cast_assoc(:skills, with: &Skill.changeset/2)
     |> validate_required([:title, :user_id])
     |> assoc_constraint(:user)
   end

@@ -30,7 +30,6 @@ defmodule Data.Resumes.PersonalInfo do
       :photo
     ])
     |> validate_required([
-      :resume_id,
       :first_name,
       :last_name
     ])
