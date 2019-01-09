@@ -26,11 +26,12 @@ defmodule Data.ResolverUser do
       {:ok, %{user: %User{created_user | jwt: new_jwt}}}
     else
       {:error, %Ecto.Changeset{} = changeset} ->
-        errors =
-          Resolver.changeset_errors_to_map(changeset.errors)
+        {
+          :error,
+          changeset.errors
+          |> Resolver.errors_to_map()
           |> Jason.encode!()
-
-        {:error, errors}
+        }
 
       _ ->
         Resolver.unauthorized()
