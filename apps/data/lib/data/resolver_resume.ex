@@ -75,6 +75,27 @@ defmodule Data.ResolverResume do
     end
   end
 
+  def delete(%{id: id}, %{context: %{current_user: user}}) do
+    case Resumes.get_resume_by(id: id, user_id: user.id) do
+      nil ->
+        {:error, "Resume you are deleting does not exist"}
+
+      resume ->
+        case Resumes.delete_resume(resume) do
+          {:ok, deleted_resume} ->
+            {:ok, wrapped(deleted_resume)}
+
+          {:error, changeset} ->
+            {
+              :error,
+              changeset.errors
+              |> Resolver.errors_to_map()
+              |> Jason.encode!()
+            }
+        end
+    end
+  end
+
   defp wrapped(%Resume{} = resume) do
     associates =
       resume

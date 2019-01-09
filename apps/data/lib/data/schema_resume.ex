@@ -161,6 +161,19 @@ defmodule Data.SchemaResume do
 
       parsing_node_ids(&Resolver.update/2, id: :resume) |> resolve()
     end
+
+    @doc "Delete a resume"
+    payload field :delete_resume do
+      input do
+        field :id, :id |> non_null()
+      end
+
+      output do
+        field :resume, :resume
+      end
+
+      parsing_node_ids(&Resolver.delete/2, id: :resume) |> resolve()
+    end
   end
 
   @desc "Queries allowed on Resume object"

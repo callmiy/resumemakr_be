@@ -158,4 +158,17 @@ defmodule Data.QueryResume do
       #{all_fields_frag()}
     """
   end
+
+  def delete do
+    """
+      mutation DeleteAResume($input:  DeleteResumeInput!) {
+        deleteResume(input: $input) {
+          resume {
+            id
+            _id
+          }
+        }
+      }
+    """
+  end
 end

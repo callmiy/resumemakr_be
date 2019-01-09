@@ -218,6 +218,62 @@ defmodule Data.SchemaResumeTest do
                  context: context
                )
     end
+
+    test "delete resume succeeds" do
+      user = RegFactory.insert()
+      context = context(user)
+      %{id: id_} = Factory.insert(user_id: user.id)
+      id_ = Integer.to_string(id_)
+
+      variables = %{
+        "input" => %{"id" => Absinthe.Relay.Node.to_global_id(:resume, id_, Schema)}
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "deleteResume" => %{
+                    "resume" => %{
+                      "id" => _id,
+                      "_id" => ^id_
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.delete(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+    end
+
+    test "delete resume fails for unknown user" do
+      user = RegFactory.insert()
+      context = context(user)
+      Factory.insert(user_id: user.id)
+      bogus_user_id = 0
+
+      variables = %{
+        "input" => %{"id" => Absinthe.Relay.Node.to_global_id(:resume, bogus_user_id, Schema)}
+      }
+
+      assert {:ok,
+              %{
+                errors: [
+                  %{
+                    message: "Resume you are deleting does not exist",
+                    path: ["deleteResume"]
+                  }
+                ]
+              }} =
+               Absinthe.run(
+                 Query.delete(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+    end
   end
 
   describe "query" do
