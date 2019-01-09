@@ -13,7 +13,7 @@ defmodule Data.ResolverResume do
          |> Map.put(:user_id, user.id)
          |> Resumes.create_resume() do
       {:ok, resume} ->
-        {:ok, %{resume: resume}}
+        {:ok, wrapped(resume)}
 
       {:error, failed_operations, changeset} ->
         {:error,
@@ -46,5 +46,43 @@ defmodule Data.ResolverResume do
              }}
   def resumes(pagination_args, %{context: %{current_user: user}}) do
     Resumes.list_resumes(user.id, pagination_args)
+  end
+
+  def update(args, %{context: %{current_user: user}}) do
+    {id, new_args} = Map.pop(args, :id)
+    user_id = user.id
+
+    case Resumes.get_resume_by(id: id, user_id: user_id) do
+      nil ->
+        {:error, "Resume does not exist"}
+
+      resume ->
+        case Resumes.update_resume(
+               resume,
+               Map.put(new_args, :user_id, user_id)
+             ) do
+          {:ok, updated_resume} ->
+            {:ok, wrapped(updated_resume)}
+        end
+    end
+  end
+
+  defp wrapped(%Resume{} = resume) do
+    associates =
+      resume
+      |> Map.take([:personal_info, :education, :experiences])
+      |> Enum.map(fn
+        {:personal_info, %Ecto.Association.NotLoaded{}} ->
+          {:personal_info, nil}
+
+        {k, %Ecto.Association.NotLoaded{}} ->
+          {k, []}
+
+        v ->
+          v
+      end)
+      |> Enum.into(%{})
+
+    %{resume: Map.merge(resume, associates)}
   end
 end

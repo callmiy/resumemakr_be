@@ -3,6 +3,7 @@ defmodule Data.Resumes.Education do
   import Ecto.Changeset
 
   alias Data.Resumes.Resume
+  alias Data.Resumes
 
   schema "education" do
     belongs_to(:resume, Resume)
@@ -11,6 +12,7 @@ defmodule Data.Resumes.Education do
     field :school, :string
     field :to_date, :string
     field :achievements, {:array, :string}
+    field :delete, :boolean, virtual: true
   end
 
   @doc false
@@ -26,5 +28,6 @@ defmodule Data.Resumes.Education do
     ])
     |> validate_required([:school, :course, :from_date])
     |> assoc_constraint(:resume)
+    |> Resumes.maybe_mark_for_deletion()
   end
 end

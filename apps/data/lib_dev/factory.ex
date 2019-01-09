@@ -27,7 +27,8 @@ defmodule Data.Factory do
 
   def random_string_int, do: Integer.to_string(Faker.random_between(2, 100))
 
-  def reject_attrs(%{} = attrs) do
+  @spec reject_attrs(attrs :: map(), additional_keys :: List.t()) :: map()
+  def reject_attrs(%{} = attrs, additional_keys \\ []) do
     Enum.reject(attrs, fn
       {_k, nil} ->
         true
@@ -35,8 +36,11 @@ defmodule Data.Factory do
       {_, %Ecto.Association.NotLoaded{}} ->
         true
 
-      _other ->
-        false
+      {:__meta__, _} ->
+        true
+
+      {k, _} ->
+        Enum.member?(additional_keys, k)
     end)
     |> Enum.into(%{})
   end

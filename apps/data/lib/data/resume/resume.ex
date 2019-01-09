@@ -34,10 +34,11 @@ defmodule Data.Resumes.Resume do
     |> cast_assoc(:education, with: &Education.changeset/2)
     |> cast_assoc(:skills, with: &Skill.changeset/2)
     |> validate_required([:title, :user_id])
+    |> unique_constraint(:title, name: :resumes_user_id_title_index)
     |> assoc_constraint(:user)
   end
 
-  def my_fields do
-    [:title, :user_id, :languages, :additional_skills, :description]
+  def assoc_fields do
+    [:personal_info, :education, :skills, :experiences]
   end
 end

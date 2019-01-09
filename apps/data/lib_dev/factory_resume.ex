@@ -24,7 +24,8 @@ defmodule Data.FactoryResume do
       personal_info: personal_info(Enum.random(@one_nil), seq),
       education: education(Enum.random(@one_nil), seq),
       additional_skills: additional_skills(Enum.random(@one_nil), seq),
-      languages: languages(Enum.random(@one_nil), seq)
+      languages: languages(Enum.random(@one_nil), seq),
+      skills: skills(Enum.random(@one_nil), seq)
     }
     |> Map.merge(attrs)
     |> Factory.reject_attrs()
@@ -99,26 +100,43 @@ defmodule Data.FactoryResume do
     ]
   end
 
-  def stringify(%{} = params) do
+  defp skills(nil, _) do
+    nil
+  end
+
+  defp skills(_, seq) do
+    [
+      %{
+        description: "Skill " <> seq,
+        achievements:
+          Enum.random([
+            nil,
+            ["Skill achievement " <> seq <> Faker.Lorem.sentence()]
+          ])
+      }
+    ]
+  end
+
+  def stringify(%{} = params, other_keys \\ []) do
     params
-    |> Factory.reject_attrs()
+    |> Factory.reject_attrs(other_keys)
     |> Enum.map(fn
       {k, v} ->
-        {Factory.to_camel_key(k), stringifyp(v)}
+        {Factory.to_camel_key(k), stringifyp(v, other_keys)}
     end)
     |> Enum.into(%{})
   end
 
-  defp stringifyp(attrs) when is_list(attrs) do
-    Enum.map(attrs, &stringifyp/1)
+  defp stringifyp(attrs, other_keys) when is_list(attrs) do
+    Enum.map(attrs, &stringifyp(&1, other_keys))
   end
 
-  defp stringifyp(%{} = attrs) do
+  defp stringifyp(%{} = attrs, other_keys) do
     attrs
-    |> Factory.reject_attrs()
+    |> Factory.reject_attrs(other_keys)
     |> Enum.map(fn
       {k, v} when is_list(v) ->
-        {Factory.to_camel_key(k), stringifyp(v)}
+        {Factory.to_camel_key(k), stringifyp(v, other_keys)}
 
       {k, v} ->
         {Factory.to_camel_key(k), v}
@@ -126,5 +144,5 @@ defmodule Data.FactoryResume do
     |> Enum.into(%{})
   end
 
-  defp stringifyp(val), do: val
+  defp stringifyp(val, _), do: val
 end

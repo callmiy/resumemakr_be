@@ -6,12 +6,14 @@ defmodule Data.SchemaResume do
 
   @desc "An object with a rating"
   object :rated do
+    field :id, non_null(:id)
     field :description, non_null(:string)
     field :level, :string
   end
 
   @desc "A resume experience"
   object :resume_experience do
+    field :id, non_null(:id)
     field :achievements, list_of(:string)
     field :company_name, :string |> non_null()
     field :from_date, :string |> non_null()
@@ -21,6 +23,7 @@ defmodule Data.SchemaResume do
 
   @desc "A Personal Info"
   object :personal_info do
+    field :id, non_null(:id)
     field :first_name, non_null(:string)
     field :last_name, non_null(:string)
     field :address, :string
@@ -33,10 +36,18 @@ defmodule Data.SchemaResume do
 
   @desc "A resume education"
   object :education do
+    field :id, non_null(:id)
     field :course, non_null(:string)
     field :from_date, non_null(:string)
     field :school, non_null(:string)
     field :to_date, :string
+    field :achievements, list_of(:string)
+  end
+
+  @desc "A resume skill"
+  object :skill do
+    field :id, non_null(:id)
+    field :description, non_null(:string)
     field :achievements, list_of(:string)
   end
 
@@ -50,6 +61,7 @@ defmodule Data.SchemaResume do
     field :additional_skills, list_of(:rated)
     field :experiences, list_of(:resume_experience)
     field :education, list_of(:education)
+    field :skills, list_of(:skill)
 
     field :inserted_at, non_null(:iso_datetime)
     field :updated_at, non_null(:iso_datetime)
@@ -57,12 +69,14 @@ defmodule Data.SchemaResume do
 
   @desc "Variables for creating an object with a rating"
   input_object :rated_input do
+    field :id, :id
     field :description, non_null(:string)
     field :level, :string
   end
 
   @desc "Variables for creating resume education"
   input_object :education_input do
+    field :id, :id
     field :course, non_null(:string)
     field :from_date, non_null(:string)
     field :school, non_null(:string)
@@ -72,6 +86,7 @@ defmodule Data.SchemaResume do
 
   @desc "Variables for creating Personal Info"
   input_object :personal_info_input do
+    field :id, :id
     field :first_name, non_null(:string)
     field :last_name, non_null(:string)
     field :address, non_null(:string)
@@ -83,12 +98,20 @@ defmodule Data.SchemaResume do
   end
 
   @desc "Variables for creating resume experience"
-  input_object :resume_experience_input do
+  input_object :create_experience_input do
+    field :id, :id
     field :achievements, list_of(:string)
     field :company_name, :string |> non_null()
     field :from_date, :string |> non_null()
     field :position, :string |> non_null()
     field :to_date, :string
+  end
+
+  @desc "A resume skill"
+  input_object :create_skill_input do
+    field :id, :id
+    field :description, non_null(:string)
+    field :achievements, list_of(:string)
   end
 
   @desc "Variables for getting a Resume"
@@ -105,9 +128,10 @@ defmodule Data.SchemaResume do
         field :description, :string
         field :personal_info, :personal_info_input
         field :education, list_of(:education_input)
-        field :experiences, list_of(:resume_experience_input)
+        field :experiences, list_of(:create_experience_input)
         field :languages, list_of(:rated_input)
         field :additional_skills, list_of(:rated_input)
+        field :skills, list_of(:create_skill_input)
       end
 
       output do
@@ -115,6 +139,27 @@ defmodule Data.SchemaResume do
       end
 
       resolve(&Resolver.create/3)
+    end
+
+    @doc "Update a resume"
+    payload field :update_resume do
+      input do
+        field :id, :id |> non_null()
+        field :title, :string
+        field :description, :string
+        field :personal_info, :personal_info_input
+        field :education, list_of(:education_input)
+        field :experiences, list_of(:create_experience_input)
+        field :languages, list_of(:rated_input)
+        field :additional_skills, list_of(:rated_input)
+        field :skills, list_of(:create_skill_input)
+      end
+
+      output do
+        field :resume, :resume
+      end
+
+      parsing_node_ids(&Resolver.update/2, id: :resume) |> resolve()
     end
   end
 

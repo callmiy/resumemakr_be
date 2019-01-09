@@ -9,6 +9,7 @@ defmodule Data.Resumes do
   alias Data.Resumes.Resume
   alias Data.Resumes.Experience
   alias Data.Resumes.Education
+  alias Ecto.Changeset
 
   @doc """
   Returns the list of resumes for a user.
@@ -111,10 +112,89 @@ defmodule Data.Resumes do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_resume(%Resume{} = resume, attrs) do
+  def update_resume(%Resume{} = resume, %{} = attrs) do
+    {resume, attrs} = augment_attrs(resume, attrs)
+
     resume
     |> Resume.changeset(attrs)
     |> Repo.update()
+  end
+
+  @spec augment_attrs(Resume.t(), map()) :: {Resume.t(), Map.t()}
+  def augment_attrs(%Resume{} = resume, %{} = attrs) do
+    resume = Repo.preload(resume, Resume.assoc_fields())
+
+    augmented_attrs =
+      resume
+      |> Map.from_struct()
+      |> Enum.reduce(%{}, fn
+        {k, _}, acc when k in [:__meta__, :inserted_at, :updated_at] ->
+          acc
+
+        {_k, %Ecto.Association.NotLoaded{}}, acc ->
+          acc
+
+        {k, v_db}, acc when is_map(v_db) or is_list(v_db) ->
+          update_if_missing(k, v_db, acc, attrs[k])
+
+        {k, _v}, acc ->
+          Map.put(acc, k, attrs[k])
+      end)
+
+    {resume, augmented_attrs}
+  end
+
+  defp update_if_missing(k, %{} = v_db, acc, nil),
+    do: Map.put(acc, k, Map.from_struct(v_db))
+
+  defp update_if_missing(_k, [], acc, nil), do: acc
+
+  defp update_if_missing(k, v_dbs, acc, nil),
+    do: Map.put(acc, k, Enum.map(v_dbs, &Map.from_struct/1))
+
+  defp update_if_missing(k, v_db, acc, %{} = v_user) do
+    atom_keys? =
+      Enum.reduce(v_user, true, fn {k, _}, acc ->
+        acc && is_atom(k)
+      end)
+
+    if atom_keys? do
+      case v_user[:id] do
+        nil ->
+          Map.put(acc, k, Map.put(v_user, :id, v_db.id))
+
+        _ ->
+          acc
+      end
+    else
+      case v_user["id"] do
+        nil ->
+          Map.put(acc, k, Map.put(v_user, "id", v_db.id))
+
+        _ ->
+          acc
+      end
+    end
+  end
+
+  defp update_if_missing(k, v_dbs, acc, v_users) do
+    v_dbs = Enum.map(v_dbs, &Map.from_struct/1)
+
+    v_users
+    |> Enum.map(&(&1[:id] || &1["id"]))
+    |> Enum.reject(&(&1 == nil))
+    |> Enum.map(&("#{&1}" |> String.to_integer()))
+    |> case do
+      [] ->
+        Map.put(acc, k, Enum.concat(v_dbs, v_users))
+
+      user_data_ids ->
+        not_in_user_data =
+          v_dbs
+          |> Enum.reject(&Enum.member?(user_data_ids, &1.id))
+
+        Map.put(acc, k, not_in_user_data |> Enum.concat(v_users))
+    end
   end
 
   @doc """
@@ -488,5 +568,14 @@ defmodule Data.Resumes do
   """
   def change_skill(%Skill{} = skill) do
     Skill.changeset(skill, %{})
+  end
+
+  @spec maybe_mark_for_deletion(Ecto.Changeset.t()) :: Ecto.Changeset.t()
+  def maybe_mark_for_deletion(%Changeset{} = changeset) do
+    if Changeset.get_change(changeset, :delete) do
+      %Changeset{changeset | action: :delete, valid?: true, errors: []}
+    else
+      changeset
+    end
   end
 end

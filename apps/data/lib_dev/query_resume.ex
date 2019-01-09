@@ -1,9 +1,11 @@
 defmodule Data.QueryResume do
-  @frag_name "ResumeAllFieldsFrag"
+  @all_fields_frag_name "ResumeAllFieldsFrag"
+  @frag_name "ResumeFrag"
   @frag_name_rated "RatedFrag"
   @frag_name_education "ResumeeducationFrag"
   @frag_name_experience "ResumeExperienceFrag"
   @frag_name_personal_info "PersonalInfoFrag"
+  @frag_name_skill "SkillFrag"
 
   @frag """
     fragment #{@frag_name} on Resume {
@@ -18,6 +20,7 @@ defmodule Data.QueryResume do
 
   @frag_rated """
     fragment #{@frag_name_rated} on Rated {
+      id
       description
       level
     }
@@ -25,6 +28,7 @@ defmodule Data.QueryResume do
 
   @frag_education """
     fragment #{@frag_name_education} on Education {
+      id
       course
       fromDate
       toDate
@@ -35,6 +39,7 @@ defmodule Data.QueryResume do
 
   @frag_experience """
     fragment #{@frag_name_experience} on ResumeExperience {
+      id
       achievements
       companyName
       fromDate
@@ -45,6 +50,7 @@ defmodule Data.QueryResume do
 
   @frag_personal_info """
     fragment #{@frag_name_personal_info} on PersonalInfo {
+      id
       address
       dateOfBirth
       email
@@ -56,11 +62,17 @@ defmodule Data.QueryResume do
     }
   """
 
-  def create_resume do
+  @frag_skill """
+    fragment #{@frag_name_skill} on Skill {
+      id
+      description
+      achievements
+    }
+  """
+
+  defp all_fields_frag do
     """
-      mutation CreateAResume($input:  ResumeInput!) {
-        resume(input: $input) {
-          resume {
+      fragment #{@all_fields_frag_name} on Resume {
             ...#{@frag_name}
 
             additionalSkills {
@@ -82,8 +94,10 @@ defmodule Data.QueryResume do
             personalInfo {
               ...#{@frag_name_personal_info}
             }
-          }
-        }
+
+            skills {
+              ...#{@frag_name_skill}
+            }
       }
 
       #{@frag}
@@ -91,6 +105,21 @@ defmodule Data.QueryResume do
       #{@frag_education}
       #{@frag_experience}
       #{@frag_personal_info}
+      #{@frag_skill}
+    """
+  end
+
+  def create_resume do
+    """
+      mutation CreateAResume($input:  ResumeInput!) {
+        resume(input: $input) {
+          resume {
+            ...#{@all_fields_frag_name}
+          }
+        }
+      }
+
+      #{all_fields_frag()}
     """
   end
 
@@ -113,6 +142,20 @@ defmodule Data.QueryResume do
       }
 
       #{@frag}
+    """
+  end
+
+  def update do
+    """
+      mutation UpdateUserResume($input: UpdateResumeInput!) {
+        updateResume(input: $input) {
+          resume {
+            ...#{@all_fields_frag_name}
+          }
+        }
+      }
+
+      #{all_fields_frag()}
     """
   end
 end

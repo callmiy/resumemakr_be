@@ -3,6 +3,7 @@ defmodule Data.Resumes.Experience do
   import Ecto.Changeset
 
   alias Data.Resumes.Resume
+  alias Data.Resumes
 
   schema "experiences" do
     belongs_to(:resume, Resume)
@@ -11,6 +12,7 @@ defmodule Data.Resumes.Experience do
     field :from_date, :string
     field :position, :string
     field :to_date, :string
+    field :delete, :boolean, virtual: true
   end
 
   def changeset(%__MODULE__{} = schema, attrs \\ %{}) do
@@ -29,5 +31,6 @@ defmodule Data.Resumes.Experience do
       :from_date
     ])
     |> assoc_constraint(:resume)
+    |> Resumes.maybe_mark_for_deletion()
   end
 end
