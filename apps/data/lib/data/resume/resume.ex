@@ -12,8 +12,11 @@ defmodule Data.Resumes.Resume do
   schema "resumes" do
     field(:title, :string)
     field(:description, :string)
+    field(:hobbies, {:array, :string})
+
     embeds_many(:languages, Rated)
     embeds_many(:additional_skills, Rated)
+
     belongs_to(:user, User)
 
     has_one(:personal_info, PersonalInfo)
@@ -26,7 +29,7 @@ defmodule Data.Resumes.Resume do
 
   def changeset(%__MODULE__{} = schema, attrs \\ %{}) do
     schema
-    |> cast(attrs, [:title, :user_id, :description])
+    |> cast(attrs, [:title, :user_id, :description, :hobbies])
     |> cast_embed(:languages, required: false)
     |> cast_embed(:additional_skills, required: false)
     |> cast_assoc(:personal_info, with: &PersonalInfo.changeset/2)

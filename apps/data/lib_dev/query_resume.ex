@@ -13,6 +13,7 @@ defmodule Data.QueryResume do
       _id
       title
       description
+      hobbies
       insertedAt
       updatedAt
     }

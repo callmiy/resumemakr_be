@@ -25,7 +25,8 @@ defmodule Data.FactoryResume do
       education: education(Enum.random(@one_nil), seq),
       additional_skills: additional_skills(Enum.random(@one_nil), seq),
       languages: languages(Enum.random(@one_nil), seq),
-      skills: skills(Enum.random(@one_nil), seq)
+      skills: skills(Enum.random(@one_nil), seq),
+      hobbies: Enum.random([nil, ["Hobby " <> seq]])
     }
     |> Map.merge(attrs)
     |> Factory.reject_attrs()

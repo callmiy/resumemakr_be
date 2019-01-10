@@ -40,7 +40,8 @@ defmodule Data.SchemaResumeTest do
                       "education" => education,
                       "skills" => skills,
                       "additionalSkills" => additional_skills,
-                      "languages" => languages
+                      "languages" => languages,
+                      "hobbies" => _hobbies
                     }
                   }
                 }
@@ -130,7 +131,8 @@ defmodule Data.SchemaResumeTest do
                       "education" => education,
                       "skills" => skills,
                       "additionalSkills" => additional_skills,
-                      "languages" => languages
+                      "languages" => languages,
+                      "hobbies" => _hobbies
                     }
                   }
                 }

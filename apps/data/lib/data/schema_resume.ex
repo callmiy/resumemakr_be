@@ -62,6 +62,7 @@ defmodule Data.SchemaResume do
     field :experiences, list_of(:resume_experience)
     field :education, list_of(:education)
     field :skills, list_of(:skill)
+    field :hobbies, list_of(:string)
 
     field :inserted_at, non_null(:iso_datetime)
     field :updated_at, non_null(:iso_datetime)
@@ -133,6 +134,7 @@ defmodule Data.SchemaResume do
         field :languages, list_of(:rated_input)
         field :additional_skills, list_of(:rated_input)
         field :skills, list_of(:create_skill_input)
+        field :hobbies, list_of(:string)
       end
 
       output do
@@ -154,6 +156,7 @@ defmodule Data.SchemaResume do
         field :languages, list_of(:rated_input)
         field :additional_skills, list_of(:rated_input)
         field :skills, list_of(:create_skill_input)
+        field :hobbies, list_of(:string)
       end
 
       output do

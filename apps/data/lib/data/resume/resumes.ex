@@ -136,6 +136,9 @@ defmodule Data.Resumes do
         {_k, %Ecto.Association.NotLoaded{}}, acc ->
           acc
 
+        {:hobbies, _}, acc ->
+          Map.put(acc, :hobbies, attrs[:hobbies])
+
         {k, v_db}, acc when is_map(v_db) or is_list(v_db) ->
           update_if_missing(k, v_db, acc, attrs[k])
 
