@@ -124,7 +124,7 @@ defmodule Data.ResolverResume do
   defp wrapped(%Resume{} = resume) do
     associates =
       resume
-      |> Map.take([:personal_info, :education, :experiences])
+      |> Map.take(Resume.assoc_fields())
       |> Enum.map(fn
         {:personal_info, %Ecto.Association.NotLoaded{}} ->
           {:personal_info, nil}
