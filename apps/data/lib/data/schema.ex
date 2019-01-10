@@ -2,6 +2,8 @@ defmodule Data.Schema do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
 
+  alias Data.ResolverResume
+
   import_types(Absinthe.Type.Custom)
   import_types(Data.SchemaTypes)
   import_types(Data.SchemaCredential)
@@ -9,6 +11,13 @@ defmodule Data.Schema do
   import_types(Data.SchemaResume)
 
   query do
+    node field do
+      resolve(fn
+        %{type: :resume, id: id}, _ ->
+          ResolverResume.get_resume(id: id)
+      end)
+    end
+
     import_fields(:user_query)
     import_fields(:resume_query)
   end

@@ -1,6 +1,8 @@
 defmodule Data.SchemaResumeTest do
   use Data.DataCase
 
+  import Absinthe.Relay.Node, only: [to_global_id: 3]
+
   alias Data.Schema
   alias Data.FactoryResume, as: Factory
   alias Data.FactoryRegistration, as: RegFactory
@@ -100,7 +102,7 @@ defmodule Data.SchemaResumeTest do
 
       update_attrs =
         Factory.params(
-          id: Absinthe.Relay.Node.to_global_id(:resume, id_, Schema),
+          id: to_global_id(:resume, id_, Schema),
           title: title
         )
 
@@ -157,8 +159,7 @@ defmodule Data.SchemaResumeTest do
       Factory.insert(user_id: user.id)
       bogus_user_id = 0
 
-      update_attrs =
-        Factory.params(id: Absinthe.Relay.Node.to_global_id(:resume, bogus_user_id, Schema))
+      update_attrs = Factory.params(id: to_global_id(:resume, bogus_user_id, Schema))
 
       updated_resume_str = Factory.stringify(update_attrs)
 
@@ -255,7 +256,7 @@ defmodule Data.SchemaResumeTest do
       bogus_user_id = 0
 
       variables = %{
-        "input" => %{"id" => Absinthe.Relay.Node.to_global_id(:resume, bogus_user_id, Schema)}
+        "input" => %{"id" => to_global_id(:resume, bogus_user_id, Schema)}
       }
 
       assert {:ok,
@@ -288,7 +289,7 @@ defmodule Data.SchemaResumeTest do
       assert {:ok,
               %{
                 data: %{
-                  "resumes" => %{
+                  "listResumes" => %{
                     "pageInfo" => %{
                       "hasNextPage" => false
                     },
@@ -305,7 +306,120 @@ defmodule Data.SchemaResumeTest do
                 }
               }} =
                Absinthe.run(
-                 Query.resumes(),
+                 Query.list_resumes(),
+                 Schema,
+                 variables: variables,
+                 context: context(user)
+               )
+    end
+
+    test "get a resume for user succeeds for valid user id and title" do
+      user = RegFactory.insert()
+      %{id: id, title: title} = Factory.insert(user_id: user.id)
+      sid = Integer.to_string(id)
+      gid = to_global_id(:resume, id, Schema)
+
+      variables = %{
+        "input" => %{
+          "title" => title,
+          "id" => gid
+        }
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "getResume" => %{
+                    "id" => ^gid,
+                    "_id" => ^sid,
+                    "title" => ^title
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.get_resume(),
+                 Schema,
+                 variables: variables,
+                 context: context(user)
+               )
+    end
+
+    test "get a resume for user succeeds for valid title" do
+      user = RegFactory.insert()
+      %{id: id, title: title} = Factory.insert(user_id: user.id)
+      sid = Integer.to_string(id)
+
+      variables = %{
+        "input" => %{
+          "title" => title
+        }
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "getResume" => %{
+                    "_id" => ^sid,
+                    "title" => ^title
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.get_resume(),
+                 Schema,
+                 variables: variables,
+                 context: context(user)
+               )
+    end
+
+    test "get a resume for user fails for invalid query argument(s)" do
+      user = RegFactory.insert()
+      %{title: title} = Factory.insert(user_id: user.id)
+      bogus_gid = to_global_id(:resume, "0", Schema)
+
+      input =
+        Enum.random([
+          %{"title" => title <> "0"},
+          %{"id" => bogus_gid}
+        ])
+
+      variables = %{
+        "input" => input
+      }
+
+      assert {:ok,
+              %{
+                errors: [
+                  %{
+                    message: "resume not found"
+                  }
+                ]
+              }} =
+               Absinthe.run(
+                 Query.get_resume(),
+                 Schema,
+                 variables: variables,
+                 context: context(user)
+               )
+    end
+
+    test "get a resume for user fails for empty argument(s)" do
+      user = RegFactory.insert()
+
+      variables = %{
+        "input" => %{}
+      }
+
+      assert {:ok,
+              %{
+                errors: [
+                  %{
+                    message: "invalid query arguments"
+                  }
+                ]
+              }} =
+               Absinthe.run(
+                 Query.get_resume(),
                  Schema,
                  variables: variables,
                  context: context(user)

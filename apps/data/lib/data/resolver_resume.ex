@@ -1,4 +1,6 @@
 defmodule Data.ResolverResume do
+  import Absinthe.Relay.Node, only: [from_global_id: 2]
+
   alias Data.Resolver
   alias Data.Resumes
   alias Data.Resumes.Resume
@@ -96,6 +98,29 @@ defmodule Data.ResolverResume do
     end
   end
 
+  def get_resume(attrs) do
+    case Resumes.get_resume_by(attrs) do
+      %Resume{} = resume ->
+        {:ok, wrapped(resume).resume}
+
+      nil ->
+        {:error, "resume not found"}
+    end
+  end
+
+  def get_resume(%{input: attrs}, %{context: %{current_user: user}}) do
+    case Map.has_key?(attrs, :id) || Map.has_key?(attrs, :title) do
+      true ->
+        attrs
+        |> convert_from_global()
+        |> Map.put(:user_id, user.id)
+        |> get_resume()
+
+      false ->
+        {:error, "invalid query arguments"}
+    end
+  end
+
   defp wrapped(%Resume{} = resume) do
     associates =
       resume
@@ -114,4 +139,16 @@ defmodule Data.ResolverResume do
 
     %{resume: Map.merge(resume, associates)}
   end
+
+  defp convert_from_global(%{id: id} = attrs) do
+    case from_global_id(id, Data.Schema) do
+      {:ok, %{id: internal_id, type: :resume}} ->
+        Map.put(attrs, :id, internal_id)
+
+      _ ->
+        attrs
+    end
+  end
+
+  defp convert_from_global(attrs), do: attrs
 end

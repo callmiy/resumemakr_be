@@ -115,8 +115,9 @@ defmodule Data.SchemaResume do
   end
 
   @desc "Variables for getting a Resume"
-  input_object :get_resume do
-    field :title, non_null(:id)
+  input_object :get_resume_input do
+    field :id, :id
+    field :title, :string
   end
 
   @desc "Mutations allowed on Resume object"
@@ -179,8 +180,15 @@ defmodule Data.SchemaResume do
   @desc "Queries allowed on Resume object"
   object :resume_query do
     @desc "query a resume "
-    connection field :resumes, node_type: :resume do
+    connection field :list_resumes, node_type: :resume do
       resolve(&Resolver.resumes/2)
+    end
+
+    @desc "Get a resume"
+    field :get_resume, :resume do
+      arg(:input, :get_resume_input |> non_null())
+
+      resolve(&Resolver.get_resume/2)
     end
   end
 

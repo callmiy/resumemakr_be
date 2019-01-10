@@ -123,10 +123,10 @@ defmodule Data.QueryResume do
     """
   end
 
-  def resumes do
+  def list_resumes do
     """
-      query GetUserResumes($first: Int!) {
-        resumes(first: $first) {
+      query ListUserResumes($first: Int!) {
+        listResumes(first: $first) {
           pageInfo {
             hasNextPage
             hasPreviousPage
@@ -138,6 +138,18 @@ defmodule Data.QueryResume do
               ...#{@frag_name}
             }
           }
+        }
+      }
+
+      #{@frag}
+    """
+  end
+
+  def get_resume do
+    """
+      query GetUserResume($input: GetResumeInput!) {
+        getResume(input: $input) {
+          ...#{@frag_name}
         }
       }
 
