@@ -111,8 +111,8 @@ defmodule Data.QueryResume do
 
   def create_resume do
     """
-      mutation CreateAResume($input:  ResumeInput!) {
-        resume(input: $input) {
+      mutation CreateAResume($input:  CreateResumeInput!) {
+        createResume(input: $input) {
           resume {
             ...#{@all_fields_frag_name}
           }

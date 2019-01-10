@@ -27,7 +27,7 @@ defmodule Data.SchemaResumeTest do
       assert {:ok,
               %{
                 data: %{
-                  "resume" => %{
+                  "createResume" => %{
                     "resume" => %{
                       "id" => _id,
                       "_id" => _,
@@ -74,7 +74,7 @@ defmodule Data.SchemaResumeTest do
       assert {:ok,
               %{
                 data: %{
-                  "resume" => %{
+                  "createResume" => %{
                     "resume" => %{
                       "title" => title_from_db
                     }

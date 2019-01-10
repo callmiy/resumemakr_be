@@ -122,7 +122,7 @@ defmodule Data.SchemaResume do
   @desc "Mutations allowed on Resume object"
   object :resume_mutation do
     @doc "Create a resume"
-    payload field :resume do
+    payload field :create_resume do
       input do
         field :title, non_null(:string)
         field :description, :string
