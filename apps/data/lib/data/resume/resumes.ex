@@ -12,6 +12,8 @@ defmodule Data.Resumes do
   alias Ecto.Changeset
   alias Data.Uploaders.ResumePhoto
 
+  @pattern_integer_id ~r/^\d+$/
+
   @doc """
   Returns the list of resumes for a user.
 
@@ -234,7 +236,17 @@ defmodule Data.Resumes do
     v_users
     |> Enum.map(&(&1[:id] || &1["id"]))
     |> Enum.reject(&(&1 == nil))
-    |> Enum.map(&("#{&1}" |> String.to_integer()))
+    |> Enum.map(fn id ->
+      str_id = "#{id}"
+
+      case Regex.match?(@pattern_integer_id, str_id) do
+        true ->
+          Integer.to_string(str_id)
+
+        _ ->
+          str_id
+      end
+    end)
     |> case do
       [] ->
         Map.put(acc, k, Enum.concat(v_dbs, v_users))

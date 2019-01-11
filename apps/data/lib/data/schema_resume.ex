@@ -56,13 +56,25 @@ defmodule Data.SchemaResume do
     field :_id, non_null(:id), resolve: fn %{id: id}, _, _ -> {:ok, id} end
     field :title, non_null(:string)
     field :description, :string
-    field :personal_info, :personal_info
     field :languages, list_of(:rated)
     field :additional_skills, list_of(:rated)
-    field :experiences, list_of(:resume_experience)
-    field :education, list_of(:education)
-    field :skills, list_of(:skill)
     field :hobbies, list_of(:string)
+
+    field :personal_info, :personal_info do
+      resolve(Resolver.get_assoc(:personal_info))
+    end
+
+    field :experiences, list_of(:resume_experience) do
+      resolve(Resolver.get_assoc(:experiences))
+    end
+
+    field :education, list_of(:education) do
+      resolve(Resolver.get_assoc(:education))
+    end
+
+    field :skills, list_of(:skill) do
+      resolve(Resolver.get_assoc(:skill))
+    end
 
     field :inserted_at, non_null(:iso_datetime)
     field :updated_at, non_null(:iso_datetime)
@@ -95,6 +107,7 @@ defmodule Data.SchemaResume do
     field :phone, non_null(:string)
     field :profession, non_null(:string)
     field :date_of_birth, :date
+
     field :photo, :upload do
     end
   end

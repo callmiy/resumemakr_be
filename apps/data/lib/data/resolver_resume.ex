@@ -1,9 +1,11 @@
 defmodule Data.ResolverResume do
   import Absinthe.Relay.Node, only: [from_global_id: 2]
+  import Absinthe.Resolution.Helpers, only: [on_load: 2]
 
   alias Data.Resolver
   alias Data.Resumes
   alias Data.Resumes.Resume
+  alias Data.Resumes.PersonalInfo
   alias Data.Uploaders.ResumePhoto
 
   @spec create(
@@ -102,7 +104,7 @@ defmodule Data.ResolverResume do
   def get_resume(attrs) do
     case Resumes.get_resume_by(attrs) do
       %Resume{} = resume ->
-        {:ok, wrapped(resume).resume}
+        {:ok, resume}
 
       nil ->
         {:error, "resume not found"}
@@ -122,52 +124,72 @@ defmodule Data.ResolverResume do
     end
   end
 
+  defp to_string_photo(%PersonalInfo{} = personal_info) do
+    case personal_info.photo do
+      nil ->
+        personal_info
+
+      %{file_name: file_name} ->
+        Map.put(
+          personal_info,
+          :photo,
+          ResumePhoto.url({file_name, personal_info})
+        )
+
+      file_name ->
+        Map.put(
+          personal_info,
+          :photo,
+          ResumePhoto.url({Path.basename(file_name), personal_info})
+        )
+    end
+  end
+
+  defp to_string_photo(nil) do
+    nil
+  end
+
+  defp to_string_photo(personal_info) do
+    personal_info
+  end
+
+  def get_assoc(key) do
+    fn root, _, %{context: %{loader: loader}} ->
+      case Map.get(root, key) do
+        %Ecto.Association.NotLoaded{} ->
+          loader
+          |> Dataloader.load(:data, key, root)
+          |> on_load(fn data_source ->
+            child = Dataloader.get(data_source, :data, key, root)
+
+            {:ok, sanitize_child(key, child)}
+          end)
+
+        child ->
+          {:ok, sanitize_child(key, child)}
+      end
+    end
+  end
+
+  def sanitize_child(key, child) do
+    case key do
+      :personal_info ->
+        to_string_photo(child)
+
+      _ ->
+        # for skills, education and experiences
+        case child do
+          nil ->
+            []
+
+          _ ->
+            child
+        end
+    end
+  end
+
   defp wrapped(%Resume{} = resume) do
-    associates =
-      resume
-      |> Map.take(Resume.assoc_fields())
-      |> Enum.map(fn
-        {:personal_info, %Ecto.Association.NotLoaded{}} ->
-          {:personal_info, nil}
-
-        {:personal_info, nil} ->
-          {:personal_info, nil}
-
-        {:personal_info, personal_info} ->
-          case personal_info.photo do
-            nil ->
-              {:personal_info, personal_info}
-
-            %{file_name: file_name} ->
-              {
-                :personal_info,
-                Map.put(
-                  personal_info,
-                  :photo,
-                  ResumePhoto.url({file_name, personal_info})
-                )
-              }
-
-            file_name ->
-              {
-                :personal_info,
-                Map.put(
-                  personal_info,
-                  :photo,
-                  ResumePhoto.url({Path.basename(file_name), personal_info})
-                )
-              }
-          end
-
-        {k, %Ecto.Association.NotLoaded{}} ->
-          {k, []}
-
-        v ->
-          v
-      end)
-      |> Enum.into(%{})
-
-    %{resume: Map.merge(resume, associates)}
+    %{resume: resume}
   end
 
   defp convert_from_global(%{id: id} = attrs) do
