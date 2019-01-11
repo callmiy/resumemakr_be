@@ -5,6 +5,14 @@ defmodule Web.Endpoint do
     websocket: true,
     longpoll: false
 
+  @upload_dir Path.expand("./../../uploads")
+
+  # in dev and test
+  plug Plug.Static,
+    at: "/uploads",
+    from: @upload_dir,
+    gzip: false
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest

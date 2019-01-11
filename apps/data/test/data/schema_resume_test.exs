@@ -11,20 +11,24 @@ defmodule Data.SchemaResumeTest do
 
   @moduletag :db
 
+  @dog_pattern ~r/dog\.jpeg/
+
   describe "mutation" do
     test "create resume succeeds" do
       user = RegFactory.insert()
 
-      attrs =
+      attrs_str =
         Factory.params()
         |> Factory.stringify()
 
+      {context, attrs_str} = context(user, attrs_str)
+
       variables = %{
-        "input" => attrs
+        "input" => attrs_str
       }
 
-      description = attrs["description"]
-      title = attrs["title"]
+      description = attrs_str["description"]
+      title = attrs_str["title"]
 
       assert {:ok,
               %{
@@ -50,15 +54,15 @@ defmodule Data.SchemaResumeTest do
                  Query.create_resume(),
                  Schema,
                  variables: variables,
-                 context: context(user)
+                 context: context
                )
 
-      assert_assoc(attrs["experiences"] || [], experiences)
-      assert_assoc(personal_info, attrs["personalInfo"])
-      assert_assoc(education, attrs["education"] || [])
-      assert_assoc(languages, attrs["languages"] || [])
-      assert_assoc(skills, attrs["skills"] || [])
-      assert_assoc(additional_skills, attrs["additionalSkills"] || [])
+      assert_assoc(attrs_str["experiences"] || [], experiences)
+      assert_assoc(personal_info, attrs_str["personalInfo"])
+      assert_assoc(education, attrs_str["education"] || [])
+      assert_assoc(languages, attrs_str["languages"] || [])
+      assert_assoc(skills, attrs_str["skills"] || [])
+      assert_assoc(additional_skills, attrs_str["additionalSkills"] || [])
     end
 
     test "title is made unique" do
@@ -96,9 +100,9 @@ defmodule Data.SchemaResumeTest do
 
     test "update resume succeeds" do
       user = RegFactory.insert()
+      attrs = Factory.params(user_id: user.id)
 
-      %{title: title, id: id_} = resume = Factory.insert(user_id: user.id)
-
+      {:ok, %{title: title, id: id_} = resume} = Resumes.create_resume(attrs)
       id_ = Integer.to_string(id_)
 
       update_attrs =
@@ -108,14 +112,11 @@ defmodule Data.SchemaResumeTest do
         )
 
       updated_resume_str = Factory.stringify(update_attrs)
+      {context, updated_resume_str} = context(user, updated_resume_str)
 
       variables = %{
         "input" => updated_resume_str
       }
-
-      context = context(user)
-
-      new_description = updated_resume_str["description"]
 
       assert {:ok,
               %{
@@ -125,7 +126,7 @@ defmodule Data.SchemaResumeTest do
                       "id" => _id,
                       "_id" => ^id_,
                       "title" => ^title,
-                      "description" => ^new_description,
+                      "description" => new_description,
                       "personalInfo" => personal_info,
                       "experiences" => experiences,
                       "education" => education,
@@ -144,6 +145,14 @@ defmodule Data.SchemaResumeTest do
                  context: context
                )
 
+      case Map.has_key?(updated_resume_str, "description") do
+        true ->
+          assert new_description == updated_resume_str["description"]
+
+        _ ->
+          assert new_description == resume.description
+      end
+
       {_, augmented_attrs} = Resumes.augment_attrs(resume, update_attrs)
       augmented_attrs_str = Factory.stringify(augmented_attrs)
 
@@ -157,13 +166,21 @@ defmodule Data.SchemaResumeTest do
 
     test "update resume fails for unknown user" do
       user = RegFactory.insert()
-      context = context(user)
       Factory.insert(user_id: user.id)
       bogus_user_id = 0
 
-      update_attrs = Factory.params(id: to_global_id(:resume, bogus_user_id, Schema))
+      update_attrs =
+        Factory.params(
+          id:
+            to_global_id(
+              :resume,
+              bogus_user_id,
+              Schema
+            )
+        )
 
       updated_resume_str = Factory.stringify(update_attrs)
+      {context, updated_resume_str} = context(user, updated_resume_str)
 
       variables = %{
         "input" => updated_resume_str
@@ -188,7 +205,6 @@ defmodule Data.SchemaResumeTest do
 
     test "update resume fails on attempt to set title to null" do
       user = RegFactory.insert()
-      context = context(user)
       resume = Factory.insert(user_id: user.id)
 
       update_attrs =
@@ -198,6 +214,8 @@ defmodule Data.SchemaResumeTest do
         update_attrs
         |> Factory.stringify()
         |> Map.put("title", nil)
+
+      {context, updated_resume_str} = context(user, updated_resume_str)
 
       variables = %{
         "input" => updated_resume_str
@@ -431,6 +449,24 @@ defmodule Data.SchemaResumeTest do
 
   defp context(user), do: %{current_user: user}
 
+  defp context(user, %{"personalInfo" => nil} = attrs),
+    do: {context(user), attrs}
+
+  defp context(user, %{"personalInfo" => %{"photo" => nil}} = attrs),
+    do: {context(user), attrs}
+
+  defp context(user, %{"personalInfo" => %{"photo" => photo_upload_plug}} = attrs) do
+    {
+      update_in(
+        context(user)[:__absinthe_plug__],
+        &Map.put(&1 || %{}, :uploads, %{"photo" => photo_upload_plug})
+      ),
+      update_in(attrs["personalInfo"]["photo"], fn _ -> "photo" end)
+    }
+  end
+
+  defp context(user, attrs), do: {context(user), attrs}
+
   defp assert_assoc(nil, nil) do
     :ok
   end
@@ -450,10 +486,15 @@ defmodule Data.SchemaResumeTest do
             :ok
 
           bv ->
-            if k in [:id, "id"] do
-              assert to_string(av) == to_string(bv)
-            else
-              assert av == bv
+            cond do
+              k == "id" ->
+                assert to_string(av) == to_string(bv)
+
+              k == "photo" ->
+                assert_photo(av, bv)
+
+              true ->
+                assert av == bv
             end
         end
     end)
@@ -462,5 +503,41 @@ defmodule Data.SchemaResumeTest do
   defp assert_assoc(a, b) when is_list(a) and is_list(b) do
     Enum.zip(a, b)
     |> Enum.each(fn {x, y} -> assert_assoc(x, y) end)
+  end
+
+  defp assert_photo("photo", v) when is_binary(v) do
+    assert Regex.match?(@dog_pattern, v)
+  end
+
+  defp assert_photo(v, "photo") when is_binary(v) do
+    assert Regex.match?(@dog_pattern, v)
+  end
+
+  defp assert_photo(%{filename: filename}, "photo") do
+    assert Regex.match?(@dog_pattern, filename)
+  end
+
+  defp assert_photo("photo", %{filename: filename}) do
+    assert Regex.match?(@dog_pattern, filename)
+  end
+
+  defp assert_photo(%{filename: filename}, v) do
+    assert Regex.match?(@dog_pattern, filename)
+    assert Regex.match?(@dog_pattern, v)
+  end
+
+  defp assert_photo(v, %{filename: filename}) do
+    assert Regex.match?(@dog_pattern, filename)
+    assert Regex.match?(@dog_pattern, v)
+  end
+
+  defp assert_photo(%{file_name: file_name}, v) do
+    assert Regex.match?(@dog_pattern, file_name)
+    assert Regex.match?(@dog_pattern, v)
+  end
+
+  defp assert_photo(v, %{file_name: file_name}) do
+    assert Regex.match?(@dog_pattern, file_name)
+    assert Regex.match?(@dog_pattern, v)
   end
 end

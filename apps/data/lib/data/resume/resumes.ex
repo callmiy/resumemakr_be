@@ -10,6 +10,7 @@ defmodule Data.Resumes do
   alias Data.Resumes.Experience
   alias Data.Resumes.Education
   alias Ecto.Changeset
+  alias Data.Uploaders.ResumePhoto
 
   @doc """
   Returns the list of resumes for a user.
@@ -122,28 +123,73 @@ defmodule Data.Resumes do
     |> Repo.update()
   end
 
+  @doc ~S"""
+    If the update attributes are missing fields from the original
+    resume, them we copy the missing fields from the resume retrieved
+    from the database into the update attributes.
+
+    The reason for this is because we are using
+    Ecto.Changeset.cast_assoc which will raise by default if there are
+    missing associations
+  """
   @spec augment_attrs(Resume.t(), map()) :: {Resume.t(), Map.t()}
   def augment_attrs(%Resume{} = resume, %{} = attrs) do
-    resume = Repo.preload(resume, Resume.assoc_fields())
+    resume =
+      resume
+      |> Repo.preload(Resume.assoc_fields())
+      |> to_string_photo_path()
 
     augmented_attrs =
       resume
       |> Map.from_struct()
       |> Enum.reduce(%{}, fn
         {k, _}, acc when k in [:__meta__, :inserted_at, :updated_at] ->
-          acc
+          case Map.has_key?(attrs, k) do
+            true ->
+              Map.put(acc, k, attrs[k])
 
-        {_k, %Ecto.Association.NotLoaded{}}, acc ->
-          acc
+            _ ->
+              acc
+          end
+
+        {k, %Ecto.Association.NotLoaded{}}, acc ->
+          case Map.has_key?(attrs, k) do
+            true ->
+              Map.put(acc, k, attrs[k])
+
+            _ ->
+              acc
+          end
 
         {:hobbies, _}, acc ->
           Map.put(acc, :hobbies, attrs[:hobbies])
 
         {k, v_db}, acc when is_map(v_db) or is_list(v_db) ->
-          update_if_missing(k, v_db, acc, attrs[k])
+          case Map.has_key?(attrs, k) do
+            true ->
+              update_if_missing(k, v_db, acc, attrs[k])
 
-        {k, _v}, acc ->
-          Map.put(acc, k, attrs[k])
+            _ ->
+              cond do
+                is_map(v_db) ->
+                  Map.put(acc, k, Map.from_struct(v_db))
+
+                is_list(v_db) ->
+                  Map.put(acc, k, Enum.map(v_db, &Map.from_struct/1))
+
+                true ->
+                  Map.put(acc, k, v_db)
+              end
+          end
+
+        {k, v}, acc ->
+          case Map.has_key?(attrs, k) do
+            true ->
+              Map.put(acc, k, attrs[k])
+
+            _ ->
+              Map.put(acc, k, v)
+          end
       end)
 
     {resume, augmented_attrs}
@@ -153,9 +199,6 @@ defmodule Data.Resumes do
     do: Map.put(acc, k, Map.from_struct(v_db))
 
   defp update_if_missing(_k, [], acc, nil), do: acc
-
-  defp update_if_missing(k, v_dbs, acc, nil),
-    do: Map.put(acc, k, Enum.map(v_dbs, &Map.from_struct/1))
 
   defp update_if_missing(k, v_db, acc, %{} = v_user) do
     atom_keys? =
@@ -169,7 +212,7 @@ defmodule Data.Resumes do
           Map.put(acc, k, Map.put(v_user, :id, v_db.id))
 
         _ ->
-          acc
+          Map.put(acc, k, v_user)
       end
     else
       case v_user["id"] do
@@ -177,10 +220,13 @@ defmodule Data.Resumes do
           Map.put(acc, k, Map.put(v_user, "id", v_db.id))
 
         _ ->
-          acc
+          Map.put(acc, k, v_user)
       end
     end
   end
+
+  defp update_if_missing(k, v_dbs, acc, nil),
+    do: Map.put(acc, k, Enum.map(v_dbs, &Map.from_struct/1))
 
   defp update_if_missing(k, v_dbs, acc, v_users) do
     v_dbs = Enum.map(v_dbs, &Map.from_struct/1)
@@ -194,12 +240,45 @@ defmodule Data.Resumes do
         Map.put(acc, k, Enum.concat(v_dbs, v_users))
 
       user_data_ids ->
-        not_in_user_data =
+        in_db_not_in_user_data =
           v_dbs
           |> Enum.reject(&Enum.member?(user_data_ids, &1.id))
+          |> Enum.map(&Map.from_struct/1)
 
-        Map.put(acc, k, not_in_user_data |> Enum.concat(v_users))
+        Map.put(acc, k, Enum.concat(in_db_not_in_user_data, v_users))
     end
+  end
+
+  defp to_string_photo_path(%Resume{personal_info: nil} = resume) do
+    resume
+  end
+
+  defp to_string_photo_path(%Resume{personal_info: %{photo: nil}} = resume) do
+    resume
+  end
+
+  defp to_string_photo_path(%Resume{personal_info: %{photo: photo}} = resume) do
+    file_name = photo.file_name
+    dir = ResumePhoto.storage_dir(:original, {nil, resume.personal_info})
+    path = Path.join([Data.umbrella_root(), dir, file_name])
+
+    confirmed_path =
+      case File.exists?(path) do
+        true ->
+          path
+
+        _ ->
+          nil
+      end
+
+    update_in(
+      resume.personal_info.photo,
+      fn _ -> confirmed_path end
+    )
+  end
+
+  defp to_string_photo_path(resume) do
+    resume
   end
 
   @doc """

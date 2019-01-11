@@ -4,6 +4,7 @@ defmodule Data.ResolverResume do
   alias Data.Resolver
   alias Data.Resumes
   alias Data.Resumes.Resume
+  alias Data.Uploaders.ResumePhoto
 
   @spec create(
           any(),
@@ -128,6 +129,35 @@ defmodule Data.ResolverResume do
       |> Enum.map(fn
         {:personal_info, %Ecto.Association.NotLoaded{}} ->
           {:personal_info, nil}
+
+        {:personal_info, nil} ->
+          {:personal_info, nil}
+
+        {:personal_info, personal_info} ->
+          case personal_info.photo do
+            nil ->
+              {:personal_info, personal_info}
+
+            %{file_name: file_name} ->
+              {
+                :personal_info,
+                Map.put(
+                  personal_info,
+                  :photo,
+                  ResumePhoto.url({file_name, personal_info})
+                )
+              }
+
+            file_name ->
+              {
+                :personal_info,
+                Map.put(
+                  personal_info,
+                  :photo,
+                  ResumePhoto.url({Path.basename(file_name), personal_info})
+                )
+              }
+          end
 
         {k, %Ecto.Association.NotLoaded{}} ->
           {k, []}

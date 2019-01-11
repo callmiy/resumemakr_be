@@ -27,7 +27,10 @@ defmodule Data.Resumes.Resume do
     timestamps(type: :utc_datetime)
   end
 
-  def changeset(%__MODULE__{} = schema, attrs \\ %{}) do
+  def changeset(%__MODULE__{} = schema), do: changeset(schema, %{})
+  def changeset(attrs), do: changeset(%__MODULE__{}, attrs)
+
+  def changeset(%__MODULE__{} = schema, attrs) do
     schema
     |> cast(attrs, [:title, :user_id, :description, :hobbies])
     |> cast_embed(:languages, required: false)

@@ -10,6 +10,7 @@ defmodule Data.FactoryResume do
   @doc false
   def insert(attrs) do
     attrs = params(attrs)
+
     {:ok, resume} = Resumes.create_resume(attrs)
     resume
   end
@@ -29,7 +30,31 @@ defmodule Data.FactoryResume do
       hobbies: Enum.random([nil, ["Hobby " <> seq]])
     }
     |> Map.merge(attrs)
+    |> replace_string_nils()
     |> Factory.reject_attrs()
+  end
+
+  defp replace_string_nils(%{} = attrs) do
+    attrs
+    |> Enum.map(fn
+      {k, "nil"} ->
+        {k, nil}
+
+      {k, %Plug.Upload{} = v} ->
+        {k, v}
+
+      {k, val} ->
+        {k, replace_string_nils(val)}
+    end)
+    |> Enum.into(%{})
+  end
+
+  defp replace_string_nils(value) when is_list(value) do
+    Enum.map(value, &replace_string_nils/1)
+  end
+
+  defp replace_string_nils(value) do
+    value
   end
 
   defp experiences(nil, _) do
@@ -61,7 +86,18 @@ defmodule Data.FactoryResume do
       address: Faker.Address.street_address(),
       email: Faker.Internet.email(),
       phone: Faker.Phone.EnUs.phone(),
-      profession: "Profession " <> seq
+      profession: "Profession " <> seq,
+      photo:
+        Enum.random([
+          nil,
+          %Plug.Upload{
+            content_type: "image/png",
+            filename: "dog.jpeg",
+            path: Path.join([Data.app_root(), "priv/test-files", "dog.jpeg"])
+          },
+          # if "nil", then we do not want to delete the photo key in stringify
+          "nil"
+        ])
     }
   end
 
@@ -138,6 +174,9 @@ defmodule Data.FactoryResume do
     |> Enum.map(fn
       {k, v} when is_list(v) ->
         {Factory.to_camel_key(k), stringifyp(v, other_keys)}
+
+      {k, "nil"} ->
+        {Factory.to_camel_key(k), nil}
 
       {k, v} ->
         {Factory.to_camel_key(k), v}

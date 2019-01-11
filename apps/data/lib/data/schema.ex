@@ -4,6 +4,7 @@ defmodule Data.Schema do
 
   alias Data.ResolverResume
 
+  import_types(Absinthe.Plug.Types)
   import_types(Absinthe.Type.Custom)
   import_types(Data.SchemaTypes)
   import_types(Data.SchemaCredential)

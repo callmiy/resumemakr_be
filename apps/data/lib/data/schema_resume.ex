@@ -95,7 +95,8 @@ defmodule Data.SchemaResume do
     field :phone, non_null(:string)
     field :profession, non_null(:string)
     field :date_of_birth, :date
-    field :photo, :string
+    field :photo, :upload do
+    end
   end
 
   @desc "Variables for creating resume experience"

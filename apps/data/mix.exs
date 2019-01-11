@@ -47,7 +47,11 @@ defmodule Data.MixProject do
       {:timex, "~> 3.4"},
       {:absinthe_relay, "~> 1.4"},
       {:absinthe, "~> 1.4"},
-      {:dataloader, "~> 1.0"}
+      {:dataloader, "~> 1.0"},
+      {:arc, "~> 0.11.0"},
+      {:arc_ecto, "~> 0.11.1"},
+      {:arc_gcs, "~> 0.1.0"},
+      {:zarex, "~> 1.0"}
     ]
   end
 
