@@ -14,6 +14,8 @@ defmodule Data.Resumes do
 
   @pattern_integer_id ~r/^\d+$/
 
+  @already_uploaded "___ALREADY_UPLOADED___"
+
   @doc """
   Returns the list of resumes for a user.
 
@@ -87,7 +89,10 @@ defmodule Data.Resumes do
   """
   def create_resume(attrs) do
     %Resume{}
-    |> Resume.changeset(unique_title(attrs))
+    |> Resume.changeset(
+      attrs
+      |> unique_title()
+    )
     |> Repo.insert()
   end
 
@@ -136,10 +141,7 @@ defmodule Data.Resumes do
   """
   @spec augment_attrs(Resume.t(), map()) :: {Resume.t(), Map.t()}
   def augment_attrs(%Resume{} = resume, %{} = attrs) do
-    resume =
-      resume
-      |> Repo.preload(Resume.assoc_fields())
-      |> to_string_photo_path()
+    resume = Repo.preload(resume, Resume.assoc_fields())
 
     augmented_attrs =
       resume
@@ -193,6 +195,7 @@ defmodule Data.Resumes do
               Map.put(acc, k, v)
           end
       end)
+      |> sanitize_personal_info()
 
     {resume, augmented_attrs}
   end
@@ -203,12 +206,7 @@ defmodule Data.Resumes do
   defp update_if_missing(_k, [], acc, nil), do: acc
 
   defp update_if_missing(k, v_db, acc, %{} = v_user) do
-    atom_keys? =
-      Enum.reduce(v_user, true, fn {k, _}, acc ->
-        acc && is_atom(k)
-      end)
-
-    if atom_keys? do
+    if atom_keys?(v_user) do
       case v_user[:id] do
         nil ->
           Map.put(acc, k, Map.put(v_user, :id, v_db.id))
@@ -241,7 +239,7 @@ defmodule Data.Resumes do
 
       case Regex.match?(@pattern_integer_id, str_id) do
         true ->
-          Integer.to_string(str_id)
+          String.to_integer(str_id)
 
         _ ->
           str_id
@@ -261,36 +259,40 @@ defmodule Data.Resumes do
     end
   end
 
-  defp to_string_photo_path(%Resume{personal_info: nil} = resume) do
-    resume
+  defp sanitize_personal_info(attrs) do
+    cond do
+      Map.has_key?(attrs, :personal_info) ->
+        update_in(attrs.personal_info, &to_string_photo_path/1)
+
+      Map.has_key?(attrs, "personal_info") ->
+        update_in(attrs["personal_info"], &to_string_photo_path/1)
+
+      true ->
+        attrs
+    end
   end
 
-  defp to_string_photo_path(%Resume{personal_info: %{photo: nil}} = resume) do
-    resume
+  defp to_string_photo_path(personal_info) when personal_info == nil or personal_info == %{} do
+    personal_info
   end
 
-  defp to_string_photo_path(%Resume{personal_info: %{photo: photo}} = resume) do
-    file_name = photo.file_name
-    dir = ResumePhoto.storage_dir(:original, {nil, resume.personal_info})
-    path = Path.join([Data.umbrella_root(), dir, file_name])
+  defp to_string_photo_path(personal_info) do
+    case personal_info[:photo] || personal_info["photo"] do
+      @already_uploaded ->
+        Map.drop(personal_info, [:photo, "photo"])
 
-    confirmed_path =
-      case File.exists?(path) do
-        true ->
-          path
+      %{file_name: _} ->
+        Map.drop(personal_info, [:photo, "photo"])
 
-        _ ->
-          nil
-      end
-
-    update_in(
-      resume.personal_info.photo,
-      fn _ -> confirmed_path end
-    )
+      _ ->
+        personal_info
+    end
   end
 
-  defp to_string_photo_path(resume) do
-    resume
+  defp atom_keys?(map) do
+    Enum.reduce(map, true, fn {k, _}, acc ->
+      acc && is_atom(k)
+    end)
   end
 
   @doc """
@@ -674,4 +676,6 @@ defmodule Data.Resumes do
       changeset
     end
   end
+
+  def already_uploaded, do: @already_uploaded
 end

@@ -11,9 +11,11 @@ defmodule Data.Uploaders.ResumePhoto do
 
   @extension_whitelist ~w(.jpg .jpeg .gif .png)
   @storage Application.get_env(:arc, :storage_dir)
+  @storage_dir "#{@storage}/resume"
+  @pattern_prefix_original ~r/^.+__original_/
 
   # Override the bucket on a per definition basis:
-  # def bucket do
+  # def bucket dofile_name
   #   :custom_bucket_name
   # end
 
@@ -29,7 +31,7 @@ defmodule Data.Uploaders.ResumePhoto do
 
   # Define a thumbnail transformation:
   @spec transform(any(), any()) :: :noaction | {:convert, <<_::560>>, :png}
-  def transform(:thumb, _) do
+  def transform(:thumb, _file_and_resource) do
     {
       :convert,
       "-strip -thumbnail 250x250^ -gravity center -extent 250x250 -format png",
@@ -42,7 +44,7 @@ defmodule Data.Uploaders.ResumePhoto do
     file_name = file.file_name
     ext_name = Path.extname(file_name)
     new_file_name = Path.basename(file_name, ext_name)
-    prefix = file_prefix(version, resource)
+    prefix = prefix_file(version, resource)
 
     # do not prefix new_file_name if already prefixed
     if String.starts_with?(new_file_name, prefix) do
@@ -52,7 +54,7 @@ defmodule Data.Uploaders.ResumePhoto do
     end
   end
 
-  defp file_prefix(version, %{email: email}) when is_binary(email) do
+  defp prefix_file(version, %{email: email}) when is_binary(email) do
     email =
       email
       |> String.replace(" ", "")
@@ -61,14 +63,20 @@ defmodule Data.Uploaders.ResumePhoto do
     "#{email}__#{version}"
   end
 
-  defp file_prefix(version, _) do
+  defp prefix_file(version, _) do
     to_string(version)
   end
 
-  # Override the storage directory:
-  def storage_dir(_version, {_file, _resource}) do
-    "#{@storage}/resume"
+  def strip_pefix(file_name, :original) do
+    String.replace(file_name, @pattern_prefix_original, "")
   end
+
+  # Override the storage directory:
+  def storage_dir(_version, _file_and_resource) do
+    @storage_dir
+  end
+
+  def storage_dir, do: @storage_dir
 
   # Provide a default URL if there hasn't been a file uploaded
   # def default_url(version, scope) do

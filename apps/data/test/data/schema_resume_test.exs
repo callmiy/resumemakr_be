@@ -8,10 +8,11 @@ defmodule Data.SchemaResumeTest do
   alias Data.FactoryRegistration, as: RegFactory
   alias Data.QueryResume, as: Query
   alias Data.Resumes
+  alias Data.Uploaders.ResumePhoto
 
   @moduletag :db
 
-  @dog_pattern ~r/dog\.jpeg/
+  @already_uploaded Resumes.already_uploaded()
 
   describe "mutation" do
     test "create resume succeeds" do
@@ -39,12 +40,12 @@ defmodule Data.SchemaResumeTest do
                       "_id" => _,
                       "title" => ^title,
                       "description" => ^description,
-                      "personalInfo" => personal_info,
-                      "experiences" => experiences,
-                      "education" => education,
-                      "skills" => skills,
-                      "additionalSkills" => additional_skills,
-                      "languages" => languages,
+                      "personalInfo" => _,
+                      "experiences" => _,
+                      "education" => _,
+                      "skills" => _,
+                      "additionalSkills" => _,
+                      "languages" => _,
                       "hobbies" => _hobbies
                     }
                   }
@@ -56,46 +57,6 @@ defmodule Data.SchemaResumeTest do
                  variables: variables,
                  context: context
                )
-
-      assert_assoc(attrs_str["experiences"] || [], experiences)
-      assert_assoc(personal_info, attrs_str["personalInfo"])
-      assert_assoc(education, attrs_str["education"] || [])
-      assert_assoc(languages, attrs_str["languages"] || [])
-      assert_assoc(skills, attrs_str["skills"] || [])
-      assert_assoc(additional_skills, attrs_str["additionalSkills"] || [])
-    end
-
-    test "title is made unique" do
-      user = RegFactory.insert()
-      title = Faker.Lorem.word()
-
-      assert {
-               :ok,
-               _resume
-             } = Resumes.create_resume(%{title: title, user_id: user.id})
-
-      variables = %{
-        "input" => %{"title" => title}
-      }
-
-      assert {:ok,
-              %{
-                data: %{
-                  "createResume" => %{
-                    "resume" => %{
-                      "title" => title_from_db
-                    }
-                  }
-                }
-              }} =
-               Absinthe.run(
-                 Query.create_resume(),
-                 Schema,
-                 variables: variables,
-                 context: context(user)
-               )
-
-      assert Regex.compile!("^#{title}_\\d{10}$") |> Regex.match?(title_from_db)
     end
 
     test "update resume succeeds" do
@@ -127,13 +88,13 @@ defmodule Data.SchemaResumeTest do
                       "_id" => ^id_,
                       "title" => ^title,
                       "description" => new_description,
-                      "personalInfo" => personal_info,
-                      "experiences" => experiences,
-                      "education" => education,
-                      "skills" => skills,
-                      "additionalSkills" => additional_skills,
-                      "languages" => languages,
-                      "hobbies" => _hobbies
+                      "personalInfo" => _,
+                      "experiences" => _,
+                      "education" => _,
+                      "skills" => _,
+                      "additionalSkills" => _,
+                      "languages" => _,
+                      "hobbies" => _
                     }
                   }
                 }
@@ -152,16 +113,6 @@ defmodule Data.SchemaResumeTest do
         _ ->
           assert new_description == resume.description
       end
-
-      {_, augmented_attrs} = Resumes.augment_attrs(resume, update_attrs)
-      augmented_attrs_str = Factory.stringify(augmented_attrs)
-
-      assert_assoc(augmented_attrs_str["experiences"] || [], experiences)
-      assert_assoc(personal_info, augmented_attrs_str["personalInfo"])
-      assert_assoc(education, augmented_attrs_str["education"] || [])
-      assert_assoc(languages, augmented_attrs_str["languages"] || [])
-      assert_assoc(skills, augmented_attrs_str["skills"] || [])
-      assert_assoc(additional_skills, augmented_attrs_str["additionalSkills"] || [])
     end
 
     test "update resume fails for unknown user" do
@@ -205,10 +156,18 @@ defmodule Data.SchemaResumeTest do
 
     test "update resume fails on attempt to set title to null" do
       user = RegFactory.insert()
-      resume = Factory.insert(user_id: user.id)
+      attrs = Factory.params(user_id: user.id)
+      resume = Factory.insert(attrs)
 
       update_attrs =
-        Factory.params(id: Absinthe.Relay.Node.to_global_id(:resume, resume.id, Schema))
+        Factory.params(
+          id:
+            to_global_id(
+              :resume,
+              resume.id,
+              Schema
+            )
+        )
 
       updated_resume_str =
         update_attrs
@@ -238,6 +197,147 @@ defmodule Data.SchemaResumeTest do
                  variables: variables,
                  context: context
                )
+    end
+
+    test "update resume with an existing photo succeeds with correct flag" do
+      user = RegFactory.insert()
+      seq = Sequence.next("")
+
+      personal_info =
+        Factory.personal_info(1, seq)
+        |> Map.put(:photo, Factory.photo_plug())
+
+      resume = Factory.insert(user_id: user.id, personal_info: personal_info)
+      id_str = Integer.to_string(resume.id)
+
+      # since we uploaded a photo before, we pass the flag to signify so
+      updated_personal_info =
+        Factory.personal_info(1, Sequence.next(""))
+        |> Map.merge(%{
+          photo: @already_uploaded,
+          email: personal_info.email
+        })
+
+      updated_attrs = %{
+        id: to_global_id(:resume, id_str, Schema),
+        personal_info: updated_personal_info
+      }
+
+      updated_attrs_str = Factory.stringify(updated_attrs)
+      context = context(user)
+
+      variables = %{
+        "input" => updated_attrs_str
+      }
+
+      photo =
+        ResumePhoto.url({
+          resume.personal_info.photo.file_name,
+          resume.personal_info
+        })
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "_id" => ^id_str,
+                      "personalInfo" => %{
+                        "photo" => ^photo
+                      }
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 context: context,
+                 variables: variables
+               )
+    end
+
+    test "update resume with an existing photo fails with incorrect flag" do
+      user = RegFactory.insert()
+      seq = Sequence.next("")
+
+      personal_info =
+        Factory.personal_info(1, seq)
+        |> Map.put(:photo, Factory.photo_plug())
+
+      resume = Factory.insert(user_id: user.id, personal_info: personal_info)
+      id_str = Integer.to_string(resume.id)
+
+      # since we uploaded a photo before, we pass the flag to signify so,
+      # but we use the wrong file to get an error response
+      updated_personal_info =
+        Factory.personal_info(1, Sequence.next(""))
+        |> Map.merge(%{
+          photo: "woops",
+          email: personal_info.email
+        })
+
+      updated_attrs = %{
+        id: to_global_id(:resume, id_str, Schema),
+        personal_info: updated_personal_info
+      }
+
+      updated_attrs_str = Factory.stringify(updated_attrs)
+      context = context(user)
+
+      variables = %{
+        "input" => updated_attrs_str
+      }
+
+      assert {:ok,
+              %{
+                errors: [
+                  %{
+                    message: message
+                  }
+                ]
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 context: context,
+                 variables: variables
+               )
+
+      assert message =~ "woops"
+    end
+
+    test "title is made unique" do
+      user = RegFactory.insert()
+      title = Faker.Lorem.word()
+
+      assert {
+               :ok,
+               _resume
+             } = Resumes.create_resume(%{title: title, user_id: user.id})
+
+      variables = %{
+        "input" => %{"title" => title}
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "createResume" => %{
+                    "resume" => %{
+                      "title" => title_from_db
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.create_resume(),
+                 Schema,
+                 variables: variables,
+                 context: context(user)
+               )
+
+      assert Regex.compile!("^#{title}_\\d{10}$") |> Regex.match?(title_from_db)
     end
 
     test "delete resume succeeds" do
@@ -455,89 +555,15 @@ defmodule Data.SchemaResumeTest do
   defp context(user, %{"personalInfo" => %{"photo" => nil}} = attrs),
     do: {context(user), attrs}
 
-  defp context(user, %{"personalInfo" => %{"photo" => photo_upload_plug}} = attrs) do
+  defp context(user, %{"personalInfo" => %{"photo" => %{} = plug}} = attrs) do
     {
       update_in(
         context(user)[:__absinthe_plug__],
-        &Map.put(&1 || %{}, :uploads, %{"photo" => photo_upload_plug})
+        &Map.put(&1 || %{}, :uploads, %{"photo" => plug})
       ),
       update_in(attrs["personalInfo"]["photo"], fn _ -> "photo" end)
     }
   end
 
   defp context(user, attrs), do: {context(user), attrs}
-
-  defp assert_assoc(nil, nil) do
-    :ok
-  end
-
-  defp assert_assoc([], []) do
-    :ok
-  end
-
-  defp assert_assoc(%{} = a, %{} = b) do
-    Enum.each(a, fn
-      {_, nil} ->
-        :ok
-
-      {k, av} ->
-        case b[k] do
-          nil ->
-            :ok
-
-          bv ->
-            cond do
-              k == "id" ->
-                assert to_string(av) == to_string(bv)
-
-              k == "photo" ->
-                assert_photo(av, bv)
-
-              true ->
-                assert av == bv
-            end
-        end
-    end)
-  end
-
-  defp assert_assoc(a, b) when is_list(a) and is_list(b) do
-    Enum.zip(a, b)
-    |> Enum.each(fn {x, y} -> assert_assoc(x, y) end)
-  end
-
-  defp assert_photo("photo", v) when is_binary(v) do
-    assert Regex.match?(@dog_pattern, v)
-  end
-
-  defp assert_photo(v, "photo") when is_binary(v) do
-    assert Regex.match?(@dog_pattern, v)
-  end
-
-  defp assert_photo(%{filename: filename}, "photo") do
-    assert Regex.match?(@dog_pattern, filename)
-  end
-
-  defp assert_photo("photo", %{filename: filename}) do
-    assert Regex.match?(@dog_pattern, filename)
-  end
-
-  defp assert_photo(%{filename: filename}, v) do
-    assert Regex.match?(@dog_pattern, filename)
-    assert Regex.match?(@dog_pattern, v)
-  end
-
-  defp assert_photo(v, %{filename: filename}) do
-    assert Regex.match?(@dog_pattern, filename)
-    assert Regex.match?(@dog_pattern, v)
-  end
-
-  defp assert_photo(%{file_name: file_name}, v) do
-    assert Regex.match?(@dog_pattern, file_name)
-    assert Regex.match?(@dog_pattern, v)
-  end
-
-  defp assert_photo(v, %{file_name: file_name}) do
-    assert Regex.match?(@dog_pattern, file_name)
-    assert Regex.match?(@dog_pattern, v)
-  end
 end

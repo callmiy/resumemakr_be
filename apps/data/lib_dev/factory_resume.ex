@@ -5,7 +5,6 @@ defmodule Data.FactoryResume do
   alias Data.Resumes
 
   @one_nil [1, nil]
-  # @simple_attrs [:user_id, :title, :description]
 
   @doc false
   def insert(attrs) do
@@ -77,9 +76,9 @@ defmodule Data.FactoryResume do
     ]
   end
 
-  defp personal_info(nil, _), do: nil
+  def personal_info(nil, _), do: nil
 
-  defp personal_info(_, seq) do
+  def personal_info(_, seq) do
     %{
       first_name: Faker.Name.first_name(),
       last_name: Faker.Name.last_name(),
@@ -90,14 +89,18 @@ defmodule Data.FactoryResume do
       photo:
         Enum.random([
           nil,
-          %Plug.Upload{
-            content_type: "image/png",
-            filename: "dog.jpeg",
-            path: Path.join([Data.app_root(), "priv/test-files", "dog.jpeg"])
-          },
-          # if "nil", then we do not want to delete the photo key in stringify
+          photo_plug(),
+          # if "nil", then we do not want to delete the photo key in stringify/2
           "nil"
         ])
+    }
+  end
+
+  def photo_plug do
+    %Plug.Upload{
+      content_type: "image/png",
+      filename: "dog.jpeg",
+      path: Path.join([Data.app_root(), "priv/test-files", "dog.jpeg"])
     }
   end
 

@@ -136,12 +136,8 @@ defmodule Data.ResolverResume do
           ResumePhoto.url({file_name, personal_info})
         )
 
-      file_name ->
-        Map.put(
-          personal_info,
-          :photo,
-          ResumePhoto.url({Path.basename(file_name), personal_info})
-        )
+      _ ->
+        personal_info
     end
   end
 

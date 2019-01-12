@@ -5,6 +5,7 @@ defmodule Data.SchemaTypes do
   use Absinthe.Schema.Notation
   use Absinthe.Relay.Schema.Notation, :modern
   use Timex
+  alias Absinthe.Blueprint
 
   alias Data.Accounts.User
   alias Data.Resumes.Resume
@@ -12,6 +13,9 @@ defmodule Data.SchemaTypes do
   alias Data.Resumes.Experience
   alias Data.Resumes.PersonalInfo
   alias Data.Resumes.Education
+  alias Data.Resumes
+
+  @already_uploaded Resumes.already_uploaded()
 
   node interface do
     resolve_type(fn
@@ -61,5 +65,37 @@ defmodule Data.SchemaTypes do
 
   defp parse_iso_datetime(_) do
     :error
+  end
+
+  @desc """
+  Represents an uploaded file.
+  """
+  scalar :custom_upload do
+    parse(fn
+      %Blueprint.Input.String{value: value}, context ->
+        case Map.fetch(context[:__absinthe_plug__][:uploads] || %{}, value) do
+          {:ok, upload} ->
+            {:ok, upload}
+
+          _ ->
+            case value do
+              @already_uploaded ->
+                {:ok, value}
+
+              _ ->
+                :error
+            end
+        end
+
+      %Blueprint.Input.Null{}, _ ->
+        {:ok, nil}
+
+      _, _ ->
+        :error
+    end)
+
+    serialize(fn _ ->
+      raise "The `:upload` scalar cannot be returned!"
+    end)
   end
 end
