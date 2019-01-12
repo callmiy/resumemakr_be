@@ -164,6 +164,9 @@ defmodule Data.Resumes do
               acc
           end
 
+        {:education, edu}, acc ->
+          sanitize_education(edu, acc, attrs)
+
         {:hobbies, _}, acc ->
           Map.put(acc, :hobbies, attrs[:hobbies])
 
@@ -197,6 +200,61 @@ defmodule Data.Resumes do
       |> sanitize_personal_info()
 
     {resume, augmented_attrs}
+  end
+
+  defp sanitize_education(edu, acc, attrs) when edu == nil or edu == [] do
+    update_if_key(:education, acc, attrs)
+  end
+
+  defp sanitize_education(edus, acc, %{education: ed} = _attrs) when ed == nil or ed == [nil] do
+    Map.put(
+      acc,
+      :education,
+      Enum.map(edus, &mark_for_deletion/1)
+    )
+  end
+
+  defp sanitize_education(db_eds, acc, %{education: update_eds}) do
+    {with_ids, no_ids} =
+      Enum.reduce(update_eds, {%{}, []}, fn ed, {with_ids, no_ids} ->
+        case Map.has_key?(ed, :id) do
+          true ->
+            {Map.put(with_ids, to_string(ed.id), ed), no_ids}
+
+          _ ->
+            {with_ids, [ed | no_ids]}
+        end
+      end)
+
+    updates =
+      Enum.reduce(db_eds, [], fn ed, acc ->
+        id = to_string(ed.id)
+
+        case with_ids[id] do
+          nil ->
+            [mark_for_deletion(ed) | acc]
+
+          update_ed ->
+            [update_ed | acc]
+        end
+      end)
+      |> Enum.concat(no_ids)
+
+    Map.put(acc, :education, updates)
+  end
+
+  defp update_if_key(key, acc, attrs) do
+    case Map.has_key?(attrs, key) do
+      true ->
+        Map.put(acc, key, attrs[key])
+
+      _ ->
+        acc
+    end
+  end
+
+  defp mark_for_deletion(schema) do
+    schema |> Map.from_struct() |> Map.put(:delete, true)
   end
 
   defp update_if_missing(k, %{} = v_db, acc, nil),

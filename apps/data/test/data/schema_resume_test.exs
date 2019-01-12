@@ -309,16 +309,16 @@ defmodule Data.SchemaResumeTest do
           email: personal_info.email
         })
 
-      updated_attrs = %{
+      update_attrs = %{
         id: to_global_id(:resume, id_str, Schema),
         personal_info: updated_personal_info
       }
 
-      updated_attrs_str = Factory.stringify(updated_attrs)
+      update_attrs_str = Factory.stringify(update_attrs)
       context = context(user)
 
       variables = %{
-        "input" => updated_attrs_str
+        "input" => update_attrs_str
       }
 
       photo =
@@ -368,16 +368,16 @@ defmodule Data.SchemaResumeTest do
           email: personal_info.email
         })
 
-      updated_attrs = %{
+      update_attrs = %{
         id: to_global_id(:resume, id_str, Schema),
         personal_info: updated_personal_info
       }
 
-      updated_attrs_str = Factory.stringify(updated_attrs)
+      update_attrs_str = Factory.stringify(update_attrs)
       context = context(user)
 
       variables = %{
-        "input" => updated_attrs_str
+        "input" => update_attrs_str
       }
 
       assert {:ok,
@@ -546,6 +546,201 @@ defmodule Data.SchemaResumeTest do
                  variables: variables,
                  context: context(user)
                )
+    end
+  end
+
+  describe "mutation education" do
+    test "deleting all" do
+      user = RegFactory.insert()
+
+      attrs =
+        Factory.params(
+          user_id: user.id,
+          education:
+            Factory.education(1, Sequence.next("")) ++ Factory.education(1, Sequence.next(""))
+        )
+
+      resume = Factory.insert(attrs)
+
+      id_str = Integer.to_string(resume.id)
+
+      update_attrs = %{
+        education: "nil",
+        id: to_global_id(:resume, id_str, Schema)
+      }
+
+      update_attrs_str = Factory.stringify(update_attrs)
+
+      variables = %{
+        "input" => update_attrs_str
+      }
+
+      context = context(user)
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "_id" => ^id_str,
+                      "education" => []
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+    end
+
+    test "one insert and one update" do
+      user = RegFactory.insert()
+      education = Factory.education(1, Sequence.next(""))
+      attrs = Factory.params(user_id: user.id, education: education)
+      %{education: [db_ed]} = resume = Factory.insert(attrs)
+      id_str = Integer.to_string(resume.id)
+
+      [ed_for_insert] = Factory.education(1, Sequence.next(""))
+
+      updated_ed = %{
+        id: to_string(db_ed.id),
+        course: "updated course",
+        school: "updated school",
+        from_date: "07/2018"
+      }
+
+      update_attrs = %{
+        education: [
+          ed_for_insert,
+          updated_ed
+        ],
+        id: to_global_id(:resume, id_str, Schema)
+      }
+
+      update_attrs_str = Factory.stringify(update_attrs)
+
+      variables = %{
+        "input" => update_attrs_str
+      }
+
+      context = context(user)
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "_id" => ^id_str,
+                      "education" => ed_gqls
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+
+      assert [ed_gql_for_update, ed_gql_for_insert] =
+               Enum.sort_by(
+                 ed_gqls,
+                 & &1["id"]
+               )
+
+      ed_keys_atom = [:achievements, :course, :from_date, :school, :to_date]
+      ed_keys_str = ["achievements", "course", "fromDate", "school", "toDate"]
+
+      assert Map.take(ed_gql_for_insert, ed_keys_str) ==
+               ed_for_insert
+               |> Map.take(ed_keys_atom)
+               |> Factory.stringify()
+
+      assert Map.take(ed_gql_for_update, ["id", "course", "school", "fromDate"]) ==
+               updated_ed
+               |> Map.take([:id, :course, :school, :from_date])
+               |> Factory.stringify()
+
+      assert db_ed.achievements == ed_gql_for_update["achievements"]
+    end
+
+    test "one insert, one delete, one update" do
+      user = RegFactory.insert()
+      ed_for_update = Factory.education(1, Sequence.next(""))
+      ed_for_delete = Factory.education(1, Sequence.next(""))
+
+      attrs =
+        Factory.params(
+          user_id: user.id,
+          education: ed_for_update ++ ed_for_delete
+        )
+
+      resume = Factory.insert(attrs)
+      id_str = Integer.to_string(resume.id)
+
+      [db_ed_for_update, db_ed_for_delete] =
+        Enum.sort_by(
+          resume.education,
+          & &1.id
+        )
+
+      db_ed_for_update_id_str = to_string(db_ed_for_update.id)
+
+      [ed_for_insert] = Factory.education(1, Sequence.next(""))
+
+      updated_ed = %{
+        id: db_ed_for_update_id_str,
+        course: "updated course",
+        school: "updated school",
+        from_date: "07/2018"
+      }
+
+      update_attrs = %{
+        education: [
+          ed_for_insert,
+          updated_ed
+        ],
+        id: to_global_id(:resume, id_str, Schema)
+      }
+
+      update_attrs_str = Factory.stringify(update_attrs)
+
+      variables = %{
+        "input" => update_attrs_str
+      }
+
+      context = context(user)
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "_id" => ^id_str,
+                      "education" => ed_gqls
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+
+      assert [ed_gql_for_update, ed_gql_for_insert] =
+               Enum.sort_by(
+                 ed_gqls,
+                 & &1["id"]
+               )
+
+      assert ed_gql_for_update["id"] == db_ed_for_update_id_str
+      assert String.to_integer(ed_gql_for_insert["id"]) > db_ed_for_delete.id
     end
   end
 

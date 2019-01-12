@@ -104,9 +104,9 @@ defmodule Data.FactoryResume do
     }
   end
 
-  defp education(nil, _), do: nil
+  def education(nil, _), do: nil
 
-  defp education(_, seq) do
+  def education(_, seq) do
     [
       %{
         achievements: ["Education achievement " <> seq],
