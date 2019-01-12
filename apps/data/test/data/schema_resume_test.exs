@@ -954,6 +954,197 @@ defmodule Data.SchemaResumeTest do
     end
   end
 
+  describe "mutation skills" do
+    test "deleting all" do
+      user = RegFactory.insert()
+
+      attrs =
+        Factory.params(
+          user_id: user.id,
+          skills: Factory.skills(1, Sequence.next("")) ++ Factory.skills(1, Sequence.next("")),
+          education: nil
+        )
+
+      resume = Factory.insert(attrs)
+      id_str = Integer.to_string(resume.id)
+
+      update_attrs = %{
+        skills: "nil",
+        id: to_global_id(:resume, id_str, Schema)
+      }
+
+      update_attrs_str = Factory.stringify(update_attrs)
+
+      variables = %{
+        "input" => update_attrs_str
+      }
+
+      context = context(user)
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "_id" => ^id_str,
+                      "skills" => []
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+    end
+
+    test "one insert and one update" do
+      user = RegFactory.insert()
+
+      attrs =
+        Factory.params(
+          user_id: user.id,
+          skills: Factory.skills(1, Sequence.next(""))
+        )
+
+      %{skills: [db_skill_for_update]} = resume = Factory.insert(attrs)
+      id_str = Integer.to_string(resume.id)
+
+      [skill_for_insert] = Factory.skills(1, Sequence.next(""))
+
+      updated_skill = %{
+        id: to_string(db_skill_for_update.id),
+        description: "updated description",
+        achievements: ["updated achievements"]
+      }
+
+      update_attrs = %{
+        skills: [
+          skill_for_insert,
+          updated_skill
+        ],
+        id: to_global_id(:resume, id_str, Schema)
+      }
+
+      update_attrs_str = Factory.stringify(update_attrs)
+
+      variables = %{
+        "input" => update_attrs_str
+      }
+
+      context = context(user)
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "_id" => ^id_str,
+                      "skills" => skills_gqls
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+
+      assert [skills_gql_for_update, skill_gql_inserted] =
+               Enum.sort_by(
+                 skills_gqls,
+                 & &1["id"]
+               )
+
+      assert skill_gql_inserted["description"] == skill_for_insert[:description]
+      assert skill_gql_inserted["achievements"] == skill_for_insert[:achievements]
+
+      assert skills_gql_for_update
+             |> Map.take(["id", "description", "achievements"]) ==
+               updated_skill
+               |> Map.take([:id, :description, :achievements])
+               |> Factory.stringify()
+    end
+
+    test "one insert, one delete, one update" do
+      user = RegFactory.insert()
+      skill_for_update = Factory.skills(1, Sequence.next(""))
+      skill_for_delete = Factory.skills(1, Sequence.next(""))
+
+      attrs =
+        Factory.params(
+          user_id: user.id,
+          skills: skill_for_update ++ skill_for_delete
+        )
+
+      resume = Factory.insert(attrs)
+      id_str = Integer.to_string(resume.id)
+
+      [db_skill_for_update, db_skill_for_delete] =
+        Enum.sort_by(
+          resume.skills,
+          & &1.id
+        )
+
+      db_skill_for_update_id_str = to_string(db_skill_for_update.id)
+
+      [skill_for_insert] = Factory.skills(1, Sequence.next(""))
+
+      updated_skill = %{
+        id: db_skill_for_update_id_str,
+        description: "updated description",
+        achievements: ["updated achievements"]
+      }
+
+      update_attrs = %{
+        skills: [
+          skill_for_insert,
+          updated_skill
+        ],
+        id: to_global_id(:resume, id_str, Schema)
+      }
+
+      update_attrs_str = Factory.stringify(update_attrs)
+
+      variables = %{
+        "input" => update_attrs_str
+      }
+
+      context = context(user)
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "_id" => ^id_str,
+                      "skills" => exp_gqls
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+
+      assert [exp_gql_for_update, exp_gql_for_insert] =
+               Enum.sort_by(
+                 exp_gqls,
+                 & &1["id"]
+               )
+
+      assert exp_gql_for_update["id"] == db_skill_for_update_id_str
+      assert String.to_integer(exp_gql_for_insert["id"]) > db_skill_for_delete.id
+    end
+  end
+
   defp context(user), do: %{current_user: user}
 
   defp context(user, %{"personalInfo" => nil} = attrs),

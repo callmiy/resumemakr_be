@@ -122,7 +122,10 @@ defmodule Data.Resumes do
 
   """
   def update_resume(%Resume{} = resume, %{} = attrs) do
-    {resume, attrs} = augment_attrs(resume, attrs)
+    {resume, attrs} =
+      resume
+      |> Repo.preload(Resume.assoc_fields())
+      |> augment_attrs(attrs)
 
     resume
     |> Resume.changeset(attrs)
@@ -140,8 +143,6 @@ defmodule Data.Resumes do
   """
   @spec augment_attrs(Resume.t(), map()) :: {Resume.t(), Map.t()}
   def augment_attrs(%Resume{} = resume, %{} = attrs) do
-    resume = Repo.preload(resume, Resume.assoc_fields())
-
     augmented_attrs =
       resume
       |> Map.from_struct()
@@ -164,7 +165,7 @@ defmodule Data.Resumes do
               acc
           end
 
-        {key, v_db}, acc when key in [:education, :experiences] ->
+        {key, v_db}, acc when key in [:education, :experiences, :skills] ->
           sanitize_assoc(key, v_db, acc, attrs)
 
         {:hobbies, _}, acc ->

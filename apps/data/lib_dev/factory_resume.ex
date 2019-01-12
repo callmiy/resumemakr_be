@@ -140,11 +140,11 @@ defmodule Data.FactoryResume do
     ]
   end
 
-  defp skills(nil, _) do
+  def skills(nil, _) do
     nil
   end
 
-  defp skills(_, seq) do
+  def skills(_, seq) do
     [
       %{
         description: "Skill " <> seq,

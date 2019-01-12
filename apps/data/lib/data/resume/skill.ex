@@ -15,7 +15,12 @@ defmodule Data.Resumes.Skill do
   @doc false
   def changeset(skill, attrs) do
     skill
-    |> cast(attrs, [:description, :achievements, :resume_id])
+    |> cast(attrs, [
+      :description,
+      :achievements,
+      :resume_id,
+      :delete
+    ])
     |> validate_required([:description])
     |> assoc_constraint(:resume)
     |> Resumes.maybe_mark_for_deletion()

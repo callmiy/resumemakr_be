@@ -73,7 +73,7 @@ defmodule Data.SchemaResume do
     end
 
     field :skills, list_of(:skill) do
-      resolve(Resolver.get_assoc(:skill))
+      resolve(Resolver.get_assoc(:skills))
     end
 
     field :inserted_at, non_null(:iso_datetime)

@@ -167,15 +167,8 @@ defmodule Data.ResolverResume do
     end
   end
 
-  def sanitize_child(key, child) do
-    case key do
-      :personal_info ->
-        to_string_photo(child)
-
-      _ ->
-        child
-    end
-  end
+  def sanitize_child(:personal_info, child), do: to_string_photo(child)
+  def sanitize_child(_, child), do: child
 
   defp wrapped(%Resume{} = resume) do
     %{resume: resume}
