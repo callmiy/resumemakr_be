@@ -14,7 +14,7 @@ defmodule Data.SchemaResumeTest do
 
   @already_uploaded Resumes.already_uploaded()
 
-  describe "mutation" do
+  describe "mutation resume" do
     test "create resume succeeds" do
       user = RegFactory.insert()
 
@@ -199,6 +199,97 @@ defmodule Data.SchemaResumeTest do
                )
     end
 
+    test "title is made unique" do
+      user = RegFactory.insert()
+      title = Faker.Lorem.word()
+
+      assert {
+               :ok,
+               _resume
+             } = Resumes.create_resume(%{title: title, user_id: user.id})
+
+      variables = %{
+        "input" => %{"title" => title}
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "createResume" => %{
+                    "resume" => %{
+                      "title" => title_from_db
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.create_resume(),
+                 Schema,
+                 variables: variables,
+                 context: context(user)
+               )
+
+      assert Regex.compile!("^#{title}_\\d{10}$") |> Regex.match?(title_from_db)
+    end
+
+    test "delete resume succeeds" do
+      user = RegFactory.insert()
+      context = context(user)
+      %{id: id_} = Factory.insert(user_id: user.id)
+      id_ = Integer.to_string(id_)
+
+      variables = %{
+        "input" => %{"id" => Absinthe.Relay.Node.to_global_id(:resume, id_, Schema)}
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "deleteResume" => %{
+                    "resume" => %{
+                      "id" => _id,
+                      "_id" => ^id_
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.delete(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+    end
+
+    test "delete resume fails for unknown user" do
+      user = RegFactory.insert()
+      context = context(user)
+      Factory.insert(user_id: user.id)
+      bogus_user_id = 0
+
+      variables = %{
+        "input" => %{"id" => to_global_id(:resume, bogus_user_id, Schema)}
+      }
+
+      assert {:ok,
+              %{
+                errors: [
+                  %{
+                    message: "Resume you are deleting does not exist",
+                    path: ["deleteResume"]
+                  }
+                ]
+              }} =
+               Absinthe.run(
+                 Query.delete(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+    end
+  end
+
+  describe "mutation personal info" do
     test "update resume with an existing photo succeeds with correct flag" do
       user = RegFactory.insert()
       seq = Sequence.next("")
@@ -305,95 +396,6 @@ defmodule Data.SchemaResumeTest do
                )
 
       assert message =~ "woops"
-    end
-
-    test "title is made unique" do
-      user = RegFactory.insert()
-      title = Faker.Lorem.word()
-
-      assert {
-               :ok,
-               _resume
-             } = Resumes.create_resume(%{title: title, user_id: user.id})
-
-      variables = %{
-        "input" => %{"title" => title}
-      }
-
-      assert {:ok,
-              %{
-                data: %{
-                  "createResume" => %{
-                    "resume" => %{
-                      "title" => title_from_db
-                    }
-                  }
-                }
-              }} =
-               Absinthe.run(
-                 Query.create_resume(),
-                 Schema,
-                 variables: variables,
-                 context: context(user)
-               )
-
-      assert Regex.compile!("^#{title}_\\d{10}$") |> Regex.match?(title_from_db)
-    end
-
-    test "delete resume succeeds" do
-      user = RegFactory.insert()
-      context = context(user)
-      %{id: id_} = Factory.insert(user_id: user.id)
-      id_ = Integer.to_string(id_)
-
-      variables = %{
-        "input" => %{"id" => Absinthe.Relay.Node.to_global_id(:resume, id_, Schema)}
-      }
-
-      assert {:ok,
-              %{
-                data: %{
-                  "deleteResume" => %{
-                    "resume" => %{
-                      "id" => _id,
-                      "_id" => ^id_
-                    }
-                  }
-                }
-              }} =
-               Absinthe.run(
-                 Query.delete(),
-                 Schema,
-                 variables: variables,
-                 context: context
-               )
-    end
-
-    test "delete resume fails for unknown user" do
-      user = RegFactory.insert()
-      context = context(user)
-      Factory.insert(user_id: user.id)
-      bogus_user_id = 0
-
-      variables = %{
-        "input" => %{"id" => to_global_id(:resume, bogus_user_id, Schema)}
-      }
-
-      assert {:ok,
-              %{
-                errors: [
-                  %{
-                    message: "Resume you are deleting does not exist",
-                    path: ["deleteResume"]
-                  }
-                ]
-              }} =
-               Absinthe.run(
-                 Query.delete(),
-                 Schema,
-                 variables: variables,
-                 context: context
-               )
     end
   end
 
