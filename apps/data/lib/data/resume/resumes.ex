@@ -164,8 +164,8 @@ defmodule Data.Resumes do
               acc
           end
 
-        {:education, edu}, acc ->
-          sanitize_education(edu, acc, attrs)
+        {key, v_db}, acc when key in [:education, :experiences] ->
+          sanitize_assoc(key, v_db, acc, attrs)
 
         {:hobbies, _}, acc ->
           Map.put(acc, :hobbies, attrs[:hobbies])
@@ -202,45 +202,50 @@ defmodule Data.Resumes do
     {resume, augmented_attrs}
   end
 
-  defp sanitize_education(edu, acc, attrs) when edu == nil or edu == [] do
-    update_if_key(:education, acc, attrs)
+  defp sanitize_assoc(key, v_db, acc, attrs) when v_db == nil or v_db == [] do
+    update_if_key(key, acc, attrs)
   end
 
-  defp sanitize_education(edus, acc, %{education: ed} = _attrs) when ed == nil or ed == [nil] do
-    Map.put(
-      acc,
-      :education,
-      Enum.map(edus, &mark_for_deletion/1)
-    )
-  end
+  defp sanitize_assoc(key, v_dbs, acc, attrs) do
+    case Map.get(attrs, key, :ok) do
+      :ok ->
+        acc
 
-  defp sanitize_education(db_eds, acc, %{education: update_eds}) do
-    {with_ids, no_ids} =
-      Enum.reduce(update_eds, {%{}, []}, fn ed, {with_ids, no_ids} ->
-        case Map.has_key?(ed, :id) do
-          true ->
-            {Map.put(with_ids, to_string(ed.id), ed), no_ids}
+      v_user when v_user == nil or v_user == [nil] ->
+        Map.put(
+          acc,
+          key,
+          Enum.map(v_dbs, &mark_for_deletion/1)
+        )
 
-          _ ->
-            {with_ids, [ed | no_ids]}
-        end
-      end)
+      v_user ->
+        {with_ids, no_ids} =
+          Enum.reduce(v_user, {%{}, []}, fn assoc, {with_ids, no_ids} ->
+            case Map.has_key?(assoc, :id) do
+              true ->
+                {Map.put(with_ids, to_string(assoc.id), assoc), no_ids}
 
-    updates =
-      Enum.reduce(db_eds, [], fn ed, acc ->
-        id = to_string(ed.id)
+              _ ->
+                {with_ids, [assoc | no_ids]}
+            end
+          end)
 
-        case with_ids[id] do
-          nil ->
-            [mark_for_deletion(ed) | acc]
+        updates =
+          Enum.reduce(v_dbs, [], fn assoc, acc ->
+            id = to_string(assoc.id)
 
-          update_ed ->
-            [update_ed | acc]
-        end
-      end)
-      |> Enum.concat(no_ids)
+            case with_ids[id] do
+              nil ->
+                [mark_for_deletion(assoc) | acc]
 
-    Map.put(acc, :education, updates)
+              update_assoc ->
+                [update_assoc | acc]
+            end
+          end)
+          |> Enum.concat(no_ids)
+
+        Map.put(acc, key, updates)
+    end
   end
 
   defp update_if_key(key, acc, attrs) do

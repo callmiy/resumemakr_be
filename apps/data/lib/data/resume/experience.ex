@@ -23,7 +23,8 @@ defmodule Data.Resumes.Experience do
       :company_name,
       :from_date,
       :to_date,
-      :achievements
+      :achievements,
+      :delete
     ])
     |> validate_required([
       :position,

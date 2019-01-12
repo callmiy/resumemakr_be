@@ -652,8 +652,8 @@ defmodule Data.SchemaResumeTest do
                  & &1["id"]
                )
 
-      ed_keys_atom = [:achievements, :course, :from_date, :school, :to_date]
-      ed_keys_str = ["achievements", "course", "fromDate", "school", "toDate"]
+      ed_keys_atom = [:achievements, :course, :from_date, :school]
+      ed_keys_str = ["achievements", "course", "fromDate", "school"]
 
       assert Map.take(ed_gql_for_insert, ed_keys_str) ==
                ed_for_insert
@@ -741,6 +741,216 @@ defmodule Data.SchemaResumeTest do
 
       assert ed_gql_for_update["id"] == db_ed_for_update_id_str
       assert String.to_integer(ed_gql_for_insert["id"]) > db_ed_for_delete.id
+    end
+  end
+
+  describe "mutation experience" do
+    test "deleting all" do
+      user = RegFactory.insert()
+
+      attrs =
+        Factory.params(
+          user_id: user.id,
+          experiences:
+            Factory.experiences(1, Sequence.next("")) ++ Factory.experiences(1, Sequence.next(""))
+        )
+
+      resume = Factory.insert(attrs)
+
+      id_str = Integer.to_string(resume.id)
+
+      update_attrs = %{
+        experiences: "nil",
+        id: to_global_id(:resume, id_str, Schema)
+      }
+
+      update_attrs_str = Factory.stringify(update_attrs)
+
+      variables = %{
+        "input" => update_attrs_str
+      }
+
+      context = context(user)
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "_id" => ^id_str,
+                      "experiences" => []
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+    end
+
+    test "one insert and one update" do
+      user = RegFactory.insert()
+
+      attrs =
+        Factory.params(
+          user_id: user.id,
+          experiences: Factory.experiences(1, Sequence.next(""))
+        )
+
+      %{experiences: [db_exp_for_update]} = resume = Factory.insert(attrs)
+      id_str = Integer.to_string(resume.id)
+
+      [exp_for_insert] = Factory.experiences(1, Sequence.next(""))
+
+      updated_exp = %{
+        id: to_string(db_exp_for_update.id),
+        company_name: "updated company",
+        position: "updated position",
+        from_date: "07/2018"
+      }
+
+      update_attrs = %{
+        experiences: [
+          exp_for_insert,
+          updated_exp
+        ],
+        id: to_global_id(:resume, id_str, Schema)
+      }
+
+      update_attrs_str = Factory.stringify(update_attrs)
+
+      variables = %{
+        "input" => update_attrs_str
+      }
+
+      context = context(user)
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "_id" => ^id_str,
+                      "experiences" => ed_gqls
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+
+      assert [ed_gql_for_update, ed_gql_for_insert] =
+               Enum.sort_by(
+                 ed_gqls,
+                 & &1["id"]
+               )
+
+      ed_keys_atom = [
+        :company_name,
+        :from_date,
+        :position
+      ]
+
+      ed_keys_str = [
+        "companyName",
+        "fromDate",
+        "position"
+      ]
+
+      assert Map.take(ed_gql_for_insert, ed_keys_str) ==
+               exp_for_insert
+               |> Map.take(ed_keys_atom)
+               |> Factory.stringify()
+
+      assert ed_gql_for_update
+             |> Map.take(["id", "companyName", "position", "fromDate"]) ==
+               updated_exp
+               |> Map.take([:id, :company_name, :position, :from_date])
+               |> Factory.stringify()
+
+      assert db_exp_for_update.achievements == ed_gql_for_update["achievements"]
+    end
+
+    test "one insert, one delete, one update" do
+      user = RegFactory.insert()
+      exp_for_update = Factory.experiences(1, Sequence.next(""))
+      exp_for_delete = Factory.experiences(1, Sequence.next(""))
+
+      attrs =
+        Factory.params(
+          user_id: user.id,
+          experiences: exp_for_update ++ exp_for_delete
+        )
+
+      resume = Factory.insert(attrs)
+      id_str = Integer.to_string(resume.id)
+
+      [db_exp_for_update, db_exp_for_delete] =
+        Enum.sort_by(
+          resume.experiences,
+          & &1.id
+        )
+
+      db_exp_for_update_id_str = to_string(db_exp_for_update.id)
+
+      [exp_for_insert] = Factory.experiences(1, Sequence.next(""))
+
+      updated_exp = %{
+        id: db_exp_for_update_id_str,
+        company_name: "updated company",
+        position: "updated position",
+        from_date: "07/2018"
+      }
+
+      update_attrs = %{
+        experiences: [
+          exp_for_insert,
+          updated_exp
+        ],
+        id: to_global_id(:resume, id_str, Schema)
+      }
+
+      update_attrs_str = Factory.stringify(update_attrs)
+
+      variables = %{
+        "input" => update_attrs_str
+      }
+
+      context = context(user)
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "_id" => ^id_str,
+                      "experiences" => exp_gqls
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+
+      assert [exp_gql_for_update, exp_gql_for_insert] =
+               Enum.sort_by(
+                 exp_gqls,
+                 & &1["id"]
+               )
+
+      assert exp_gql_for_update["id"] == db_exp_for_update_id_str
+      assert String.to_integer(exp_gql_for_insert["id"]) > db_exp_for_delete.id
     end
   end
 

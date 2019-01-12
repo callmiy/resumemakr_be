@@ -56,11 +56,11 @@ defmodule Data.FactoryResume do
     value
   end
 
-  defp experiences(nil, _) do
+  def experiences(nil, _) do
     nil
   end
 
-  defp experiences(_, seq) do
+  def experiences(_, seq) do
     [
       %{
         company_name: "Company " <> seq,
