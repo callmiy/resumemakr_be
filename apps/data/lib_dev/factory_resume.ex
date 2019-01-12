@@ -29,31 +29,7 @@ defmodule Data.FactoryResume do
       hobbies: Enum.random([nil, ["Hobby " <> seq]])
     }
     |> Map.merge(attrs)
-    |> replace_string_nils()
     |> Factory.reject_attrs()
-  end
-
-  defp replace_string_nils(%{} = attrs) do
-    attrs
-    |> Enum.map(fn
-      {k, "nil"} ->
-        {k, nil}
-
-      {k, %Plug.Upload{} = v} ->
-        {k, v}
-
-      {k, val} ->
-        {k, replace_string_nils(val)}
-    end)
-    |> Enum.into(%{})
-  end
-
-  defp replace_string_nils(value) when is_list(value) do
-    Enum.map(value, &replace_string_nils/1)
-  end
-
-  defp replace_string_nils(value) do
-    value
   end
 
   def experiences(nil, _) do
@@ -157,35 +133,21 @@ defmodule Data.FactoryResume do
     ]
   end
 
-  def stringify(%{} = params, other_keys \\ []) do
+  def stringify(%{} = params) do
     params
-    |> Factory.reject_attrs(other_keys)
     |> Enum.map(fn
-      {k, v} ->
-        {Factory.to_camel_key(k), stringifyp(v, other_keys)}
-    end)
-    |> Enum.into(%{})
-  end
-
-  defp stringifyp(attrs, other_keys) when is_list(attrs) do
-    Enum.map(attrs, &stringifyp(&1, other_keys))
-  end
-
-  defp stringifyp(%{} = attrs, other_keys) do
-    attrs
-    |> Factory.reject_attrs(other_keys)
-    |> Enum.map(fn
-      {k, v} when is_list(v) ->
-        {Factory.to_camel_key(k), stringifyp(v, other_keys)}
-
-      {k, "nil"} ->
-        {Factory.to_camel_key(k), nil}
-
-      {k, v} ->
+      {k, %Plug.Upload{} = v} ->
         {Factory.to_camel_key(k), v}
+
+      {k, v} ->
+        {Factory.to_camel_key(k), stringify(v)}
     end)
     |> Enum.into(%{})
   end
 
-  defp stringifyp(val, _), do: val
+  def stringify(attrs) when is_list(attrs) do
+    Enum.map(attrs, &stringify(&1))
+  end
+
+  def stringify(val), do: val
 end

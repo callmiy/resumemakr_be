@@ -165,6 +165,9 @@ defmodule Data.Resumes do
               acc
           end
 
+        {:personal_info, v_db}, acc ->
+          sanitize_assoc(:personal_info, v_db, acc, attrs)
+
         {key, v_db}, acc when key in [:education, :experiences, :skills] ->
           sanitize_assoc(key, v_db, acc, attrs)
 
@@ -205,6 +208,28 @@ defmodule Data.Resumes do
 
   defp sanitize_assoc(key, v_db, acc, attrs) when v_db == nil or v_db == [] do
     update_if_key(key, acc, attrs)
+  end
+
+  defp sanitize_assoc(:personal_info, v_db, acc, attrs) do
+    case Map.get(attrs, :personal_info, :ok) do
+      :ok ->
+        acc
+
+      nil ->
+        Map.put(
+          acc,
+          :personal_info,
+          mark_for_deletion(v_db)
+        )
+
+      v_user ->
+        # we assume user is trying to update/delete
+        Map.put(
+          acc,
+          :personal_info,
+          Map.put(v_user, :id, v_db.id)
+        )
+    end
   end
 
   defp sanitize_assoc(key, v_dbs, acc, attrs) do

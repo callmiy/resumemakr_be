@@ -27,23 +27,33 @@ defmodule Data.Factory do
 
   def random_string_int, do: Integer.to_string(Faker.random_between(2, 100))
 
-  @spec reject_attrs(attrs :: map(), additional_keys :: List.t()) :: map()
-  def reject_attrs(%{} = attrs, additional_keys \\ []) do
-    Enum.reject(attrs, fn
-      {_k, nil} ->
-        true
+  def reject_attrs(%{} = attrs) do
+    Enum.reduce(attrs, %{}, fn
+      {_k, nil}, acc ->
+        acc
 
-      {_, %Ecto.Association.NotLoaded{}} ->
-        true
+      {_, %Ecto.Association.NotLoaded{}}, acc ->
+        acc
 
-      {:__meta__, _} ->
-        true
+      {:__meta__, _}, acc ->
+        acc
 
-      {k, _} ->
-        Enum.member?(additional_keys, k)
+      {k, %Plug.Upload{} = v}, acc ->
+        Map.put(acc, k, v)
+
+      {k, "nil"}, acc ->
+        Map.put(acc, k, nil)
+
+      {k, val}, acc ->
+        Map.put(acc, k, reject_attrs(val))
     end)
-    |> Enum.into(%{})
   end
+
+  def reject_attrs(attrs) when is_list(attrs) do
+    Enum.map(attrs, &reject_attrs(&1))
+  end
+
+  def reject_attrs(v), do: v
 
   defmacro __using__(_opts) do
     quote do

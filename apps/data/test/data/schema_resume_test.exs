@@ -397,6 +397,51 @@ defmodule Data.SchemaResumeTest do
 
       assert message =~ "woops"
     end
+
+    test "deleting" do
+      user = RegFactory.insert()
+
+      attrs =
+        Factory.params(
+          user_id: user.id,
+          personal_info: Factory.personal_info(1, Sequence.next("")),
+          education: nil
+        )
+
+      resume = Factory.insert(attrs)
+      id_str = Integer.to_string(resume.id)
+
+      update_attrs = %{
+        personal_info: nil,
+        id: to_global_id(:resume, id_str, Schema)
+      }
+
+      update_attrs_str = Factory.stringify(update_attrs)
+
+      variables = %{
+        "input" => update_attrs_str
+      }
+
+      context = context(user)
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "_id" => ^id_str,
+                      "personalInfo" => nil
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 variables: variables,
+                 context: context
+               )
+    end
   end
 
   describe "query" do
