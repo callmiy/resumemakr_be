@@ -10,9 +10,8 @@ defmodule Data.Uploaders.ResumePhoto do
   @versions [:original, :thumb]
 
   @extension_whitelist ~w(.jpg .jpeg .gif .png)
-  @storage Application.get_env(:arc, :storage_dir)
-  @storage_dir "#{@storage}/resume"
-  @pattern_prefix_original ~r/^.+__original_/
+
+  @storage_dir "#{Application.get_env(:arc, :storage_dir)}/resume"
 
   # Override the bucket on a per definition basis:
   # def bucket dofile_name
@@ -65,10 +64,6 @@ defmodule Data.Uploaders.ResumePhoto do
 
   defp prefix_file(version, _) do
     to_string(version)
-  end
-
-  def strip_pefix(file_name, :original) do
-    String.replace(file_name, @pattern_prefix_original, "")
   end
 
   # Override the storage directory:

@@ -10,7 +10,6 @@ defmodule Data.Resumes do
   alias Data.Resumes.Experience
   alias Data.Resumes.Education
   alias Ecto.Changeset
-  alias Data.Uploaders.ResumePhoto
 
   @pattern_integer_id ~r/^\d+$/
 

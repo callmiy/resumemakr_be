@@ -173,14 +173,7 @@ defmodule Data.ResolverResume do
         to_string_photo(child)
 
       _ ->
-        # for skills, education and experiences
-        case child do
-          nil ->
-            []
-
-          _ ->
-            child
-        end
+        child
     end
   end
 
