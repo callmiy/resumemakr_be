@@ -21,7 +21,7 @@ defmodule Data.Resumes.Skill do
       :resume_id,
       :delete
     ])
-    |> validate_required([:description])
+    # |> validate_required([:description])
     |> assoc_constraint(:resume)
     |> Resumes.maybe_mark_for_deletion()
   end

@@ -26,11 +26,11 @@ defmodule Data.Resumes.Experience do
       :achievements,
       :delete
     ])
-    |> validate_required([
-      :position,
-      :company_name,
-      :from_date
-    ])
+    # |> validate_required([
+    #   :position,
+    #   :company_name,
+    #   :from_date
+    # ])
     |> assoc_constraint(:resume)
     |> Resumes.maybe_mark_for_deletion()
   end

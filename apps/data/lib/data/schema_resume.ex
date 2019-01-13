@@ -7,7 +7,7 @@ defmodule Data.SchemaResume do
   @desc "An object with a rating"
   object :rated do
     field :id, non_null(:id)
-    field :description, non_null(:string)
+    field :description, :string
     field :level, :string
   end
 
@@ -15,17 +15,17 @@ defmodule Data.SchemaResume do
   object :resume_experience do
     field :id, non_null(:id)
     field :achievements, list_of(:string)
-    field :company_name, :string |> non_null()
-    field :from_date, :string |> non_null()
-    field :position, :string |> non_null()
+    field :company_name, :string
+    field :from_date, :string
+    field :position, :string
     field :to_date, :string
   end
 
   @desc "A Personal Info"
   object :personal_info do
     field :id, non_null(:id)
-    field :first_name, non_null(:string)
-    field :last_name, non_null(:string)
+    field :first_name, :string
+    field :last_name, :string
     field :address, :string
     field :email, :string
     field :phone, :string
@@ -37,9 +37,9 @@ defmodule Data.SchemaResume do
   @desc "A resume education"
   object :education do
     field :id, non_null(:id)
-    field :course, non_null(:string)
-    field :from_date, non_null(:string)
-    field :school, non_null(:string)
+    field :course, :string
+    field :from_date, :string
+    field :school, :string
     field :to_date, :string
     field :achievements, list_of(:string)
   end
@@ -47,7 +47,7 @@ defmodule Data.SchemaResume do
   @desc "A resume skill"
   object :skill do
     field :id, non_null(:id)
-    field :description, non_null(:string)
+    field :description, :string
     field :achievements, list_of(:string)
   end
 
@@ -83,16 +83,16 @@ defmodule Data.SchemaResume do
   @desc "Variables for creating an object with a rating"
   input_object :rated_input do
     field :id, :id
-    field :description, non_null(:string)
+    field :description, :string
     field :level, :string
   end
 
   @desc "Variables for creating resume education"
   input_object :education_input do
     field :id, :id
-    field :course, non_null(:string)
-    field :from_date, non_null(:string)
-    field :school, non_null(:string)
+    field :course, :string
+    field :from_date, :string
+    field :school, :string
     field :to_date, :string
     field :achievements, list_of(:string)
   end
@@ -100,12 +100,12 @@ defmodule Data.SchemaResume do
   @desc "Variables for creating Personal Info"
   input_object :personal_info_input do
     field :id, :id
-    field :first_name, non_null(:string)
-    field :last_name, non_null(:string)
-    field :address, non_null(:string)
-    field :email, non_null(:string)
-    field :phone, non_null(:string)
-    field :profession, non_null(:string)
+    field :first_name, :string
+    field :last_name, :string
+    field :address, :string
+    field :email, :string
+    field :phone, :string
+    field :profession, :string
     field :date_of_birth, :string
 
     field :photo, :custom_upload do
@@ -116,16 +116,16 @@ defmodule Data.SchemaResume do
   input_object :create_experience_input do
     field :id, :id
     field :achievements, list_of(:string)
-    field :company_name, :string |> non_null()
-    field :from_date, :string |> non_null()
-    field :position, :string |> non_null()
+    field :company_name, :string
+    field :from_date, :string
+    field :position, :string
     field :to_date, :string
   end
 
   @desc "A resume skill"
   input_object :create_skill_input do
     field :id, :id
-    field :description, non_null(:string)
+    field :description, :string
     field :achievements, list_of(:string)
   end
 

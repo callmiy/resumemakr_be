@@ -39,10 +39,10 @@ defmodule Data.Resumes.PersonalInfo do
       :delete
     ])
     |> cast_attachments(attrs, [:photo])
-    |> validate_required([
-      :first_name,
-      :last_name
-    ])
+    # |> validate_required([
+    #   :first_name,
+    #   :last_name
+    # ])
     |> assoc_constraint(:resume)
     |> Resumes.maybe_mark_for_deletion()
   end
