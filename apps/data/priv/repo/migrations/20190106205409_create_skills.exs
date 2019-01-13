@@ -3,8 +3,8 @@ defmodule Data.Repo.Migrations.CreateSkills do
 
   def change do
     create table(:skills) do
-      add(:description, :string)
-      add(:achievements, {:array, :string})
+      add(:description, :text)
+      add(:achievements, {:array, :text})
 
       add(
         :resume_id,

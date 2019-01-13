@@ -6,7 +6,7 @@ defmodule Data.Repo.Migrations.CreateResumeTitles do
 
     create table(:resumes) do
       add :title, :citext, null: false
-      add :description, :string
+      add :description, :text
       add :languages, :jsonb
       add :additional_skills, :jsonb
 

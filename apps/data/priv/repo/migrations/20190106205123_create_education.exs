@@ -7,7 +7,7 @@ defmodule Data.Repo.Migrations.CreateEducation do
       add :course, :string
       add :from_date, :string
       add :to_date, :string
-      add :achievements, {:array, :string}
+      add :achievements, {:array, :text}
 
       add :resume_id,
           references(:resumes, on_delete: :delete_all),

@@ -6,7 +6,7 @@ defmodule Xx.Repo.Migrations.CreatePersonalInfo do
       add :first_name, :string
       add :last_name, :string
       add :profession, :string
-      add :address, :string
+      add :address, :text
       add :email, :string
       add :phone, :string
       add :photo, :string

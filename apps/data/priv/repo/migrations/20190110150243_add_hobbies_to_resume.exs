@@ -3,7 +3,7 @@ defmodule Data.Repo.Migrations.AddHobbiesToResume do
 
   def change do
     alter table(:resumes) do
-      add :hobbies, {:array, :string}
+      add :hobbies, {:array, :text}
     end
   end
 end

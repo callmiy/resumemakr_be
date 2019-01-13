@@ -3,11 +3,11 @@ defmodule Data.Repo.Migrations.CreateExperiences do
 
   def change do
     create table(:experiences) do
-      add :position, :string
+      add :position, :text
       add :company_name, :string
       add :from_date, :string
       add :to_date, :string
-      add :achievements, {:array, :string}
+      add :achievements, {:array, :text}
 
       add :resume_id,
           references(:resumes, on_delete: :delete_all),
