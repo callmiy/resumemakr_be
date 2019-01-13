@@ -30,7 +30,7 @@ defmodule Data.SchemaResume do
     field :email, :string
     field :phone, :string
     field :profession, :string
-    field :date_of_birth, :date
+    field :date_of_birth, :string
     field :photo, :string
   end
 
@@ -106,7 +106,7 @@ defmodule Data.SchemaResume do
     field :email, non_null(:string)
     field :phone, non_null(:string)
     field :profession, non_null(:string)
-    field :date_of_birth, :date
+    field :date_of_birth, :string
 
     field :photo, :custom_upload do
     end

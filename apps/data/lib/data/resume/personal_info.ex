@@ -16,7 +16,7 @@ defmodule Data.Resumes.PersonalInfo do
     field :email, :string
     field :phone, :string
     field :profession, :string
-    field :date_of_birth, :date
+    field :date_of_birth, :string
     field :photo, ResumePhoto.Type
     field :delete, :boolean, virtual: true
   end

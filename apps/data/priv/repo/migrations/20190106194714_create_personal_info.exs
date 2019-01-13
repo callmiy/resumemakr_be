@@ -10,7 +10,7 @@ defmodule Xx.Repo.Migrations.CreatePersonalInfo do
       add :email, :string
       add :phone, :string
       add :photo, :string
-      add :date_of_birth, :date
+      add :date_of_birth, :string
 
       add :resume_id,
           references(:resumes, on_delete: :delete_all),
