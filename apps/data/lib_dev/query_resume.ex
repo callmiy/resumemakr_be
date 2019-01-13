@@ -46,6 +46,7 @@ defmodule Data.QueryResume do
       fromDate
       position
       toDate
+      index
     }
   """
 

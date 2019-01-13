@@ -19,6 +19,7 @@ defmodule Data.SchemaResume do
     field :from_date, :string
     field :position, :string
     field :to_date, :string
+    field :index, :integer |> non_null()
   end
 
   @desc "A Personal Info"
@@ -120,6 +121,7 @@ defmodule Data.SchemaResume do
     field :from_date, :string
     field :position, :string
     field :to_date, :string
+    field :index, :integer |> non_null()
   end
 
   @desc "A resume skill"

@@ -12,6 +12,7 @@ defmodule Data.Resumes.Experience do
     field :from_date, :string
     field :position, :string
     field :to_date, :string
+    field :index, :integer
     field :delete, :boolean, virtual: true
   end
 
@@ -24,7 +25,8 @@ defmodule Data.Resumes.Experience do
       :from_date,
       :to_date,
       :achievements,
-      :delete
+      :delete,
+      :index
     ])
     # |> validate_required([
     #   :position,

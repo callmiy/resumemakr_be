@@ -39,6 +39,7 @@ defmodule Data.FactoryResume do
   def experiences(_, seq) do
     [
       %{
+        index: 1,
         company_name: "Company " <> seq,
         from_date: "03/2015",
         position: "Position " <> seq,

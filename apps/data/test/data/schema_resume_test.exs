@@ -854,7 +854,8 @@ defmodule Data.SchemaResumeTest do
         id: to_string(db_exp_for_update.id),
         company_name: "updated company",
         position: "updated position",
-        from_date: "07/2018"
+        from_date: "07/2018",
+        index: 2
       }
 
       update_attrs = %{
@@ -951,7 +952,8 @@ defmodule Data.SchemaResumeTest do
         id: db_exp_for_update_id_str,
         company_name: "updated company",
         position: "updated position",
-        from_date: "07/2018"
+        from_date: "07/2018",
+        index: 2
       }
 
       update_attrs = %{
