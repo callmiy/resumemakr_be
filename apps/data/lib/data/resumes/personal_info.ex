@@ -2,6 +2,9 @@ defmodule Data.Resumes.PersonalInfo do
   use Ecto.Schema
   use Arc.Ecto.Schema
 
+  # @dialyzer {:no_match, cast_attachments: 4}
+  @dialyzer :no_match
+
   import Ecto.Changeset
 
   alias Data.Resumes.Resume

@@ -9,6 +9,7 @@ defmodule Data.Resumes.Skill do
     belongs_to(:resume, Resume)
     field :achievements, {:array, :string}
     field :description, :string
+    field :index, :integer
     field :delete, :boolean, virtual: true
   end
 
@@ -19,7 +20,8 @@ defmodule Data.Resumes.Skill do
       :description,
       :achievements,
       :resume_id,
-      :delete
+      :delete,
+      :index
     ])
     # |> validate_required([:description])
     |> assoc_constraint(:resume)

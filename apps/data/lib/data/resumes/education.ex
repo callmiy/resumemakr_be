@@ -12,6 +12,7 @@ defmodule Data.Resumes.Education do
     field :school, :string
     field :to_date, :string
     field :achievements, {:array, :string}
+    field :index, :integer
     field :delete, :boolean, virtual: true
   end
 
@@ -25,7 +26,8 @@ defmodule Data.Resumes.Education do
       :from_date,
       :to_date,
       :achievements,
-      :delete
+      :delete,
+      :index
     ])
     # |> validate_required([:school, :course, :from_date])
     |> assoc_constraint(:resume)

@@ -9,6 +9,7 @@ defmodule Data.Repo.Migrations.CreateResumeTitles do
       add :description, :text
       add :languages, :jsonb
       add :additional_skills, :jsonb
+      add :hobbies, {:array, :text}
 
       add :user_id,
           references(:users, on_delete: :delete_all),

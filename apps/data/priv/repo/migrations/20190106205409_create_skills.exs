@@ -5,6 +5,7 @@ defmodule Data.Repo.Migrations.CreateSkills do
     create table(:skills) do
       add(:description, :text)
       add(:achievements, {:array, :text})
+      add :index, :integer, null: false, default: 1
 
       add(
         :resume_id,

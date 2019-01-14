@@ -104,7 +104,7 @@ defmodule Data.ResolverResume do
   def get_resume(attrs) do
     case Resumes.get_resume_by(attrs) do
       %Resume{} = resume ->
-        {:ok, resume}
+        {:ok, sanitize_children(resume)}
 
       nil ->
         {:error, "resume not found"}
@@ -156,22 +156,35 @@ defmodule Data.ResolverResume do
           loader
           |> Dataloader.load(:data, key, root)
           |> on_load(fn data_source ->
-            child = Dataloader.get(data_source, :data, key, root)
-
-            {:ok, sanitize_child(key, child)}
+            assoc = Dataloader.get(data_source, :data, key, root)
+            {:ok, sanitize_child(key, assoc)}
           end)
 
-        child ->
-          {:ok, sanitize_child(key, child)}
+        assoc ->
+          {:ok, sanitize_child(key, assoc)}
       end
     end
   end
 
   def sanitize_child(:personal_info, child), do: to_string_photo(child)
+
+  def sanitize_child(_, child) when is_list(child),
+    do: Enum.sort_by(child, & &1.index)
+
   def sanitize_child(_, child), do: child
 
+  defp sanitize_children(%Resume{} = resume) do
+    children =
+      resume
+      |> Map.take(Resume.assoc_fields())
+      |> Enum.map(fn {k, v} -> {k, sanitize_child(k, v)} end)
+      |> Enum.into(%{})
+
+    Map.merge(resume, children)
+  end
+
   defp wrapped(%Resume{} = resume) do
-    %{resume: resume}
+    %{resume: sanitize_children(resume)}
   end
 
   defp convert_from_global(%{id: id} = attrs) do
