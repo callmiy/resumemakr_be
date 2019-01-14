@@ -413,6 +413,55 @@ defmodule Data.Resumes do
   end
 
   @doc """
+  Clones a Resume.
+
+  ## Examples
+
+      iex> resume_resume(Resume)
+      {:ok, %Resume{}}
+
+      iex> resume_resume(Resume)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def clone_resume(%Resume{} = resume, attrs \\ %{}) do
+    resume
+    |> Repo.preload(Resume.assoc_fields())
+    |> mapify()
+    |> Map.merge(attrs)
+    |> create_resume()
+  end
+
+  def mapify(%_struct{} = v),
+    do:
+      Map.from_struct(v)
+      |> Map.delete(:__meta__)
+      |> mapify()
+
+  def mapify(%{} = data) do
+    Enum.reduce(data, %{}, fn
+      {_k, %Ecto.Association.NotLoaded{}}, acc ->
+        acc
+
+      {:id, _}, acc ->
+        acc
+
+      {:photo, _}, acc ->
+        acc
+
+      {k, _}, acc when k in [:updated_at, :inserted_at] ->
+        acc
+
+      {k, v}, acc ->
+        Map.put(acc, k, mapify(v))
+    end)
+    |> Enum.into(%{})
+  end
+
+  def mapify(v) when is_list(v), do: Enum.map(v, &mapify/1)
+  def mapify(v), do: v
+
+  @doc """
   Returns the list of personal_info.
 
   ## Examples

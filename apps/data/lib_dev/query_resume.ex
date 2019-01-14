@@ -187,4 +187,18 @@ defmodule Data.QueryResume do
       }
     """
   end
+
+  def clone do
+    """
+      mutation CloneUserResume($input: CloneResumeInput!) {
+        cloneResume(input: $input) {
+          resume {
+            ...#{@all_fields_frag_name}
+          }
+        }
+      }
+
+      #{all_fields_frag()}
+    """
+  end
 end

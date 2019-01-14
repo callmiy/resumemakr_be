@@ -124,6 +124,29 @@ defmodule Data.ResolverResume do
     end
   end
 
+  def clone(inputs, %{context: %{current_user: user}}) do
+    {id, attrs} = Map.pop(inputs, :id)
+
+    case Resumes.get_resume_by(id: id, user_id: user.id) do
+      nil ->
+        {:error, "Resume you are trying to clone does not exist"}
+
+      resume ->
+        case Resumes.clone_resume(resume, attrs) do
+          {:ok, cloned_resume} ->
+            {:ok, wrapped(cloned_resume)}
+
+          {:error, changeset} ->
+            {
+              :error,
+              changeset.errors
+              |> Resolver.errors_to_map()
+              |> Jason.encode!()
+            }
+        end
+    end
+  end
+
   defp to_string_photo(%PersonalInfo{} = personal_info) do
     case personal_info.photo do
       nil ->

@@ -1196,6 +1196,100 @@ defmodule Data.SchemaResumeTest do
     end
   end
 
+  describe "clone resume" do
+    test "clone with same title succeeds" do
+      user = RegFactory.insert()
+      resume = Factory.insert(user_id: user.id)
+      id = resume.id
+
+      variables = %{
+        "input" => %{
+          "id" => to_global_id(:resume, id, Schema)
+        }
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "cloneResume" => %{
+                    "resume" => %{
+                      "id" => _,
+                      "_id" => new_id,
+                      "title" => new_resume_title,
+                      "personalInfo" => personal_info
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(Query.clone(), Schema,
+                 context: context(user),
+                 variables: variables
+               )
+
+      assert id < String.to_integer(new_id)
+      assert new_resume_title =~ resume.title
+
+      case personal_info do
+        nil -> :ok
+        %{"photo" => nil} -> :ok
+      end
+    end
+
+    test "clone with different title succeeds" do
+      user = RegFactory.insert()
+      resume = Factory.insert(user_id: user.id)
+      id_str = Integer.to_string(resume.id)
+      new_title = Faker.String.base64()
+
+      variables = %{
+        "input" => %{
+          "id" => to_global_id(:resume, id_str, Schema),
+          "title" => new_title
+        }
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "cloneResume" => %{
+                    "resume" => %{
+                      "id" => _,
+                      "title" => ^new_title
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(Query.clone(), Schema,
+                 context: context(user),
+                 variables: variables
+               )
+    end
+
+    test "clone fails if resume does not exist" do
+      user = RegFactory.insert()
+      bogus_id = "0"
+
+      variables = %{
+        "input" => %{
+          "id" => to_global_id(:resume, bogus_id, Schema)
+        }
+      }
+
+      assert {:ok,
+              %{
+                errors: [
+                  %{
+                    message: "Resume you are trying to clone does not exist"
+                  }
+                ]
+              }} =
+               Absinthe.run(Query.clone(), Schema,
+                 context: context(user),
+                 variables: variables
+               )
+    end
+  end
+
   defp context(user), do: %{current_user: user}
 
   defp context(user, %{"personalInfo" => nil} = attrs),

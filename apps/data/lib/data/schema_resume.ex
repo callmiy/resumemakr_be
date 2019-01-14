@@ -198,6 +198,21 @@ defmodule Data.SchemaResume do
 
       parsing_node_ids(&Resolver.delete/2, id: :resume) |> resolve()
     end
+
+    @doc "Create a by copying data from an existing resume"
+    payload field :clone_resume do
+      input do
+        field :id, :id |> non_null()
+        field :title, :string
+        field :description, :string
+      end
+
+      output do
+        field :resume, :resume
+      end
+
+      parsing_node_ids(&Resolver.clone/2, id: :resume) |> resolve()
+    end
   end
 
   @desc "Queries allowed on Resume object"
