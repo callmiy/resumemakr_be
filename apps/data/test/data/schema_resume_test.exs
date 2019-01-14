@@ -654,7 +654,8 @@ defmodule Data.SchemaResumeTest do
         id: to_string(db_ed.id),
         course: "updated course",
         school: "updated school",
-        from_date: "07/2018"
+        from_date: "07/2018",
+        index: 2
       }
 
       update_attrs = %{
@@ -741,7 +742,8 @@ defmodule Data.SchemaResumeTest do
         id: db_ed_for_update_id_str,
         course: "updated course",
         school: "updated school",
-        from_date: "07/2018"
+        from_date: "07/2018",
+        index: 2
       }
 
       update_attrs = %{
@@ -1064,7 +1066,8 @@ defmodule Data.SchemaResumeTest do
       updated_skill = %{
         id: to_string(db_skill_for_update.id),
         description: "updated description",
-        achievements: ["updated achievements"]
+        achievements: ["updated achievements"],
+        index: 2
       }
 
       update_attrs = %{
@@ -1144,7 +1147,8 @@ defmodule Data.SchemaResumeTest do
       updated_skill = %{
         id: db_skill_for_update_id_str,
         description: "updated description",
-        achievements: ["updated achievements"]
+        achievements: ["updated achievements"],
+        index: 2
       }
 
       update_attrs = %{

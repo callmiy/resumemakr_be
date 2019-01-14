@@ -86,6 +86,7 @@ defmodule Data.FactoryResume do
   def education(_, seq) do
     [
       %{
+        index: 1,
         achievements: ["Education achievement " <> seq],
         course: "Course " <> seq,
         from_date: "03/2000",
@@ -124,6 +125,7 @@ defmodule Data.FactoryResume do
   def skills(_, seq) do
     [
       %{
+        index: 1,
         description: "Skill " <> seq,
         achievements:
           Enum.random([

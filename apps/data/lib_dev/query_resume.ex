@@ -30,6 +30,7 @@ defmodule Data.QueryResume do
   @frag_education """
     fragment #{@frag_name_education} on Education {
       id
+      index
       course
       fromDate
       toDate
@@ -67,6 +68,7 @@ defmodule Data.QueryResume do
   @frag_skill """
     fragment #{@frag_name_skill} on Skill {
       id
+      index
       description
       achievements
     }

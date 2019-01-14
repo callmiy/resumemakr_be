@@ -43,6 +43,7 @@ defmodule Data.SchemaResume do
     field :school, :string
     field :to_date, :string
     field :achievements, list_of(:string)
+    field :index, :integer |> non_null()
   end
 
   @desc "A resume skill"
@@ -50,6 +51,7 @@ defmodule Data.SchemaResume do
     field :id, non_null(:id)
     field :description, :string
     field :achievements, list_of(:string)
+    field :index, :integer |> non_null()
   end
 
   @desc "A Resume"
@@ -96,6 +98,7 @@ defmodule Data.SchemaResume do
     field :school, :string
     field :to_date, :string
     field :achievements, list_of(:string)
+    field :index, :integer |> non_null()
   end
 
   @desc "Variables for creating Personal Info"
@@ -129,6 +132,7 @@ defmodule Data.SchemaResume do
     field :id, :id
     field :description, :string
     field :achievements, list_of(:string)
+    field :index, :integer |> non_null()
   end
 
   @desc "Variables for getting a Resume"
