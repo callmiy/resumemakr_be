@@ -10,8 +10,7 @@ defmodule Data.Resumes do
   alias Data.Resumes.Experience
   alias Data.Resumes.Education
   alias Ecto.Changeset
-
-  @pattern_integer_id ~r/^\d+$/
+  alias Data.Uploaders.ResumePhoto
 
   @already_uploaded "___ALREADY_UPLOADED___"
 
@@ -165,32 +164,11 @@ defmodule Data.Resumes do
               acc
           end
 
-        {:personal_info, v_db}, acc ->
-          sanitize_assoc(:personal_info, v_db, acc, attrs)
-
-        {key, v_db}, acc when key in [:education, :experiences, :skills] ->
-          sanitize_assoc(key, v_db, acc, attrs)
-
         {:hobbies, _}, acc ->
           Map.put(acc, :hobbies, attrs[:hobbies])
 
         {k, v_db}, acc when is_map(v_db) or is_list(v_db) ->
-          case Map.has_key?(attrs, k) do
-            true ->
-              update_if_missing(k, v_db, acc, attrs[k])
-
-            _ ->
-              cond do
-                is_map(v_db) ->
-                  Map.put(acc, k, Map.from_struct(v_db))
-
-                is_list(v_db) ->
-                  Map.put(acc, k, Enum.map(v_db, &Map.from_struct/1))
-
-                true ->
-                  Map.put(acc, k, v_db)
-              end
-          end
+          sanitize_assoc(k, v_db, acc, attrs)
 
         {k, v}, acc ->
           case Map.has_key?(attrs, k) do
@@ -201,7 +179,6 @@ defmodule Data.Resumes do
               Map.put(acc, k, v)
           end
       end)
-      |> sanitize_personal_info()
 
     {resume, augmented_attrs}
   end
@@ -219,7 +196,7 @@ defmodule Data.Resumes do
         Map.put(
           acc,
           :personal_info,
-          mark_for_deletion(v_db)
+          v_db |> Map.delete(:photo) |> mark_for_deletion()
         )
 
       v_user ->
@@ -227,7 +204,7 @@ defmodule Data.Resumes do
         Map.put(
           acc,
           :personal_info,
-          Map.put(v_user, :id, v_db.id)
+          Map.put(sanitize_photo(v_user), :id, v_db.id)
         )
     end
   end
@@ -288,83 +265,7 @@ defmodule Data.Resumes do
     schema |> Map.from_struct() |> Map.put(:delete, true)
   end
 
-  defp update_if_missing(k, %{} = v_db, acc, nil),
-    do: Map.put(acc, k, Map.from_struct(v_db))
-
-  defp update_if_missing(_k, [], acc, nil), do: acc
-
-  defp update_if_missing(k, v_db, acc, %{} = v_user) do
-    if atom_keys?(v_user) do
-      case v_user[:id] do
-        nil ->
-          Map.put(acc, k, Map.put(v_user, :id, v_db.id))
-
-        _ ->
-          Map.put(acc, k, v_user)
-      end
-    else
-      case v_user["id"] do
-        nil ->
-          Map.put(acc, k, Map.put(v_user, "id", v_db.id))
-
-        _ ->
-          Map.put(acc, k, v_user)
-      end
-    end
-  end
-
-  defp update_if_missing(k, v_dbs, acc, nil),
-    do: Map.put(acc, k, Enum.map(v_dbs, &Map.from_struct/1))
-
-  defp update_if_missing(k, v_dbs, acc, v_users) do
-    v_dbs = Enum.map(v_dbs, &Map.from_struct/1)
-
-    v_users
-    |> Enum.map(&(&1[:id] || &1["id"]))
-    |> Enum.reject(&(&1 == nil))
-    |> Enum.map(fn id ->
-      str_id = "#{id}"
-
-      case Regex.match?(@pattern_integer_id, str_id) do
-        true ->
-          String.to_integer(str_id)
-
-        _ ->
-          str_id
-      end
-    end)
-    |> case do
-      [] ->
-        Map.put(acc, k, Enum.concat(v_dbs, v_users))
-
-      user_data_ids ->
-        in_db_not_in_user_data =
-          v_dbs
-          |> Enum.reject(&Enum.member?(user_data_ids, &1.id))
-          |> Enum.map(&Map.from_struct/1)
-
-        Map.put(acc, k, Enum.concat(in_db_not_in_user_data, v_users))
-    end
-  end
-
-  defp sanitize_personal_info(attrs) do
-    cond do
-      Map.has_key?(attrs, :personal_info) ->
-        update_in(attrs.personal_info, &to_string_photo_path/1)
-
-      Map.has_key?(attrs, "personal_info") ->
-        update_in(attrs["personal_info"], &to_string_photo_path/1)
-
-      true ->
-        attrs
-    end
-  end
-
-  defp to_string_photo_path(personal_info) when personal_info == nil or personal_info == %{} do
-    personal_info
-  end
-
-  defp to_string_photo_path(personal_info) do
+  defp sanitize_photo(personal_info) do
     case personal_info[:photo] || personal_info["photo"] do
       @already_uploaded ->
         Map.drop(personal_info, [:photo, "photo"])
@@ -375,12 +276,6 @@ defmodule Data.Resumes do
       _ ->
         personal_info
     end
-  end
-
-  defp atom_keys?(map) do
-    Enum.reduce(map, true, fn {k, _}, acc ->
-      acc && is_atom(k)
-    end)
   end
 
   @doc """
@@ -427,18 +322,18 @@ defmodule Data.Resumes do
   def clone_resume(%Resume{} = resume, attrs \\ %{}) do
     resume
     |> Repo.preload(Resume.assoc_fields())
-    |> mapify()
+    |> clone_resume_p()
     |> Map.merge(attrs)
     |> create_resume()
   end
 
-  def mapify(%_struct{} = v),
+  defp clone_resume_p(%_struct{} = v),
     do:
       Map.from_struct(v)
       |> Map.delete(:__meta__)
-      |> mapify()
+      |> clone_resume_p()
 
-  def mapify(%{} = data) do
+  defp clone_resume_p(%{} = data) do
     Enum.reduce(data, %{}, fn
       {_k, %Ecto.Association.NotLoaded{}}, acc ->
         acc
@@ -446,20 +341,51 @@ defmodule Data.Resumes do
       {:id, _}, acc ->
         acc
 
-      {:photo, _}, acc ->
+      {:photo, nil}, acc ->
         acc
+
+      {:photo, %{file_name: file_name}}, acc ->
+        path = clone_photo(file_name)
+        Map.put(acc, :photo, path)
 
       {k, _}, acc when k in [:updated_at, :inserted_at] ->
         acc
 
       {k, v}, acc ->
-        Map.put(acc, k, mapify(v))
+        Map.put(acc, k, clone_resume_p(v))
     end)
     |> Enum.into(%{})
   end
 
-  def mapify(v) when is_list(v), do: Enum.map(v, &mapify/1)
-  def mapify(v), do: v
+  defp clone_resume_p(v) when is_list(v), do: Enum.map(v, &clone_resume_p/1)
+  defp clone_resume_p(v), do: v
+
+  defp clone_photo(file_name) do
+    path =
+      Path.join([
+        Data.umbrella_root(),
+        ResumePhoto.url({file_name, nil})
+      ])
+
+    case File.read(path) do
+      {:ok, bin} ->
+        basename = "___clone___" <> Path.basename(path)
+        new_path = Path.join(Path.dirname(path), basename)
+        File.write!(new_path, bin)
+        ext = Path.extname(file_name) |> String.trim_leading(".")
+
+        %Plug.Upload{
+          path: new_path,
+          filename: file_name,
+          content_type: "image/" <> ext
+        }
+
+        nil
+
+      _ ->
+        nil
+    end
+  end
 
   @doc """
   Returns the list of personal_info.

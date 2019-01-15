@@ -30,7 +30,7 @@ defmodule Data.Uploaders.ResumePhoto do
 
   # Define a thumbnail transformation:
   @spec transform(any(), any()) :: :noaction | {:convert, <<_::560>>, :png}
-  def transform(:thumb, _file_and_resource) do
+  def transform(:thumb, {_file, _resource}) do
     {
       :convert,
       "-strip -thumbnail 250x250^ -gravity center -extent 250x250 -format png",
@@ -38,37 +38,27 @@ defmodule Data.Uploaders.ResumePhoto do
     }
   end
 
-  # Override the persisted filenames:
-  def filename(version, {file, resource}) do
+  def filename(version, {file, _resource}) do
     file_name = file.file_name
     ext_name = Path.extname(file_name)
     new_file_name = Path.basename(file_name, ext_name)
-    prefix = prefix_file(version, resource)
 
-    # do not prefix new_file_name if already prefixed
-    if String.starts_with?(new_file_name, prefix) do
-      new_file_name
-    else
-      "#{prefix}_#{new_file_name}"
+    case version do
+      :original ->
+        new_file_name
+
+      _ ->
+        "___#{version}___#{new_file_name}"
     end
   end
 
-  defp prefix_file(version, %{email: email}) when is_binary(email) do
-    email =
-      email
-      |> String.replace(" ", "")
-      |> Zarex.sanitize(padding: 30)
-
-    "#{email}__#{version}"
-  end
-
-  defp prefix_file(version, _) do
-    to_string(version)
-  end
-
   # Override the storage directory:
-  def storage_dir(_version, _file_and_resource) do
+  def storage_dir(_version, {_, nil}) do
     @storage_dir
+  end
+
+  def storage_dir(_version, {_, resource}) do
+    "#{@storage_dir}/#{resource.id}"
   end
 
   def storage_dir, do: @storage_dir

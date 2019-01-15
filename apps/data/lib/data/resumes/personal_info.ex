@@ -41,7 +41,7 @@ defmodule Data.Resumes.PersonalInfo do
       :photo,
       :delete
     ])
-    |> cast_attachments(attrs, [:photo])
+    |> cast_attachments(attrs, [:photo], allow_paths: true)
     # |> validate_required([
     #   :first_name,
     #   :last_name
