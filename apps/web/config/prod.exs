@@ -15,6 +15,7 @@ use Mix.Config
 # before starting your production server.
 
 config :web, Web.Endpoint,
+  load_from_system_env: true,
   url: [
     scheme: "https",
     host: "exceach.herokuapp.com",
