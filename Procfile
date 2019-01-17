@@ -1,0 +1,1 @@
+web: MIX_ENV=prod mix ecto.migrate && iex -S mix phx.server
