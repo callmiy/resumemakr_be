@@ -39,7 +39,7 @@ defmodule Data.Uploaders.ResumePhoto do
   end
 
   def filename(version, {file, _resource}) do
-    file_name = file.file_name
+    file_name = String.replace(file.file_name, ~r/[\s\(\)]/, "_")
     ext_name = Path.extname(file_name)
     new_file_name = Path.basename(file_name, ext_name)
 
