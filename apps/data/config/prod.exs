@@ -1,7 +1,7 @@
 use Mix.Config
 
 config :data, Data.Guardian,
-  issuer: "resume_builder",
+  issuer: "resume_makr",
   secret_key: System.get_env("SECRET_KEY_BASE")
 
 # Configure your database

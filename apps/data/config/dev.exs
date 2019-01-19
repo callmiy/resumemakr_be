@@ -8,6 +8,6 @@ use Mix.Config
 config :data, Data.Repo,
   username: "postgres",
   password: "",
-  database: "resume_builder_dev",
+  database: "resume_makr_dev",
   hostname: "localhost",
   pool_size: 10

@@ -18,14 +18,14 @@ config :web, Web.Endpoint,
   load_from_system_env: true,
   url: [
     scheme: "https",
-    host: "exceach.herokuapp.com",
+    host: "resumemakr.herokuapp.com",
     port: 443
   ],
   force_ssl: [rewrite_on: [:x_forwarded_proto]],
   secret_key_base: System.get_env("SECRET_KEY_BASE"),
   check_origin: [
-    "https://exceach.herokuapp.com",
-    "https://exceach.netlify.com"
+    "https://resumemakr.herokuapp.com",
+    "https://resumemakr.netlify.com"
   ]
 
 # ## SSL Support
