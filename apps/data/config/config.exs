@@ -18,19 +18,6 @@ config :arc,
   storage_dir: "uploads"
 
 config :goth,
-  json: """
-    {
-      "type": "service_account",
-      "project_id": "",
-      "private_key_id": "3f1d7f704b624e646175f75292d6bc92424d4e96",
-      "private_key": "-----BEGIN PRIVATE KEY-----\nM==\n-----END PRIVATE KEY-----\n",
-      "client_email": "a@ab.com",
-      "client_id": "1",
-      "auth_uri": "https://ab.com/auth",
-      "token_uri": "https://ab.com/token",
-      "auth_provider_x509_cert_url": "https://www.ab.com/oauth2/v1/certs",
-      "client_x509_cert_url": "https://www.ab.com"
-    }
-  """
+  json: ~s({"project_id": "", "private_key": "", "token_uri": ""})
 
 import_config "#{Mix.env()}.exs"
