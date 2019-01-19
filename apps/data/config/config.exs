@@ -17,7 +17,4 @@ config :arc,
 config :arc,
   storage_dir: "uploads"
 
-config :goth,
-  json: ~s({"project_id": "", "private_key": "", "token_uri": ""})
-
 import_config "#{Mix.env()}.exs"
