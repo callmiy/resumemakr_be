@@ -9,6 +9,7 @@ defmodule Data.SchemaResume do
     field :id, non_null(:id)
     field :description, :string
     field :level, :string
+    field :index, :integer |> non_null()
   end
 
   @desc "A resume experience"
@@ -88,6 +89,7 @@ defmodule Data.SchemaResume do
     field :id, :id
     field :description, :string
     field :level, :string
+    field :index, :integer |> non_null()
   end
 
   @desc "Variables for creating resume education"

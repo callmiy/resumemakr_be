@@ -102,7 +102,8 @@ defmodule Data.FactoryResume do
     [
       %{
         description: "Additional Skill " <> seq,
-        level: Enum.random(1..5) |> to_string()
+        level: Enum.random(1..5) |> to_string(),
+        index: 1
       }
     ]
   end
@@ -113,7 +114,8 @@ defmodule Data.FactoryResume do
     [
       %{
         description: "Language " <> seq,
-        level: Enum.random(1..5) |> to_string()
+        level: Enum.random(1..5) |> to_string(),
+        index: 1,
       }
     ]
   end

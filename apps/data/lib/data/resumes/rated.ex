@@ -8,13 +8,14 @@ defmodule Data.Resumes.Rated do
   embedded_schema do
     field :description, :string
     field :level, :string
+    field :index, :integer
     field :delete, :boolean, virtual: true
   end
 
   def changeset(%__MODULE__{} = schema, attrs) do
     schema
-    |> cast(attrs, [:description, :level])
-    |> validate_required([:description])
+    |> cast(attrs, [:description, :level, :index])
+    # |> validate_required([:description])
     |> Resumes.maybe_mark_for_deletion()
   end
 end

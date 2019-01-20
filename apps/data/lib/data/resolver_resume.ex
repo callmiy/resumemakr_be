@@ -8,6 +8,8 @@ defmodule Data.ResolverResume do
   alias Data.Resumes.PersonalInfo
   alias Data.Uploaders.ResumePhoto
 
+  @fields_to_sanitize Resume.assoc_fields() ++ [:languages, :additional_skills]
+
   @spec create(
           any(),
           map(),
@@ -199,7 +201,7 @@ defmodule Data.ResolverResume do
   defp sanitize_children(%Resume{} = resume) do
     children =
       resume
-      |> Map.take(Resume.assoc_fields())
+      |> Map.take(@fields_to_sanitize)
       |> Enum.map(fn {k, v} -> {k, sanitize_child(k, v)} end)
       |> Enum.into(%{})
 

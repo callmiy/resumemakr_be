@@ -24,6 +24,7 @@ defmodule Data.QueryResume do
       id
       description
       level
+      index
     }
   """
 
