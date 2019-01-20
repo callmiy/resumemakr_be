@@ -13,6 +13,7 @@
         "mixTestFailure"
       ]
     },
+
     {
       "label": "mix test file db",
       "type": "shell",
@@ -23,6 +24,7 @@
         "mixTestFailure"
       ]
     },
+
     {
       "label": "mix test all db",
       "type": "shell",
@@ -33,6 +35,7 @@
         "mixTestFailure"
       ]
     },
+
     {
       "label": "mix test",
       "type": "shell",
@@ -73,11 +76,11 @@
         "mixTestFailure"
       ]
     },
+
     {
       "label": "deploy to heroku",
       "type": "shell",
-      "command": "git checkout master && git merge dev && git checkout dev && git push heroku master",
-      "problemMatcher": []
+      "command": "git checkout master && git merge dev && git checkout dev && git push heroku master"
     }
   ]
 }
