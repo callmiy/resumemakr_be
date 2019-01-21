@@ -3,7 +3,7 @@ defmodule Data.QueryResume do
   @frag_name "ResumeFrag"
   @frag_name_rated "RatedFrag"
   @frag_name_education "ResumeeducationFrag"
-  @frag_name_experience "ResumeExperienceFrag"
+  @frag_name_experience "ExperienceFrag"
   @frag_name_personal_info "PersonalInfoFrag"
   @frag_name_skill "SkillFrag"
 
@@ -41,7 +41,7 @@ defmodule Data.QueryResume do
   """
 
   @frag_experience """
-    fragment #{@frag_name_experience} on ResumeExperience {
+    fragment #{@frag_name_experience} on Experience {
       id
       achievements
       companyName

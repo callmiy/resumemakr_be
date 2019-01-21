@@ -13,7 +13,7 @@ defmodule Data.SchemaResume do
   end
 
   @desc "A resume experience"
-  object :resume_experience do
+  object :experience do
     field :id, non_null(:id)
     field :achievements, list_of(:string)
     field :company_name, :string
@@ -75,7 +75,7 @@ defmodule Data.SchemaResume do
       resolve(Resolver.get_assoc(:personal_info))
     end
 
-    field :experiences, list_of(:resume_experience) do
+    field :experiences, list_of(:experience) do
       resolve(Resolver.get_assoc(:experiences))
     end
 
