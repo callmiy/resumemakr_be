@@ -1,8 +1,9 @@
 defmodule Web.UserSocket do
   use Phoenix.Socket
+  use Absinthe.Phoenix.Socket, schema: Data.Schema
 
   ## Channels
-  # channel "room:*", Web.RoomChannel
+  channel "data:*", Web.DataChannel
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
@@ -15,9 +16,26 @@ defmodule Web.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(_params, socket, _connect_info) do
-    {:ok, socket}
+  def connect(%{"token" => token}, socket) do
+    case Data.Guardian.resource_from_token(token) do
+      {:ok, user, _claims} ->
+        {
+          :ok,
+          socket
+          |> assign(:user, user)
+          |> Absinthe.Phoenix.Socket.put_options(
+            context: %{
+              current_user: user
+            }
+          )
+        }
+
+      _ ->
+        :error
+    end
   end
+
+  def connect(_params, socket), do: {:ok, socket}
 
   # Socket id's are topics that allow you to identify all sockets for a given user:
   #

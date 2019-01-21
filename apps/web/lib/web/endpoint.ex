@@ -2,8 +2,8 @@ defmodule Web.Endpoint do
   use Phoenix.Endpoint, otp_app: :web
 
   socket "/socket", Web.UserSocket,
-    websocket: true,
-    longpoll: false
+    websocket: [timeout: 45_000],
+    longpoll: true
 
   @upload_dir Path.expand("./../../uploads")
 
