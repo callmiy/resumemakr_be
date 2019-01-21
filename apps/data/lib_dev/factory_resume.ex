@@ -6,9 +6,16 @@ defmodule Data.FactoryResume do
 
   @one_nil [1, nil]
 
+  @dog_img_file_upload "data:image/jpeg;base64," <>
+                         (Data.app_root()
+                          |> Path.join("priv/test-files/dog.jpeg")
+                          |> File.read!()
+                          |> Base.encode64())
+
   @doc false
   def insert(attrs) do
     attrs = params(attrs)
+    attrs = parse_photo(attrs)
 
     {:ok, resume} = Resumes.create_resume(attrs)
     resume
@@ -74,11 +81,7 @@ defmodule Data.FactoryResume do
   end
 
   def photo_plug do
-    %Plug.Upload{
-      content_type: "image/png",
-      filename: "dog.jpeg",
-      path: Path.join([Data.app_root(), "priv/test-files", "dog.jpeg"])
-    }
+    @dog_img_file_upload
   end
 
   def education(nil, _), do: nil
@@ -115,7 +118,7 @@ defmodule Data.FactoryResume do
       %{
         description: "Language " <> seq,
         level: Enum.random(1..5) |> to_string(),
-        index: 1,
+        index: 1
       }
     ]
   end
@@ -155,4 +158,16 @@ defmodule Data.FactoryResume do
   end
 
   def stringify(val), do: val
+
+  defp parse_photo(%{personal_info: %{photo: photo}} = attrs) do
+    case Data.plug_from_base64(photo) do
+      {:ok, plug} ->
+        update_in(attrs.personal_info.photo, fn _ -> plug end)
+
+      _ ->
+        attrs
+    end
+  end
+
+  defp parse_photo(attrs), do: attrs
 end

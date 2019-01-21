@@ -114,7 +114,7 @@ defmodule Data.SchemaResume do
     field :profession, :string
     field :date_of_birth, :string
 
-    field :photo, :custom_upload do
+    field :photo, :file_upload do
     end
   end
 

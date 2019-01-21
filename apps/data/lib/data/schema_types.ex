@@ -70,32 +70,26 @@ defmodule Data.SchemaTypes do
   @desc """
   Represents an uploaded file.
   """
-  scalar :custom_upload do
+  scalar :file_upload do
     parse(fn
-      %Blueprint.Input.String{value: value}, context ->
-        case Map.fetch(context[:__absinthe_plug__][:uploads] || %{}, value) do
-          {:ok, upload} ->
-            {:ok, upload}
+      %Blueprint.Input.String{value: value} ->
+        case value do
+          @already_uploaded ->
+            {:ok, value}
 
-          _ ->
-            case value do
-              @already_uploaded ->
-                {:ok, value}
-
-              _ ->
-                :error
-            end
+          string_val ->
+            Data.plug_from_base64(string_val)
         end
 
-      %Blueprint.Input.Null{}, _ ->
+      %Blueprint.Input.Null{} ->
         {:ok, nil}
 
-      _, _ ->
+      _ ->
         :error
     end)
 
     serialize(fn _ ->
-      raise "The `:upload` scalar cannot be returned!"
+      raise "The `:file_upload` scalar cannot be returned!"
     end)
   end
 end

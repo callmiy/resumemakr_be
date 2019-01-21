@@ -29,4 +29,43 @@ defmodule Data do
   def app_root do
     Path.join(umbrella_root(), "apps/data")
   end
+
+  def plug_from_base64("data:" <> string_val) do
+    with [mime, may_be_encoded_64] <-
+           String.split(
+             string_val,
+             ";base64,",
+             parts: 2
+           ),
+         {:ok, binary} <- Base.decode64(may_be_encoded_64) do
+      [_, ext] = String.split(mime, "/", parts: 2)
+
+      filename =
+        System.os_time(:seconds)
+        |> Integer.to_string()
+        |> Kernel.<>(".#{ext}")
+
+      path = Path.join([Data.umbrella_root(), "uploads", filename])
+
+      case File.write(path, binary, [:binary]) do
+        :ok ->
+          {
+            :ok,
+            %Plug.Upload{
+              filename: filename,
+              content_type: mime,
+              path: path
+            }
+          }
+
+        _ ->
+          :error
+      end
+    else
+      _ ->
+        :error
+    end
+  end
+
+  def plug_from_base64(_), do: :error
 end

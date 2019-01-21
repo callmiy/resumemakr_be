@@ -22,8 +22,6 @@ defmodule Data.SchemaResumeTest do
         Factory.params()
         |> Factory.stringify()
 
-      {context, attrs_str} = context(user, attrs_str)
-
       variables = %{
         "input" => attrs_str
       }
@@ -55,7 +53,7 @@ defmodule Data.SchemaResumeTest do
                  Query.create_resume(),
                  Schema,
                  variables: variables,
-                 context: context
+                 context: context(user)
                )
     end
 
@@ -73,7 +71,6 @@ defmodule Data.SchemaResumeTest do
         )
 
       updated_resume_str = Factory.stringify(update_attrs)
-      {context, updated_resume_str} = context(user, updated_resume_str)
 
       variables = %{
         "input" => updated_resume_str
@@ -103,7 +100,7 @@ defmodule Data.SchemaResumeTest do
                  Query.update(),
                  Schema,
                  variables: variables,
-                 context: context
+                 context: context(user)
                )
 
       case Map.has_key?(updated_resume_str, "description") do
@@ -131,7 +128,6 @@ defmodule Data.SchemaResumeTest do
         )
 
       updated_resume_str = Factory.stringify(update_attrs)
-      {context, updated_resume_str} = context(user, updated_resume_str)
 
       variables = %{
         "input" => updated_resume_str
@@ -150,7 +146,7 @@ defmodule Data.SchemaResumeTest do
                  Query.update(),
                  Schema,
                  variables: variables,
-                 context: context
+                 context: context(user)
                )
     end
 
@@ -174,8 +170,6 @@ defmodule Data.SchemaResumeTest do
         |> Factory.stringify()
         |> Map.put("title", nil)
 
-      {context, updated_resume_str} = context(user, updated_resume_str)
-
       variables = %{
         "input" => updated_resume_str
       }
@@ -195,7 +189,7 @@ defmodule Data.SchemaResumeTest do
                  Query.update(),
                  Schema,
                  variables: variables,
-                 context: context
+                 context: context(user)
                )
     end
 
@@ -234,7 +228,6 @@ defmodule Data.SchemaResumeTest do
 
     test "delete resume succeeds" do
       user = RegFactory.insert()
-      context = context(user)
       %{id: id_} = Factory.insert(user_id: user.id)
       id_ = Integer.to_string(id_)
 
@@ -257,13 +250,12 @@ defmodule Data.SchemaResumeTest do
                  Query.delete(),
                  Schema,
                  variables: variables,
-                 context: context
+                 context: context(user)
                )
     end
 
     test "delete resume fails for unknown user" do
       user = RegFactory.insert()
-      context = context(user)
       Factory.insert(user_id: user.id)
       bogus_user_id = 0
 
@@ -284,7 +276,7 @@ defmodule Data.SchemaResumeTest do
                  Query.delete(),
                  Schema,
                  variables: variables,
-                 context: context
+                 context: context(user)
                )
     end
   end
@@ -1291,22 +1283,4 @@ defmodule Data.SchemaResumeTest do
   end
 
   defp context(user), do: %{current_user: user}
-
-  defp context(user, %{"personalInfo" => nil} = attrs),
-    do: {context(user), attrs}
-
-  defp context(user, %{"personalInfo" => %{"photo" => nil}} = attrs),
-    do: {context(user), attrs}
-
-  defp context(user, %{"personalInfo" => %{"photo" => %{} = plug}} = attrs) do
-    {
-      update_in(
-        context(user)[:__absinthe_plug__],
-        &Map.put(&1 || %{}, :uploads, %{"photo" => plug})
-      ),
-      update_in(attrs["personalInfo"]["photo"], fn _ -> "photo" end)
-    }
-  end
-
-  defp context(user, attrs), do: {context(user), attrs}
 end
