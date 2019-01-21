@@ -34,6 +34,13 @@ defmodule Data.SchemaResume do
     field :profession, :string
     field :date_of_birth, :string
     field :photo, :string
+
+    field :encoded_photo, :string do
+      resolve(fn
+        personal_info, _, _ ->
+          {:ok, Data.Resumes.encoded_photo(personal_info)}
+      end)
+    end
   end
 
   @desc "A resume education"

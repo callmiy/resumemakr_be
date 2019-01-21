@@ -741,4 +741,25 @@ defmodule Data.Resumes do
   end
 
   def already_uploaded, do: @already_uploaded
+
+  def encoded_photo(%{photo: nil}), do: nil
+
+  def encoded_photo(%{photo: %{file_name: file_name}} = personal_info) do
+    url = ResumePhoto.url({file_name, personal_info})
+
+    Data.umbrella_root()
+    |> Path.join(url)
+    |> Data.file_to_data_uri(mime(url))
+  end
+
+  def encoded_photo(%{photo: url}),
+    do:
+      Data.umbrella_root()
+      |> Path.join(url)
+      |> Data.file_to_data_uri(mime(url))
+
+  defp mime(filename) do
+    ext = Path.extname(filename) |> String.trim_leading(".")
+    "image/#{ext}"
+  end
 end

@@ -63,6 +63,7 @@ defmodule Data.QueryResume do
       phone
       photo
       profession
+      encodedPhoto
     }
   """
 

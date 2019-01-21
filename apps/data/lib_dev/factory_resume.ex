@@ -6,11 +6,8 @@ defmodule Data.FactoryResume do
 
   @one_nil [1, nil]
 
-  @dog_img_file_upload "data:image/jpeg;base64," <>
-                         (Data.app_root()
-                          |> Path.join("priv/test-files/dog.jpeg")
-                          |> File.read!()
-                          |> Base.encode64())
+  @dog_img_file_upload Path.join(Data.app_root(), "priv/test-files/dog.jpeg")
+                       |> Data.file_to_data_uri("image/jpeg")
 
   @doc false
   def insert(attrs) do

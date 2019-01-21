@@ -68,4 +68,14 @@ defmodule Data do
   end
 
   def plug_from_base64(_), do: :error
+
+  def file_to_data_uri(path, mime) do
+    case File.read(path) do
+      {:ok, binary} ->
+        "data:#{mime};base64," <> Base.encode64(binary)
+
+      _ ->
+        nil
+    end
+  end
 end

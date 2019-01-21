@@ -8,6 +8,7 @@ alias Data.Resumes.Resume
 alias Data.Accounts
 alias Data.Accounts.User
 alias Data.Repo
+alias Data.Uploaders.ResumePhoto
 
 alias Data.FactoryResume
 alias Data.FactoryUser
