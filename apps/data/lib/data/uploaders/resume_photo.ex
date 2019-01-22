@@ -53,13 +53,11 @@ defmodule Data.Uploaders.ResumePhoto do
   end
 
   # Override the storage directory:
-  def storage_dir(_version, {_, nil}) do
+  def storage_dir(_version, _file_and_resource) do
     @storage_dir
   end
 
-  def storage_dir(_version, {_, resource}) do
-    "#{@storage_dir}/#{resource.id}"
-  end
+
 
   def storage_dir, do: @storage_dir
 
