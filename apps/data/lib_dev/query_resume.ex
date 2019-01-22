@@ -2,7 +2,7 @@ defmodule Data.QueryResume do
   @all_fields_frag_name "ResumeAllFieldsFrag"
   @frag_name "ResumeFrag"
   @frag_name_rated "RatedFrag"
-  @frag_name_education "ResumeeducationFrag"
+  @frag_name_education "ResumeEducationFrag"
   @frag_name_experience "ExperienceFrag"
   @frag_name_personal_info "PersonalInfoFrag"
   @frag_name_skill "SkillFrag"
@@ -63,7 +63,6 @@ defmodule Data.QueryResume do
       phone
       photo
       profession
-      encodedPhoto
     }
   """
 
