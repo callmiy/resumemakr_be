@@ -11,12 +11,11 @@ defmodule Data do
     path = Path.expand(".")
 
     case Path.basename(path) do
-      "be" ->
-        path
+      "data" ->
+        Path.join(path, "../..") |> Path.expand()
 
       _ ->
-        Path.join(path, "../..")
-        |> Path.expand()
+        path
     end
   end
 
@@ -45,8 +44,7 @@ defmodule Data do
         |> Integer.to_string()
         |> Kernel.<>(".#{ext}")
 
-      dir = Path.join(Data.umbrella_root(), "uploads") |> create_if_no_dir()
-      path = Path.join([dir, filename])
+      path = Path.join([Data.umbrella_root(), "uploads", filename])
 
       case File.write(path, binary, [:binary]) do
         :ok ->
@@ -77,17 +75,6 @@ defmodule Data do
 
       _ ->
         nil
-    end
-  end
-
-  defp create_if_no_dir(path) do
-    case File.exists?(path) do
-      true ->
-        path
-
-      _ ->
-        File.mkdir_p!(path)
-        path
     end
   end
 end
