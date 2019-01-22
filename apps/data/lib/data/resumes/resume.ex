@@ -14,8 +14,8 @@ defmodule Data.Resumes.Resume do
     field(:description, :string)
     field(:hobbies, {:array, :string})
 
-    embeds_many(:languages, Rated)
-    embeds_many(:additional_skills, Rated)
+    embeds_many(:languages, Rated, on_replace: :delete)
+    embeds_many(:additional_skills, Rated, on_replace: :delete)
 
     belongs_to(:user, User)
 

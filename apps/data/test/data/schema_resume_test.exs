@@ -1188,6 +1188,80 @@ defmodule Data.SchemaResumeTest do
     end
   end
 
+  describe "mutation rated" do
+    test "delete languages succeeds" do
+      user = RegFactory.insert()
+      [lang] = Factory.languages(:ok, Sequence.next(""))
+
+      resume =
+        Factory.insert(
+          user_id: user.id,
+          languages: [lang]
+        )
+
+      assert List.first(resume.languages).description == lang.description
+
+      variables = %{
+        "input" => %{
+          "id" => to_global_id(:resume, resume.id, Schema)
+        }
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "languages" => []
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 context: context(user),
+                 variables: variables
+               )
+    end
+
+    test "delete additional_skills succeeds" do
+      user = RegFactory.insert()
+      [add_skill] = Factory.additional_skills(:ok, Sequence.next(""))
+
+      resume =
+        Factory.insert(
+          user_id: user.id,
+          additional_skills: [add_skill]
+        )
+
+      assert List.first(resume.additional_skills).description == add_skill.description
+
+      variables = %{
+        "input" => %{
+          "id" => to_global_id(:resume, resume.id, Schema)
+        }
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "updateResume" => %{
+                    "resume" => %{
+                      "additionalSkills" => []
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(
+                 Query.update(),
+                 Schema,
+                 context: context(user),
+                 variables: variables
+               )
+    end
+  end
+
   describe "clone resume" do
     test "clone with same title succeeds" do
       user = RegFactory.insert()

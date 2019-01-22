@@ -13,6 +13,7 @@ defmodule Data.Resumes do
   alias Data.Uploaders.ResumePhoto
 
   @already_uploaded "___ALREADY_UPLOADED___"
+  @resume_assoc_fields Resume.assoc_fields()
 
   @doc """
   Returns the list of resumes for a user.
@@ -121,13 +122,10 @@ defmodule Data.Resumes do
 
   """
   def update_resume(%Resume{} = resume, %{} = attrs) do
-    {resume, attrs} =
-      resume
-      |> Repo.preload(Resume.assoc_fields())
-      |> augment_attrs(attrs)
+    resume = Repo.preload(resume, @resume_assoc_fields)
 
     resume
-    |> Resume.changeset(attrs)
+    |> Resume.changeset(augment_attrs(resume, attrs))
     |> Repo.update()
   end
 
@@ -140,51 +138,35 @@ defmodule Data.Resumes do
     Ecto.Changeset.cast_assoc which will raise by default if there are
     missing associations
   """
-  @spec augment_attrs(Resume.t(), map()) :: {Resume.t(), Map.t()}
+  @spec augment_attrs(Resume.t(), map()) :: Map.t()
   def augment_attrs(%Resume{} = resume, %{} = attrs) do
-    augmented_attrs =
-      resume
-      |> Map.from_struct()
-      |> Enum.reduce(%{}, fn
-        {k, _}, acc when k in [:__meta__, :inserted_at, :updated_at] ->
-          case Map.has_key?(attrs, k) do
-            true ->
-              Map.put(acc, k, attrs[k])
+    resume
+    |> Map.from_struct()
+    |> Enum.reduce(%{}, fn
+      {k, _}, acc
+      when k in [
+             :__meta__,
+             :inserted_at,
+             :updated_at,
+             :title,
+             :id,
+             :user_id
+           ] ->
+        update_if_key(k, attrs, acc)
 
-            _ ->
-              acc
-          end
+      {k, v_db}, acc when k in @resume_assoc_fields ->
+        sanitize_assoc(k, v_db, acc, attrs)
 
-        {k, %Ecto.Association.NotLoaded{}}, acc ->
-          case Map.has_key?(attrs, k) do
-            true ->
-              Map.put(acc, k, attrs[k])
+      {k, v}, acc when is_list(v) ->
+        Map.put(acc, k, attrs[k] || [])
 
-            _ ->
-              acc
-          end
-
-        {:hobbies, _}, acc ->
-          Map.put(acc, :hobbies, attrs[:hobbies])
-
-        {k, v_db}, acc when is_map(v_db) or is_list(v_db) ->
-          sanitize_assoc(k, v_db, acc, attrs)
-
-        {k, v}, acc ->
-          case Map.has_key?(attrs, k) do
-            true ->
-              Map.put(acc, k, attrs[k])
-
-            _ ->
-              Map.put(acc, k, v)
-          end
-      end)
-
-    {resume, augmented_attrs}
+      {k, _v}, acc ->
+        update_if_key(k, attrs, acc)
+    end)
   end
 
   defp sanitize_assoc(key, v_db, acc, attrs) when v_db == nil or v_db == [] do
-    update_if_key(key, acc, attrs)
+    update_if_key(key, attrs, acc)
   end
 
   defp sanitize_assoc(:personal_info, v_db, acc, attrs) do
@@ -251,16 +233,6 @@ defmodule Data.Resumes do
     end
   end
 
-  defp update_if_key(key, acc, attrs) do
-    case Map.has_key?(attrs, key) do
-      true ->
-        Map.put(acc, key, attrs[key])
-
-      _ ->
-        acc
-    end
-  end
-
   defp mark_for_deletion(schema) do
     schema |> Map.from_struct() |> Map.put(:delete, true)
   end
@@ -275,6 +247,16 @@ defmodule Data.Resumes do
 
       _ ->
         personal_info
+    end
+  end
+
+  defp update_if_key(k, attrs, acc) do
+    case Map.has_key?(attrs, k) do
+      true ->
+        Map.put(acc, k, attrs[k])
+
+      _ ->
+        acc
     end
   end
 
@@ -321,7 +303,7 @@ defmodule Data.Resumes do
   """
   def clone_resume(%Resume{} = resume, attrs \\ %{}) do
     resume
-    |> Repo.preload(Resume.assoc_fields())
+    |> Repo.preload(@resume_assoc_fields)
     |> clone_resume_p()
     |> Map.merge(attrs)
     |> create_resume()

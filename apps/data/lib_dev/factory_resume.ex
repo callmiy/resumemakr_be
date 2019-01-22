@@ -96,9 +96,9 @@ defmodule Data.FactoryResume do
     ]
   end
 
-  defp additional_skills(nil, _), do: nil
+  def additional_skills(nil, _), do: nil
 
-  defp additional_skills(_, seq) do
+  def additional_skills(_, seq) do
     [
       %{
         description: "Additional Skill " <> seq,
@@ -108,9 +108,9 @@ defmodule Data.FactoryResume do
     ]
   end
 
-  defp languages(nil, _), do: nil
+  def languages(nil, _), do: nil
 
-  defp languages(_, seq) do
+  def languages(_, seq) do
     [
       %{
         description: "Language " <> seq,
