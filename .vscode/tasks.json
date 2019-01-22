@@ -37,12 +37,18 @@
       "label": "iex -S mix",
       "type": "shell",
       "command": "iex --werl -S mix",
+      "windows": {
+        "command": "iex --dot-iex .iexa.exs --werl -S mix"
+      },
       "problemMatcher": []
     },
     {
       "label": "iex -S mix phx.server",
       "type": "shell",
       "command": "iex --werl -S mix phx.server",
+      "windows": {
+        "command": "iex --dot-iex .iexa.exs --werl -S mix phx.server"
+      },
       "problemMatcher": []
     },
     {
