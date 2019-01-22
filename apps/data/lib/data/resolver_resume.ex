@@ -64,10 +64,7 @@ defmodule Data.ResolverResume do
         {:error, "Resume you are updating does not exist"}
 
       resume ->
-        case Resumes.update_resume(
-               resume,
-               Map.put(new_args, :user_id, user_id)
-             ) do
+        case Resumes.update_resume(resume, new_args) do
           {:ok, updated_resume} ->
             {:ok, wrapped(updated_resume)}
 
