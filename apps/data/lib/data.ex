@@ -45,7 +45,8 @@ defmodule Data do
         |> Integer.to_string()
         |> Kernel.<>(".#{ext}")
 
-      path = Path.join([Data.umbrella_root(), "uploads", filename])
+      dir = Path.join(Data.umbrella_root(), "uploads") |> create_if_no_dir()
+      path = Path.join([dir, filename])
 
       case File.write(path, binary, [:binary]) do
         :ok ->
@@ -76,6 +77,17 @@ defmodule Data do
 
       _ ->
         nil
+    end
+  end
+
+  defp create_if_no_dir(path) do
+    case File.exists?(path) do
+      true ->
+        path
+
+      _ ->
+        File.mkdir_p!(path)
+        path
     end
   end
 end
