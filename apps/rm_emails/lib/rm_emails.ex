@@ -24,7 +24,7 @@ defmodule RMEmails do
   @impl true
   @spec send_password_recovery(email_address, token :: binary()) :: :ok
   def send_password_recovery(email_address, token) do
-    impl().password_recovery(email_address, token)
+    impl().send_password_recovery(email_address, token)
     :ok
   end
 
