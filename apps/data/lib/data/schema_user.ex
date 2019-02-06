@@ -4,6 +4,16 @@ defmodule Data.SchemaUser do
 
   alias Data.ResolverUser, as: Resolver
 
+  @desc "User credential"
+  object :credential do
+    field(:id, non_null(:id))
+    field(:source, :string)
+    field(:token, :string)
+    field(:user, :user)
+    field(:inserted_at, non_null(:iso_datetime))
+    field(:updated_at, non_null(:iso_datetime))
+  end
+
   @desc "A User"
   node object(:user) do
     field(:_id, non_null(:id))
@@ -14,6 +24,11 @@ defmodule Data.SchemaUser do
 
     field(:inserted_at, non_null(:iso_datetime))
     field(:updated_at, non_null(:iso_datetime))
+  end
+
+  @desc "Create password recovery success response"
+  object :pwd_recovery do
+    field :email, :string |> non_null
   end
 
   @desc "Mutations allowed on User object"
@@ -62,6 +77,11 @@ defmodule Data.SchemaUser do
       end
 
       resolve(&Resolver.update/3)
+    end
+
+    field :recover_pwd, :pwd_recovery do
+      arg(:email, :string |> non_null())
+      resolve(&Resolver.create_pwd_recovery/3)
     end
   end
 

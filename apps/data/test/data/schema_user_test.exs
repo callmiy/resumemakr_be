@@ -260,6 +260,37 @@ defmodule Data.SchemaUserTest do
     end
   end
 
+  describe "password recovery" do
+    # @tag :skip
+    test "create password recovery succeeds if user found with email" do
+      %{email: email} = RegFactory.insert()
+
+      assert {:ok,
+              %{
+                data: %{
+                  "recoverPwd" => %{
+                    "email" => ^email
+                  }
+                }
+              }} = Absinthe.run(Query.password_recovery(email), Schema)
+    end
+
+    test "create password recovery fails if user not found" do
+      bogus_email = "me@bogus.com"
+
+      error = "Unknown user email: #{bogus_email}"
+
+      assert {:ok,
+              %{
+                errors: [
+                  %{
+                    message: ^error
+                  }
+                ]
+              }} = Absinthe.run(Query.password_recovery(bogus_email), Schema)
+    end
+  end
+
   defp context(user) do
     %{current_user: user}
   end

@@ -6,7 +6,6 @@ defmodule Data.Schema do
 
   import_types(Absinthe.Type.Custom)
   import_types(Data.SchemaTypes)
-  import_types(Data.SchemaCredential)
   import_types(Data.SchemaUser)
   import_types(Data.SchemaResume)
 

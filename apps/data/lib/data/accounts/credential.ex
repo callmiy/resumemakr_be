@@ -14,15 +14,25 @@ defmodule Data.Accounts.Credential do
 
     # in case user chooses to use password as source
     field(:password, :string, virtual: true)
+    field :recovery_token, :string
+    field :recovery_token_expires, :utc_datetime
 
     belongs_to(:user, User)
-    timestamps()
+
+    timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(%__MODULE__{} = credential, attrs \\ %{}) do
-    credential
-    |> cast(attrs, [:source, :token, :user_id, :password])
+  def changeset(%__MODULE__{} = schema, attrs \\ %{}) do
+    schema
+    |> cast(attrs, [
+      :source,
+      :token,
+      :user_id,
+      :password,
+      :recovery_token,
+      :recovery_token_expires
+    ])
     |> validate()
   end
 

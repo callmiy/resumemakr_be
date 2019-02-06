@@ -70,4 +70,15 @@ defmodule Data.QueryUser do
       parameters: "$input: LoginInput!"
     }
   end
+
+  @doc "password_recovery"
+  def password_recovery(email) do
+    """
+      mutation RecoverUserPassword {
+        recoverPwd(email: "#{email}") {
+          email
+        }
+      }
+    """
+  end
 end

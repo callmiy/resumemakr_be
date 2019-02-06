@@ -78,7 +78,16 @@ defmodule Data.Accounts do
       ** nil
 
   """
+
   def get_credential(id), do: Repo.get(Credential, id)
+
+  def get_credential_by(%{email: email}) do
+    Credential
+    |> join(:inner, [c], u in assoc(c, :user))
+    |> where([c, u], u.email == ^email)
+    |> preload([c, u], user: u)
+    |> Repo.one()
+  end
 
   @doc """
   Updates a credential.
@@ -206,4 +215,14 @@ defmodule Data.Accounts do
   end
 
   def get_user_by(attrs), do: Repo.get_by(User, attrs)
+
+  def create_pwd_recovery(%Credential{} = credential, jwt) do
+    with {:ok, c} <-
+           update_credential(credential, %{
+             recovery_token: jwt,
+             recovery_token_expires: Timex.now() |> Timex.shift(hours: 8)
+           }) do
+      {:ok, %{email: c.user.email}}
+    end
+  end
 end

@@ -1,6 +1,7 @@
 defmodule Data.ResolverUser do
   alias Data.Accounts
   alias Data.Accounts.User
+  alias Data.Accounts.Credential
   alias Data.Resolver
   alias Data.Guardian
 
@@ -62,10 +63,26 @@ defmodule Data.ResolverUser do
       {:error, errs} ->
         {
           :error,
-          Poison.encode!(%{
+          Jason.encode!(%{
             error: errs
           })
         }
+    end
+  end
+
+  def create_pwd_recovery(_root, %{email: email} = args, _) do
+    with %Credential{
+           user: user
+         } = credential <- Accounts.get_credential_by(args),
+         {:ok, jwt, _claim} <- Guardian.encode_and_sign(user),
+         {:ok, result} <- Accounts.create_pwd_recovery(credential, jwt) do
+      {:ok, result}
+    else
+      nil ->
+        {:error, "Unknown user email: #{email}"}
+
+      {:error, err} ->
+        {:error, Jason.encode!(%{error: err})}
     end
   end
 end
