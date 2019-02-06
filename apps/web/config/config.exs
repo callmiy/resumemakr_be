@@ -20,4 +20,7 @@ config :web, Web.Plug.Guardian.Pipeline,
   module: Data.Guardian,
   error_handler: Web.Plug.Guardian.Pipeline
 
+port = System.get_env("PHOENIX_RESUME_MAKR_PORT") || "4025"
+config :web, front_end_url: "http://localhost:" <> port
+
 import_config "#{Mix.env()}.exs"

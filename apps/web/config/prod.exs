@@ -14,6 +14,8 @@ use Mix.Config
 # which you should run after static files are built and
 # before starting your production server.
 
+front_end_url = "https://resumemakr.netlify.com"
+
 config :web, Web.Endpoint,
   load_from_system_env: true,
   url: [
@@ -25,8 +27,10 @@ config :web, Web.Endpoint,
   secret_key_base: System.get_env("SECRET_KEY_BASE"),
   check_origin: [
     "https://resumemakr.herokuapp.com",
-    "https://resumemakr.netlify.com"
+    front_end_url
   ]
+
+config :web, front_end_url: front_end_url
 
 # ## SSL Support
 #

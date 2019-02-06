@@ -14,4 +14,14 @@ defmodule RMEmails.DefaultImpl do
     email_address |> Composition.welcome() |> Mailer.deliver()
     :ok
   end
+
+  @impl true
+  @spec send_password_recovery(email_address, token :: binary()) :: :ok
+  def send_password_recovery(email_address, token) do
+    email_address
+    |> Composition.password_recovery(token)
+    |> Mailer.deliver()
+
+    :ok
+  end
 end

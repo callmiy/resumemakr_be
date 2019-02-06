@@ -11,7 +11,8 @@ defmodule RMEmails.MixProject do
       lockfile: "../../mix.lock",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      compilers: [:phoenix] ++ Mix.compilers()
     ]
   end
 
@@ -32,7 +33,9 @@ defmodule RMEmails.MixProject do
       {:swoosh, "~> 0.20"},
       {:gen_smtp, "~> 0.13.0"},
       {:constantizer, "~> 0.2.0"},
-      {:mox, "~> 0.4.0", only: :test}
+      {:mox, "~> 0.4.0", only: :test},
+      {:phoenix, "~> 1.4.0"},
+      {:phoenix_html, "~> 2.13"}
     ]
   end
 end

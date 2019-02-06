@@ -1,4 +1,8 @@
 defmodule RMEmails do
+  use Phoenix.View,
+    root: "lib/rm_emails/templates",
+    namespace: RMEmails
+
   @moduledoc ~S"""
     Used for sending emails to users
   """
@@ -15,6 +19,13 @@ defmodule RMEmails do
   @spec send_welcome(email_address) :: :ok
   def send_welcome(email_address) do
     impl().send_welcome(email_address)
+  end
+
+  @impl true
+  @spec send_password_recovery(email_address, token :: binary()) :: :ok
+  def send_password_recovery(email_address, token) do
+    impl().password_recovery(email_address, token)
+    :ok
   end
 
   defconstp impl do

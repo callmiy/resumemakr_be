@@ -1,0 +1,35 @@
+<div>
+  <style>
+    .resume-makr-recovery-email {
+      width: 600px;
+      margin: 0 auto;
+    }
+  </style>
+
+  <div id="resume-makr-recovery-email" class="resume-makr-recovery-email">
+    <h1>Reset Your Password</h1>
+
+    <div>
+      You told us you forgot your password. If you really did, click here to
+      choose a new one:
+    </div>
+
+    <button type="button">Choose a New Password</button>
+
+    <div>
+      If you didn’t mean to reset your password, then you can just ignore this
+      email; your password will not change.
+    </div>
+
+    <hr />
+
+    <div>"Choose a New Password" button not working?</div>
+    <div>Just copy and paste this link in your browser:</div>
+    <%
+      url = Application.get_env(
+          :web, :front_end_url
+        ) <> "/reset/" <> assigns[:token]
+    %>
+    <a href="<%= url %>"><%= url %></a>
+  </div>
+</div>
