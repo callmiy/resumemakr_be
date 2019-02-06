@@ -233,7 +233,7 @@ defmodule Data.SchemaUserTest do
       refute jwt == new_jwt
     end
 
-    test "refreshes user fails for tampered with jwt" do
+    test "refresh user fails for tampered with jwt" do
       user = RegFactory.insert()
       {:ok, jwt, _claims} = Guardian.encode_and_sign(user)
 
@@ -258,6 +258,31 @@ defmodule Data.SchemaUserTest do
                 ]
               }} = Absinthe.run(query, Schema, variables: %{"jwt" => jwt <> "9"})
     end
+
+    test "aktualisieren benutzer fehler für unsinn-Token" do
+      queryMap = Query.refresh()
+
+      query = """
+        query RefreshUser(#{queryMap.parameters}) {
+          #{queryMap.query}
+        }
+
+        #{queryMap.fragments}
+      """
+
+      token = "unsinn-token"
+
+      assert {:ok,
+              %{
+                data: %{"refreshUser" => nil},
+                errors: [
+                  %{
+                    message: "{\"error\":\"invalid_token\"}",
+                    path: ["refreshUser"]
+                  }
+                ]
+              }} = Absinthe.run(query, Schema, variables: %{"jwt" => token})
+    end
   end
 
   describe "password recovery" do
@@ -268,7 +293,7 @@ defmodule Data.SchemaUserTest do
       assert {:ok,
               %{
                 data: %{
-                  "recoverPwd" => %{
+                  "anfordernPasswortZuruckSetzen" => %{
                     "email" => ^email
                   }
                 }

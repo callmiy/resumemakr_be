@@ -27,61 +27,76 @@ defmodule Data.SchemaUser do
   end
 
   @desc "Create password recovery success response"
-  object :pwd_recovery do
-    field :email, :string |> non_null
+  object :anfordern_passwort_zuruck_setzen do
+    field(:email, :string |> non_null)
   end
 
   @desc "Mutations allowed on User object"
   object :user_mutation do
     @doc "Create a user and her credential"
-    payload field :registration do
+    payload field(:registration) do
       input do
-        field :name, non_null(:string)
-        field :email, non_null(:string)
-        field :source, non_null(:string)
-        field :password, non_null(:string)
-        field :password_confirmation, non_null(:string)
+        field(:name, non_null(:string))
+        field(:email, non_null(:string))
+        field(:source, non_null(:string))
+        field(:password, non_null(:string))
+        field(:password_confirmation, non_null(:string))
       end
 
       output do
-        field :user, :user
+        field(:user, :user)
       end
 
       resolve(&Resolver.create/3)
     end
 
     @doc "Log in a user"
-    payload field :login do
+    payload field(:login) do
       input do
-        field :password, non_null(:string)
-        field :email, non_null(:string)
+        field(:password, non_null(:string))
+        field(:email, non_null(:string))
       end
 
       output do
-        field :user, :user
+        field(:user, :user)
       end
 
       resolve(&Resolver.login/3)
     end
 
     @doc "Update a user"
-    payload field :update_user do
+    payload field(:update_user) do
       input do
-        field :jwt, non_null(:string)
-        field :name, :string
-        field :email, :string
+        field(:jwt, non_null(:string))
+        field(:name, :string)
+        field(:email, :string)
       end
 
       output do
-        field :user, :user
+        field(:user, :user)
       end
 
       resolve(&Resolver.update/3)
     end
 
-    field :recover_pwd, :pwd_recovery do
+    field :anfordern_passwort_zuruck_setzen, :anfordern_passwort_zuruck_setzen do
       arg(:email, :string |> non_null())
-      resolve(&Resolver.create_pwd_recovery/3)
+      resolve(&Resolver.anfordern_passwort_zuruck_setzen/3)
+    end
+
+    @doc "Reset user password"
+    payload field(:passwort_zuruck_setzen) do
+      input do
+        field(:token, non_null(:string))
+        field(:password, non_null(:string))
+        field(:password_confirmation, non_null(:string))
+      end
+
+      output do
+        field(:user, :user)
+      end
+
+      resolve(&Resolver.create/3)
     end
   end
 

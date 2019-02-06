@@ -51,7 +51,7 @@ defmodule Data.MixProject do
       {:arc, "~> 0.11.0"},
       {:arc_ecto, "~> 0.11.1"},
       {:arc_gcs, "~> 0.1.0", only: :prod},
-      {:zarex, "~> 1.0"}
+      {:rm_emails, in_umbrella: true}
     ]
   end
 

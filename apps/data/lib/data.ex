@@ -40,7 +40,7 @@ defmodule Data do
       [_, ext] = String.split(mime, "/", parts: 2)
 
       filename =
-        System.os_time(:seconds)
+        System.os_time(:second)
         |> Integer.to_string()
         |> Kernel.<>(".#{ext}")
 

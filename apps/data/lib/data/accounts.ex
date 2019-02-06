@@ -216,13 +216,14 @@ defmodule Data.Accounts do
 
   def get_user_by(attrs), do: Repo.get_by(User, attrs)
 
-  def create_pwd_recovery(%Credential{} = credential, jwt) do
-    with {:ok, c} <-
+  def anfordern_passwort_zuruck_setzen(%Credential{} = credential, jwt) do
+    with {:ok, %{user: %{email: email}}} <-
            update_credential(credential, %{
              recovery_token: jwt,
              recovery_token_expires: Timex.now() |> Timex.shift(hours: 8)
-           }) do
-      {:ok, %{email: c.user.email}}
+           }),
+         :ok <- RMEmails.send_password_recovery(email, jwt) do
+      {:ok, %{email: email}}
     end
   end
 end

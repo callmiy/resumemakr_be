@@ -60,6 +60,14 @@ defmodule Data.ResolverUser do
          {:ok, user, _claims} <- Guardian.resource_from_token(jwt) do
       {:ok, %User{user | jwt: new_jwt}}
     else
+      {:error, %ArgumentError{}} ->
+        {
+          :error,
+          Jason.encode!(%{
+            error: "invalid_token"
+          })
+        }
+
       {:error, errs} ->
         {
           :error,
@@ -70,12 +78,12 @@ defmodule Data.ResolverUser do
     end
   end
 
-  def create_pwd_recovery(_root, %{email: email} = args, _) do
+  def anfordern_passwort_zuruck_setzen(_root, %{email: email} = args, _) do
     with %Credential{
            user: user
          } = credential <- Accounts.get_credential_by(args),
          {:ok, jwt, _claim} <- Guardian.encode_and_sign(user),
-         {:ok, result} <- Accounts.create_pwd_recovery(credential, jwt) do
+         {:ok, result} <- Accounts.anfordern_passwort_zuruck_setzen(credential, jwt) do
       {:ok, result}
     else
       nil ->

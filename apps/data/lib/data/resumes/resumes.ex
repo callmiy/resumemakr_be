@@ -103,7 +103,7 @@ defmodule Data.Resumes do
         attrs
 
       _ ->
-        Map.put(attrs, :title, "#{title}_#{System.os_time(:seconds)}")
+        Map.put(attrs, :title, "#{title}_#{System.os_time(:second)}")
     end
   end
 
@@ -186,7 +186,7 @@ defmodule Data.Resumes do
         Map.put(
           acc,
           :personal_info,
-          Map.put(sanitize_photo(v_user), :id, v_db.id)
+          v_user |> sanitize_photo() |> Map.put(:id, v_db.id)
         )
     end
   end

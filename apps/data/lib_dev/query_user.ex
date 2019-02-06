@@ -74,8 +74,8 @@ defmodule Data.QueryUser do
   @doc "password_recovery"
   def password_recovery(email) do
     """
-      mutation RecoverUserPassword {
-        recoverPwd(email: "#{email}") {
+      mutation AnfordernBenutzerPasswortZuruckSetzen {
+        anfordernPasswortZuruckSetzen(email: "#{email}") {
           email
         }
       }
