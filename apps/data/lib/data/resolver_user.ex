@@ -97,7 +97,7 @@ defmodule Data.ResolverUser do
   def veranderung_passwort_zuruck_setzen(_source, params, _) do
     {token, aktualisieren_params} = Map.pop(params, :token)
 
-    with {:ok, %{user: user}} <- Accounts.bekomm_anmelden_info_pzs(token, aktualisieren_params),
+    with {:ok, %{user: user}} <- Accounts.bekommt_anmelden_info_pzs(token, aktualisieren_params),
          {:ok, jwt, _claim} <- Guardian.encode_and_sign(user) do
       {:ok, %{user: %User{user | jwt: jwt}}}
     else
@@ -108,6 +108,16 @@ defmodule Data.ResolverUser do
           |> Resolver.errors_to_map()
           |> Jason.encode!()
         }
+
+      _ ->
+        Resolver.unauthorized()
+    end
+  end
+
+  def pzs_token_kontrollieren(_, %{token: token}, _) do
+    case Accounts.pzs_token_nicht_ablaufen(token, true) do
+      %{} ->
+        {:ok, %{token: token}}
 
       _ ->
         Resolver.unauthorized()

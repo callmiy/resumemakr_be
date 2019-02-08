@@ -98,4 +98,15 @@ defmodule Data.QueryUser do
       #{user_frag}
     """
   end
+
+  @doc "pzs_token_kontrollieren"
+  def pzs_token_kontrollieren(token) do
+    """
+      query PzsTokenKontrollieren {
+        pzsTokenKontrollieren(token: "#{token}") {
+          token
+        }
+      }
+    """
+  end
 end

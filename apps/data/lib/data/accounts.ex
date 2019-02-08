@@ -13,6 +13,8 @@ defmodule Data.Accounts do
   alias Data.Accounts.Credential
   alias Data.Accounts.User
 
+  @stunden_pzs_token_ablaufen 8
+
   # ACCOUNTS
 
   def register(%{} = params) do
@@ -146,25 +148,33 @@ defmodule Data.Accounts do
   Aktualisiert ein anmelden info
 
   ## Beispiele
-      iex> bekomm_anmelden_info_pzs(nil, %{field: new_value})
+      iex> bekommt_anmelden_info_pzs(nil, %{field: new_value})
       nil
 
-      iex> bekomm_anmelden_info_pzs(token, %{password: x, confirm_password: x})
+      iex> bekommt_anmelden_info_pzs(token, %{password: x, confirm_password: x})
       {:ok, %Credential{}}
 
-      iex> bekomm_anmelden_info_pzs(token, %{field: bad_value})
+      iex> bekommt_anmelden_info_pzs(token, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
 
-  def bekomm_anmelden_info_pzs(nil, _), do: nil
+  def pzs_token_nicht_ablaufen(token, exec \\ false) do
+    query =
+      where(
+        Credential,
+        [c],
+        c.recovery_token == ^token and c.recovery_token_expires >= ^DateTime.utc_now()
+      )
 
-  def bekomm_anmelden_info_pzs(token, params) do
-    case Credential
-         |> where(
-           [c],
-           c.recovery_token == ^token and c.recovery_token_expires >= ^DateTime.utc_now()
-         )
+    if exec, do: Repo.one(query), else: query
+  end
+
+  def bekommt_anmelden_info_pzs(nil, _), do: nil
+
+  def bekommt_anmelden_info_pzs(token, params) do
+    case token
+         |> pzs_token_nicht_ablaufen()
          |> join(:inner, [c], u in assoc(c, :user))
          |> preload([c, u], user: u)
          |> Repo.one() do
@@ -276,7 +286,8 @@ defmodule Data.Accounts do
     with {:ok, %{user: %{email: email}}} <-
            update_credential(credential, %{
              recovery_token: jwt,
-             recovery_token_expires: Timex.now() |> Timex.shift(hours: 8)
+             recovery_token_expires:
+               Timex.now() |> Timex.shift(hours: @stunden_pzs_token_ablaufen)
            }),
          :ok <- RMEmails.send_password_recovery(email, jwt) do
       {:ok, %{email: email}}

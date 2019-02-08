@@ -31,6 +31,11 @@ defmodule Data.SchemaUser do
     field(:email, :string |> non_null)
   end
 
+  @desc "PZS Token Kontrollieren Erfolgeich Nachricht"
+  object :pzs_token_kontrollieren_nachricht do
+    field(:token, :string |> non_null)
+  end
+
   @desc "Mutations allowed on User object"
   object :user_mutation do
     @doc "Create a user and her credential"
@@ -106,6 +111,12 @@ defmodule Data.SchemaUser do
     field :refresh_user, :user do
       arg(:jwt, non_null(:string))
       resolve(&Resolver.refresh/3)
+    end
+
+    @desc "Kontrollieren dass Passwortzurücksetzen Token is nicht falsch"
+    field :pzs_token_kontrollieren, :pzs_token_kontrollieren_nachricht do
+      arg(:token, non_null(:string))
+      resolve(&Resolver.pzs_token_kontrollieren/3)
     end
   end
 end
