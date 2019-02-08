@@ -85,7 +85,7 @@ defmodule Data.SchemaUser do
     end
 
     @doc "Reset user password"
-    payload field(:passwort_zuruck_setzen) do
+    payload field(:veranderung_passwort_zuruck_setzen) do
       input do
         field(:token, non_null(:string))
         field(:password, non_null(:string))
@@ -96,7 +96,7 @@ defmodule Data.SchemaUser do
         field(:user, :user)
       end
 
-      resolve(&Resolver.create/3)
+      resolve(&Resolver.veranderung_passwort_zuruck_setzen/3)
     end
   end
 

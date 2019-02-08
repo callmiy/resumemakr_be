@@ -10,6 +10,8 @@ defmodule Data.Resolver do
     {:error, message: @unauthorized}
   end
 
+  def nicht_berechtigung, do: @unauthorized
+
   @doc """
   Take an error returned by applying Ecto.Repo.transaction to a Multi
   operation and return a string representation.

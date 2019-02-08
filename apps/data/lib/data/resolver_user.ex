@@ -93,4 +93,24 @@ defmodule Data.ResolverUser do
         {:error, Jason.encode!(%{error: err})}
     end
   end
+
+  def veranderung_passwort_zuruck_setzen(_source, params, _) do
+    {token, aktualisieren_params} = Map.pop(params, :token)
+
+    with {:ok, %{user: user}} <- Accounts.bekomm_anmelden_info_pzs(token, aktualisieren_params),
+         {:ok, jwt, _claim} <- Guardian.encode_and_sign(user) do
+      {:ok, %{user: %User{user | jwt: jwt}}}
+    else
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {
+          :error,
+          changeset.errors
+          |> Resolver.errors_to_map()
+          |> Jason.encode!()
+        }
+
+      _ ->
+        Resolver.unauthorized()
+    end
+  end
 end

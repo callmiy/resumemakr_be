@@ -81,4 +81,21 @@ defmodule Data.QueryUser do
       }
     """
   end
+
+  @doc "veranderung_passwort_zuruck_setzen"
+  def veranderung_passwort_zuruck_setzen do
+    {_, user_frag} = all_fields_fragment()
+
+    """
+      mutation VeranderungPasswortZuruckSetzen($input: VeranderungPasswortZuruckSetzenInput!) {
+        veranderungPasswortZuruckSetzen(input: $input) {
+          user {
+            ...#{@frag_name}
+          }
+        }
+      }
+
+      #{user_frag}
+    """
+  end
 end

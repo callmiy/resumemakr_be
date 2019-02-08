@@ -1,6 +1,12 @@
 defmodule Data.Accounts do
   import Ecto.Query, warn: false
-  import Comeonin.Bcrypt, only: [{:dummy_checkpw, 0}, {:checkpw, 2}]
+
+  import Comeonin.Bcrypt,
+    only: [
+      {:dummy_checkpw, 0},
+      {:checkpw, 2},
+      {:hashpwsalt, 1}
+    ]
 
   alias Data.Repo
   alias Data.Accounts.Registration
@@ -135,6 +141,56 @@ defmodule Data.Accounts do
   def change_credential(%Credential{} = credential, attrs \\ %{}) do
     Credential.changeset(credential, attrs)
   end
+
+  @doc """
+  Aktualisiert ein anmelden info
+
+  ## Beispiele
+      iex> bekomm_anmelden_info_pzs(nil, %{field: new_value})
+      nil
+
+      iex> bekomm_anmelden_info_pzs(token, %{password: x, confirm_password: x})
+      {:ok, %Credential{}}
+
+      iex> bekomm_anmelden_info_pzs(token, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+
+  def bekomm_anmelden_info_pzs(nil, _), do: nil
+
+  def bekomm_anmelden_info_pzs(token, params) do
+    case Credential
+         |> where(
+           [c],
+           c.recovery_token == ^token and c.recovery_token_expires >= ^DateTime.utc_now()
+         )
+         |> join(:inner, [c], u in assoc(c, :user))
+         |> preload([c, u], user: u)
+         |> Repo.one() do
+      nil ->
+        nil
+
+      anmelden_info ->
+        case hash_passwort(params) do
+          nil ->
+            nil
+
+          hash ->
+            update_credential(anmelden_info, %{
+              recovery_token: nil,
+              recovery_token_expires: nil,
+              token: hash
+            })
+        end
+    end
+  end
+
+  defp hash_passwort(%{password: password, password_confirmation: password}) do
+    hashpwsalt(password)
+  end
+
+  defp hash_passwort(_), do: nil
 
   ################################## USERS ##################################
 
