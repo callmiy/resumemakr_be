@@ -1,3 +1,0 @@
-[submodule "frontend"]
-	path = frontend
-	url = git@github-resumemakr-fe:samba6/resumemakr_fe.git
