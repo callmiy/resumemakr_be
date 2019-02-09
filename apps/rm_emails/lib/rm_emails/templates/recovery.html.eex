@@ -33,4 +33,13 @@ assigns[:token] %>
     Just copy and paste this link in your browser:
   </div>
   <a href="<%= url %>"><%= url %></a>
+
+  <h3>
+    Please note that the link must be used within
+    <b style="text-decoration: underline;font-weight: 800;color: #ff9b00;"
+      >24 hours</b
+    >
+    from time of receipt. You will need to request another link if it expires
+    before use.
+  </h3>
 </div>

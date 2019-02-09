@@ -14,6 +14,8 @@ defmodule Data.SchemaUserTest do
 
   @moduletag :db
 
+  @stunden_pzs_token_ablaufen Accounts.stunden_pzs_token_ablaufen()
+
   describe "mutation" do
     # @tag :skip
     test "registers user succeeds" do
@@ -334,7 +336,7 @@ defmodule Data.SchemaUserTest do
       {:ok, _anmelden_info} =
         Accounts.update_credential(user.credential, %{
           recovery_token: jwt,
-          recovery_token_expires: Timex.now() |> Timex.shift(hours: 8)
+          recovery_token_expires: Timex.now() |> Timex.shift(hours: @stunden_pzs_token_ablaufen)
         })
 
       id = to_global_id(:user, user.id, Schema)
@@ -431,7 +433,7 @@ defmodule Data.SchemaUserTest do
       {:ok, %Credential{} = _anmelden_info} =
         Accounts.update_credential(user.credential, %{
           recovery_token: jwt,
-          recovery_token_expires: Timex.now() |> Timex.shift(hours: 8)
+          recovery_token_expires: Timex.now() |> Timex.shift(hours: @stunden_pzs_token_ablaufen)
         })
 
       {:ok, %Credential{} = _anmelden_info} =

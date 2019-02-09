@@ -13,7 +13,7 @@ defmodule Data.Accounts do
   alias Data.Accounts.Credential
   alias Data.Accounts.User
 
-  @stunden_pzs_token_ablaufen 8
+  @stunden_pzs_token_ablaufen 24
 
   # ACCOUNTS
 
@@ -293,4 +293,6 @@ defmodule Data.Accounts do
       {:ok, %{email: email}}
     end
   end
+
+  def stunden_pzs_token_ablaufen, do: @stunden_pzs_token_ablaufen
 end
