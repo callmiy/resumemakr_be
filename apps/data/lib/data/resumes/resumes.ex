@@ -13,6 +13,7 @@ defmodule Data.Resumes do
 
   @already_uploaded "___ALREADY_UPLOADED___"
   @resume_assoc_fields Resume.assoc_fields()
+  @title_with_time_pattern ~r/^(.+?)_\d{10}$/
 
   @doc """
   Returns the list of resumes for a user.
@@ -87,26 +88,42 @@ defmodule Data.Resumes do
   """
   def create_resume(attrs) do
     %Resume{}
-    |> Resume.changeset(
-      attrs
-      |> unique_title()
-    )
+    |> Resume.changeset(attrs)
     |> Repo.insert()
+    |> maybe_error_unique_title()
   end
 
-  defp unique_title(%{title: nil} = attrs), do: attrs
-
-  defp unique_title(%{title: title, user_id: user_id} = attrs) do
-    case get_resume_by(title: title, user_id: user_id) do
-      nil ->
-        attrs
+  defp maybe_error_unique_title(
+         {:error,
+          %Ecto.Changeset{changes: %{title: title}, errors: [title: {_, error}]} = changeset} =
+           result
+       ) do
+    case Keyword.get(error, :constraint) do
+      :unique ->
+        changeset
+        |> Ecto.Changeset.force_change(:title, unique_title(title))
+        |> Map.merge(%{errors: [], valid?: true})
+        |> Repo.insert()
 
       _ ->
-        Map.put(attrs, :title, "#{title}_#{System.os_time(:second)}")
+        result
     end
   end
 
-  defp unique_title(attrs), do: attrs
+  defp maybe_error_unique_title(result), do: result
+
+  defp unique_title(title) do
+    title =
+      case Regex.run(@title_with_time_pattern, title) do
+        nil ->
+          title
+
+        [_, title] ->
+          title
+      end
+
+    "#{title}_#{System.os_time(:second)}"
+  end
 
   @doc """
   Updates a Resume.
@@ -307,7 +324,7 @@ defmodule Data.Resumes do
       resume
       |> clone_resume_attrs()
       |> Map.merge(attrs)
-      |> unique_title()
+      |> Map.put(:title, clone_title(resume.title, attrs[:title]))
 
     changeset = Resume.changeset(%Resume{}, attrs)
 
@@ -320,6 +337,18 @@ defmodule Data.Resumes do
         |> update_in(&Ecto.Changeset.put_change(&1, :photo, photo_path))
     end
     |> Repo.insert()
+  end
+
+  defp clone_title(from_title, nil) do
+    unique_title(from_title)
+  end
+
+  defp clone_title(from_title, from_title) do
+    unique_title(from_title)
+  end
+
+  defp clone_title(_, to_title) do
+    to_title
   end
 
   defp clone_resume_attrs(%_struct{} = v),
@@ -336,10 +365,7 @@ defmodule Data.Resumes do
       {_k, %Ecto.Association.NotLoaded{}}, acc ->
         acc
 
-      {:id, _}, acc ->
-        acc
-
-      {k, _}, acc when k in [:updated_at, :inserted_at, :resume_id] ->
+      {k, _}, acc when k in [:updated_at, :inserted_at, :resume_id, :id] ->
         acc
 
       {k, v}, acc ->
