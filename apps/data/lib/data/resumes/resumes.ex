@@ -10,7 +10,6 @@ defmodule Data.Resumes do
   alias Data.Resumes.Experience
   alias Data.Resumes.Education
   alias Ecto.Changeset
-  alias Data.Uploaders.ResumePhoto
 
   @already_uploaded "___ALREADY_UPLOADED___"
   @resume_assoc_fields Resume.assoc_fields()
@@ -302,72 +301,55 @@ defmodule Data.Resumes do
 
   """
   def clone_resume(%Resume{} = resume, attrs \\ %{}) do
-    resume
-    |> Repo.preload(@resume_assoc_fields)
-    |> clone_resume_p()
-    |> Map.merge(attrs)
-    |> create_resume()
+    resume = Repo.preload(resume, @resume_assoc_fields)
+
+    attrs =
+      resume
+      |> clone_resume_attrs()
+      |> Map.merge(attrs)
+      |> unique_title()
+
+    changeset = Resume.changeset(%Resume{}, attrs)
+
+    case (attrs.personal_info || %{}) |> Map.get(:photo_path) do
+      nil ->
+        changeset
+
+      photo_path ->
+        changeset.changes.personal_info
+        |> update_in(&Ecto.Changeset.put_change(&1, :photo, photo_path))
+    end
+    |> Repo.insert()
   end
 
-  defp clone_resume_p(%_struct{} = v),
+  defp clone_resume_attrs(%_struct{} = v),
     do:
       Map.from_struct(v)
       |> Map.delete(:__meta__)
-      |> clone_resume_p()
+      |> clone_resume_attrs()
 
-  defp clone_resume_p(%{} = data) do
+  defp clone_resume_attrs(%{} = data) do
     Enum.reduce(data, %{}, fn
+      {:photo, %{file_name: _} = path}, acc ->
+        Map.merge(acc, %{photo: nil, photo_path: path})
+
       {_k, %Ecto.Association.NotLoaded{}}, acc ->
         acc
 
       {:id, _}, acc ->
         acc
 
-      {:photo, nil}, acc ->
-        acc
-
-      {:photo, %{file_name: file_name}}, acc ->
-        path = clone_photo(file_name)
-        Map.put(acc, :photo, path)
-
-      {k, _}, acc when k in [:updated_at, :inserted_at] ->
+      {k, _}, acc when k in [:updated_at, :inserted_at, :resume_id] ->
         acc
 
       {k, v}, acc ->
-        Map.put(acc, k, clone_resume_p(v))
+        Map.put(acc, k, clone_resume_attrs(v))
     end)
     |> Enum.into(%{})
   end
 
-  defp clone_resume_p(v) when is_list(v), do: Enum.map(v, &clone_resume_p/1)
-  defp clone_resume_p(v), do: v
-
-  defp clone_photo(file_name) do
-    path =
-      Path.join([
-        Data.umbrella_root(),
-        ResumePhoto.url({file_name, nil})
-      ])
-
-    case File.read(path) do
-      {:ok, bin} ->
-        basename = "___clone___" <> Path.basename(path)
-        new_path = Path.join(Path.dirname(path), basename)
-        File.write!(new_path, bin)
-        ext = Path.extname(file_name) |> String.trim_leading(".")
-
-        %Plug.Upload{
-          path: new_path,
-          filename: file_name,
-          content_type: "image/" <> ext
-        }
-
-        nil
-
-      _ ->
-        nil
-    end
-  end
+  defp clone_resume_attrs(v) when is_list(v), do: Enum.map(v, &clone_resume_attrs/1)
+  defp clone_resume_attrs(v), do: v
 
   @doc """
   Returns the list of personal_info.

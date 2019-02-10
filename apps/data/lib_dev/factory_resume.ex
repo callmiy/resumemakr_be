@@ -13,7 +13,6 @@ defmodule Data.FactoryResume do
   def insert(attrs) do
     attrs = params(attrs)
     attrs = parse_photo(attrs)
-
     {:ok, resume} = Resumes.create_resume(attrs)
     resume
   end

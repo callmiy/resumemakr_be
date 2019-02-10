@@ -232,7 +232,7 @@ defmodule Data.SchemaResumeTest do
       id_ = Integer.to_string(id_)
 
       variables = %{
-        "input" => %{"id" => Absinthe.Relay.Node.to_global_id(:resume, id_, Schema)}
+        "input" => %{"id" => to_global_id(:resume, id_, Schema)}
       }
 
       assert {:ok,
@@ -1282,7 +1282,7 @@ defmodule Data.SchemaResumeTest do
                       "id" => _,
                       "_id" => new_id,
                       "title" => new_resume_title,
-                      "personalInfo" => personal_info
+                      "personalInfo" => _personal_info
                     }
                   }
                 }
@@ -1294,11 +1294,6 @@ defmodule Data.SchemaResumeTest do
 
       assert id < String.to_integer(new_id)
       assert new_resume_title =~ resume.title
-
-      case personal_info do
-        nil -> :ok
-        %{"photo" => nil} -> :ok
-      end
     end
 
     test "clone with different title succeeds" do
@@ -1353,6 +1348,43 @@ defmodule Data.SchemaResumeTest do
                  context: context(user),
                  variables: variables
                )
+    end
+
+    test "clone mit Bild" do
+      user = RegFactory.insert()
+
+      personal_info =
+        Factory.personal_info(1, Sequence.next(""))
+        |> Map.put(:photo, Factory.photo_plug())
+
+      resume = Factory.insert(user_id: user.id, personal_info: personal_info)
+
+      variables = %{
+        "input" => %{
+          "id" => to_global_id(:resume, resume.id, Schema)
+        }
+      }
+
+      assert {:ok,
+              %{
+                data: %{
+                  "cloneResume" => %{
+                    "resume" => %{
+                      "id" => _,
+                      "_id" => _,
+                      "personalInfo" => %{
+                        "photo" => photo
+                      }
+                    }
+                  }
+                }
+              }} =
+               Absinthe.run(Query.clone(), Schema,
+                 context: context(user),
+                 variables: variables
+               )
+
+      assert photo =~ resume.personal_info.photo.file_name
     end
   end
 

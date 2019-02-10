@@ -11,11 +11,11 @@ defmodule Data do
     path = Path.expand(".")
 
     case Path.basename(path) do
-      "data" ->
-        Path.join(path, "../..") |> Path.expand()
+      "be" ->
+        path
 
       _ ->
-        path
+        Path.join(path, "../..") |> Path.expand()
     end
   end
 
@@ -44,7 +44,7 @@ defmodule Data do
         |> Integer.to_string()
         |> Kernel.<>(".#{ext}")
 
-      path = Path.join([Data.umbrella_root(), "uploads", filename])
+      path = Path.join([umbrella_root(), "uploads", filename])
 
       case File.write(path, binary, [:binary]) do
         :ok ->
