@@ -13,7 +13,7 @@ defmodule Data.Resumes do
 
   @already_uploaded "___ALREADY_UPLOADED___"
   @resume_assoc_fields Resume.assoc_fields()
-  @title_with_time_pattern ~r/^(.+?)_\d{10}$/
+  @title_with_time_pattern ~r/^(.+?)(?:_\d{10})+$/
 
   @doc """
   Returns the list of resumes for a user.
@@ -51,6 +51,7 @@ defmodule Data.Resumes do
   def list_resumes(user_id, pagination_args) do
     Resume
     |> where([r], r.user_id == ^user_id)
+    |> order_by([r], desc: r.updated_at)
     |> Absinthe.Relay.Connection.from_query(&Repo.all/1, pagination_args)
   end
 
