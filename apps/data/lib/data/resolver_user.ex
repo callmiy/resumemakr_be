@@ -43,14 +43,6 @@ defmodule Data.ResolverUser do
     with {:ok, %{user: user}} <- Accounts.authenticate(params),
          {:ok, jwt, _claim} <- Guardian.encode_and_sign(user) do
       {:ok, %{user: %User{user | jwt: jwt}}}
-    else
-      {:error, errs} ->
-        {
-          :error,
-          Poison.encode!(%{
-            error: errs
-          })
-        }
     end
   end
 

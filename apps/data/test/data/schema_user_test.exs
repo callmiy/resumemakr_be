@@ -201,7 +201,7 @@ defmodule Data.SchemaUserTest do
 
       assert {:ok,
               %{
-                errors: [%{message: "{\"error\":\"Invalid email/password\"}"}]
+                errors: [%{message: "Invalid email/password"}]
               }} =
                Absinthe.run(query, Schema,
                  variables: %{
