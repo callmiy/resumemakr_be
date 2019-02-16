@@ -51,6 +51,22 @@
       },
       "problemMatcher": []
     },
+
+    {
+      "label": "iex -S mix phx.server local prod",
+      "type": "shell",
+      "command": "iex  -S mix phx.server",
+      "windows": {
+        "command": "iex  --werl -S mix phx.server && cd ../fe && serve -s build -l 4027"
+      },
+      "problemMatcher": [],
+      "options": {
+        "env": {
+          "RESUME_MAKR_PHOENIX_PORT": "4026"
+        }
+      }
+    },
+
     {
       "label": "deploy to heroku",
       "type": "shell",
