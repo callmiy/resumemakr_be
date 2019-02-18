@@ -55,9 +55,9 @@
     {
       "label": "iex -S mix phx.server local prod",
       "type": "shell",
-      "command": "iex  -S mix phx.server",
+      "command": "iex -S mix phx.server && cd ../fe && yarn build-local-prod && serve -s build -l 4027",
       "windows": {
-        "command": "iex  --werl -S mix phx.server && cd ../fe && serve -s build -l 4027"
+        "command": "iex  --werl -S mix phx.server && cd ../fe && yarn build-local-prod && serve -s build -l 4027"
       },
       "problemMatcher": [],
       "options": {
