@@ -282,7 +282,7 @@ defmodule Data.Accounts do
 
   def get_user_by(attrs), do: Repo.get_by(User, attrs)
 
-  def anfordern_passwort_zuruck_setzen(%Credential{} = credential, jwt) do
+  def anfordern_pzs(%Credential{} = credential, jwt) do
     with {:ok, %{user: %{email: email}}} <-
            update_credential(credential, %{
              recovery_token: jwt,

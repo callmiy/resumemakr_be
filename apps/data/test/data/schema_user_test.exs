@@ -545,7 +545,7 @@ defmodule Data.SchemaUserTest do
     test "Pzs Token kontrollieren erfolgreich" do
       user = RegFactory.insert()
       {:ok, jwt, _claim} = Data.Guardian.encode_and_sign(user)
-      {:ok, _} = Accounts.anfordern_passwort_zuruck_setzen(user.credential, jwt)
+      {:ok, _} = Accounts.anfordern_pzs(user.credential, jwt)
 
       assert {:ok,
               %{

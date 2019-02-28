@@ -70,12 +70,12 @@ defmodule Data.ResolverUser do
     end
   end
 
-  def anfordern_passwort_zuruck_setzen(_root, %{email: email} = args, _) do
+  def anfordern_pzs(_root, %{email: email} = args, _) do
     with %Credential{
            user: user
          } = credential <- Accounts.get_credential_by(args),
          {:ok, jwt, _claim} <- Guardian.encode_and_sign(user),
-         {:ok, result} <- Accounts.anfordern_passwort_zuruck_setzen(credential, jwt) do
+         {:ok, result} <- Accounts.anfordern_pzs(credential, jwt) do
       {:ok, result}
     else
       nil ->
@@ -86,7 +86,7 @@ defmodule Data.ResolverUser do
     end
   end
 
-  def veranderung_passwort_zuruck_setzen(_source, params, _) do
+  def veranderung_pzs(_source, params, _) do
     {token, aktualisieren_params} = Map.pop(params, :token)
 
     with {:ok, %{user: user}} <- Accounts.bekommt_anmelden_info_pzs(token, aktualisieren_params),

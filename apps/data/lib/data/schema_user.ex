@@ -86,7 +86,7 @@ defmodule Data.SchemaUser do
 
     field :anfordern_passwort_zuruck_setzen, :anfordern_passwort_zuruck_setzen do
       arg(:email, :string |> non_null())
-      resolve(&Resolver.anfordern_passwort_zuruck_setzen/3)
+      resolve(&Resolver.anfordern_pzs/3)
     end
 
     @doc "Reset user password"
@@ -101,7 +101,7 @@ defmodule Data.SchemaUser do
         field(:user, :user)
       end
 
-      resolve(&Resolver.veranderung_passwort_zuruck_setzen/3)
+      resolve(&Resolver.veranderung_pzs/3)
     end
   end
 
