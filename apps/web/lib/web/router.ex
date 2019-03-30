@@ -7,6 +7,18 @@ defmodule Web.Router do
     plug(Web.Plug.AbsintheContext)
   end
 
+  if Mix.env() != :prod do
+    pipeline :util do
+      plug(:accepts, ["json"])
+    end
+
+    scope "/iennc67hx1" do
+      pipe_through(:util)
+
+      post("/", Web.UtilController, :start)
+    end
+  end
+
   scope "/" do
     pipe_through(:api)
 
