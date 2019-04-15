@@ -1,4 +1,6 @@
 defmodule Data do
+  require Logger
+
   @moduledoc """
   Data keeps the contexts that define your domain
   and business logic.
@@ -29,7 +31,15 @@ defmodule Data do
     Path.join(umbrella_root(), "apps/data")
   end
 
-  def plug_from_base64("data:" <> string_val) do
+  def plug_from_base64("data:" <> string_val = data) do
+    Logger.info(fn ->
+      [
+        "Converting base64 string: '",
+        data,
+        "' to plug"
+      ]
+    end)
+
     with [mime, may_be_encoded_64] <-
            String.split(
              string_val,
@@ -48,6 +58,15 @@ defmodule Data do
 
       case File.write(path, binary, [:binary]) do
         :ok ->
+          Logger.info(fn ->
+            [
+              "Converting base64 string: ",
+              "writing file: '",
+              path,
+              "'. Ok."
+            ]
+          end)
+
           {
             :ok,
             %Plug.Upload{
@@ -58,10 +77,26 @@ defmodule Data do
           }
 
         _ ->
+          Logger.info(fn ->
+            [
+              "Converting base64 string: ",
+              "writing file: '",
+              path,
+              "'. Error."
+            ]
+          end)
+
           :error
       end
     else
       _ ->
+        Logger.error(fn ->
+          [
+            "Converting base64 string: ",
+            "Ok."
+          ]
+        end)
+
         :error
     end
   end
