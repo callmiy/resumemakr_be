@@ -12,6 +12,8 @@ defmodule Data do
   def umbrella_root do
     path = Path.expand(".")
 
+    Logger.info(["umbrella root path: ", path, "   ", Path.join(path, "../..") |> Path.expand()])
+
     case Path.basename(path) do
       "be" ->
         path
