@@ -9,13 +9,13 @@ defmodule Data do
   if it comes from the database, an external API or others.
   """
 
+  @umbrella_base System.get_env("APP_ROOT") || "be"
+
   def umbrella_root do
     path = Path.expand(".")
 
-    Logger.info(["umbrella root path: ", path, "   ", Path.join(path, "../..") |> Path.expand()])
-
     case Path.basename(path) do
-      "be" ->
+      @umbrella_base ->
         path
 
       _ ->
