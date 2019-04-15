@@ -36,9 +36,9 @@ defmodule Data do
   def plug_from_base64("data:" <> string_val = data) do
     Logger.info(fn ->
       [
-        "Converting base64 string: '",
-        data,
-        "' to plug"
+        "\n\n\nConverting base64 string: '",
+        String.slice(data, 0..60),
+        "...' to plug."
       ]
     end)
 
@@ -65,7 +65,7 @@ defmodule Data do
               "Converting base64 string: ",
               "writing file: '",
               path,
-              "'. Ok."
+              "'. Ok.\n\n\n"
             ]
           end)
 
@@ -84,7 +84,7 @@ defmodule Data do
               "Converting base64 string: ",
               "writing file: '",
               path,
-              "'. Error."
+              "'. Error.\n"
             ]
           end)
 

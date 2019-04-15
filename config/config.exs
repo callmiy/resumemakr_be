@@ -14,7 +14,7 @@ import_config "../apps/*/config/config.exs"
 
 # Configures Elixir's Logger
 config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
+  format: "$time $metadata[$level] $metadata[$request_id] $message\n",
   metadata: [:request_id]
 
 # Use Jason for JSON parsing in Phoenix
