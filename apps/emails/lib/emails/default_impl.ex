@@ -1,12 +1,12 @@
-defmodule RMEmails.DefaultImpl do
+defmodule Emails.DefaultImpl do
   @moduledoc false
 
-  alias RMEmails.DefaultImpl.Mailer
-  alias RMEmails.DefaultImpl.Composition
+  alias Emails.DefaultImpl.Mailer
+  alias Emails.DefaultImpl.Composition
 
-  @behaviour RMEmails.Impl
+  @behaviour Emails.Impl
 
-  @type email_address :: RMEmails.email_address()
+  @type email_address :: Emails.email_address()
 
   @impl true
   @spec send_welcome(email_address) :: :ok

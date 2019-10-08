@@ -8,7 +8,7 @@ defmodule Data.Repo.Migrations.AddResumeRatedIndex do
       case r
            |> Map.take([:additional_skills, :languages])
            |> Enum.reduce(%{}, fn
-             {k, []}, acc ->
+             {_, []}, acc ->
                acc
 
              {k, v}, acc ->

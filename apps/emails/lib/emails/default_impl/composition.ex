@@ -1,4 +1,4 @@
-defmodule RMEmails.DefaultImpl.Composition do
+defmodule Emails.DefaultImpl.Composition do
   @moduledoc false
   import Swoosh.Email
 
@@ -15,7 +15,7 @@ defmodule RMEmails.DefaultImpl.Composition do
   def password_recovery(email, token) do
     msg =
       Phoenix.View.render_to_string(
-        RMEmails,
+        Emails,
         "recovery.html",
         token: token
       )

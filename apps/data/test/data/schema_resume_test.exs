@@ -291,6 +291,7 @@ defmodule Data.SchemaResumeTest do
         |> Map.put(:photo, Factory.photo_plug())
 
       resume = Factory.insert(user_id: user.id, personal_info: personal_info)
+
       id_str = Integer.to_string(resume.id)
 
       # since we uploaded a photo before, we pass the flag to signify so

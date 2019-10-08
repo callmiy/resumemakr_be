@@ -1,34 +1,29 @@
-defmodule RMEmails do
+defmodule Emails do
   use Phoenix.View,
-    root: "lib/rm_emails/templates",
-    namespace: RMEmails
+    root: "lib/emails/templates",
+    namespace: Emails
 
   @moduledoc ~S"""
     Used for sending emails to users
   """
 
-  import Constantizer
+  alias Emails.DefaultImpl
 
-  alias RMEmails.DefaultImpl
-
+  @app Application.get_env(:emails, :impl, DefaultImpl)
   @type email_address :: binary()
 
-  @behaviour RMEmails.Impl
+  @behaviour Emails.Impl
 
   @impl true
   @spec send_welcome(email_address) :: :ok
   def send_welcome(email_address) do
-    impl().send_welcome(email_address)
+    @app.send_welcome(email_address)
   end
 
   @impl true
   @spec send_password_recovery(email_address, token :: binary()) :: :ok
   def send_password_recovery(email_address, token) do
-    impl().send_password_recovery(email_address, token)
+    @app.send_password_recovery(email_address, token)
     :ok
-  end
-
-  defconstp impl do
-    Application.get_env(:rm_emails, :impl, DefaultImpl)
   end
 end

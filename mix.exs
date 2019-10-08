@@ -1,4 +1,4 @@
-defmodule Data.Umbrella.MixProject do
+defmodule Resumemakr.Umbrella.MixProject do
   use Mix.Project
 
   def project do
@@ -22,6 +22,8 @@ defmodule Data.Umbrella.MixProject do
   # Dependencies listed here are available only for this project
   # and cannot be accessed from applications inside the apps folder
   defp deps do
-    []
+    [
+      {:mix_test_watch, "~> 0.8", only: :test, runtime: false}
+    ]
   end
 end

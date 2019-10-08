@@ -1,15 +1,15 @@
-defmodule RMEmails.MixProject do
+defmodule Emails.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :rm_emails,
+      app: :emails,
       version: "0.1.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.7",
+      elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       compilers: [:phoenix] ++ Mix.compilers()
@@ -30,10 +30,9 @@ defmodule RMEmails.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:swoosh, "~> 0.20"},
-      {:gen_smtp, "~> 0.13.0"},
-      {:constantizer, "~> 0.2.0"},
-      {:mox, "~> 0.4.0", only: :test},
+      {:swoosh, "~> 0.23.4"},
+      {:gen_smtp, "~> 0.15.0"},
+      {:mox, "~> 0.5.1", only: :test},
       {:phoenix, "~> 1.4.0"},
       {:phoenix_html, "~> 2.13"}
     ]

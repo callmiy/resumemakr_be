@@ -1,10 +1,10 @@
-defmodule RMEmails.DefaultImplTest do
+defmodule Emails.DefaultImplTest do
   use ExUnit.Case, async: true
 
   import Swoosh.TestAssertions
 
-  alias RMEmails.DefaultImpl
-  alias RMEmails.DefaultImpl.Composition
+  alias Emails.DefaultImpl
+  alias Emails.DefaultImpl.Composition
 
   test "send_welcome/1 sends welcome message to appropriate email" do
     email = "noreply@test.us"

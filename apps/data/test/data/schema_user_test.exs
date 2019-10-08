@@ -2,6 +2,8 @@ defmodule Data.SchemaUserTest do
   use Data.DataCase
 
   import Absinthe.Relay.Node, only: [to_global_id: 3]
+  import ExUnit.CaptureLog
+
   alias Data.Schema
   alias Data.QueryRegistration, as: RegQuery
   alias Data.FactoryRegistration, as: RegFactory
@@ -12,7 +14,7 @@ defmodule Data.SchemaUserTest do
   alias Data.Accounts.Credential
   alias Data.Resolver
 
-  @moduletag :db
+  @moduletag capture_log: true
 
   @stunden_pzs_token_ablaufen Accounts.stunden_pzs_token_ablaufen()
 
@@ -149,6 +151,7 @@ defmodule Data.SchemaUserTest do
     # @tag :skip
     test "login succeeds" do
       %{email: email, password: password} = params = RegFactory.params()
+
       RegFactory.insert(params)
       query_map = Query.login()
 
@@ -211,6 +214,34 @@ defmodule Data.SchemaUserTest do
                    }
                  }
                )
+    end
+
+    test "login rescues errors" do
+      %{
+        email: email,
+        password: password
+      } = params = RegFactory.params()
+
+      %{
+        credential: credential
+      } = RegFactory.insert(params)
+
+      credential
+      |> Credential.changeset(%{token: "1"})
+      |> Data.Repo.update()
+
+      log_message =
+        capture_log(fn ->
+          assert {:error, error} =
+                   Data.Accounts.authenticate(%{
+                     email: email,
+                     password: password
+                   })
+
+          assert is_binary(error)
+        end)
+
+      assert log_message =~ "STACK"
     end
   end
 

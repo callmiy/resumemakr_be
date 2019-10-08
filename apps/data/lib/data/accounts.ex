@@ -1,12 +1,6 @@
 defmodule Data.Accounts do
+  require Logger
   import Ecto.Query, warn: false
-
-  import Comeonin.Bcrypt,
-    only: [
-      {:dummy_checkpw, 0},
-      {:checkpw, 2},
-      {:hashpwsalt, 1}
-    ]
 
   alias Data.Repo
   alias Data.Accounts.Registration
@@ -14,6 +8,9 @@ defmodule Data.Accounts do
   alias Data.Accounts.User
 
   @stunden_pzs_token_ablaufen 24
+
+  @authenticate_user_exception_header "\n\nException while getting experience with:"
+  @stacktrace "\n\n---------------STACKTRACE---------\n\n"
 
   # ACCOUNTS
 
@@ -45,16 +42,28 @@ defmodule Data.Accounts do
     |> Repo.one()
     |> case do
       nil ->
-        dummy_checkpw()
         {:error, "Invalid email/password"}
 
       %Credential{} = cred ->
-        if checkpw(password, cred.token) do
+        if Pbkdf2.verify_pass(password, cred.token) do
           {:ok, cred}
         else
           {:error, "Invalid email/password"}
         end
     end
+  rescue
+    error ->
+      Logger.error(fn ->
+        [
+          @authenticate_user_exception_header,
+          @stacktrace,
+          :error
+          |> Exception.format(error, __STACKTRACE__)
+          |> Data.prettify_with_new_line()
+        ]
+      end)
+
+      {:error, "Invalid email/password"}
   end
 
   #################################### CREDENTIAL ##############################
@@ -197,7 +206,7 @@ defmodule Data.Accounts do
   end
 
   defp hash_passwort(%{password: password, password_confirmation: password}) do
-    hashpwsalt(password)
+    Pbkdf2.hash_pwd_salt(password)
   end
 
   defp hash_passwort(_), do: nil
@@ -289,7 +298,7 @@ defmodule Data.Accounts do
              recovery_token_expires:
                Timex.now() |> Timex.shift(hours: @stunden_pzs_token_ablaufen)
            }),
-         :ok <- RMEmails.send_password_recovery(email, jwt) do
+         :ok <- Emails.send_password_recovery(email, jwt) do
       {:ok, %{email: email}}
     end
   end

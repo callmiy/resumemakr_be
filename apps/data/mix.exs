@@ -9,7 +9,7 @@ defmodule Data.MixProject do
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.7",
+      elixir: "~> 1.9",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -36,22 +36,23 @@ defmodule Data.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:ecto_sql, "~> 3.0"},
+      {:ecto_sql, "~> 3.1"},
       {:postgrex, ">= 0.0.0"},
-      {:bcrypt_elixir, "~> 1.1"},
-      {:comeonin, "~> 4.1"},
-      {:mox, "~> 0.4.0", only: :test},
-      {:constantizer, "~> 0.2.0"},
-      {:faker, "~> 0.11.2", only: [:dev, :test]},
+      {:jason, "~> 1.0"},
+      {:pbkdf2_elixir, "~> 1.0"},
+      {:mox, "~> 0.5.1", only: :test},
+      {:faker, "~> 0.13.0", only: [:dev, :test]},
       {:sequence, github: "samba6/sequence", only: [:dev, :test]},
-      {:timex, "~> 3.4"},
-      {:absinthe_relay, "~> 1.4"},
       {:absinthe, "~> 1.4"},
+      {:absinthe_relay, "~> 1.4"},
       {:dataloader, "~> 1.0"},
       {:arc, "~> 0.11.0"},
       {:arc_ecto, "~> 0.11.1"},
       {:arc_gcs, "~> 0.1.0", only: :prod},
-      {:rm_emails, in_umbrella: true}
+      {:guardian, "~> 1.2"},
+      {:timex, "~> 3.6"},
+      {:ecto_ulid, "~> 0.2.0"},
+      {:emails, in_umbrella: true}
     ]
   end
 
