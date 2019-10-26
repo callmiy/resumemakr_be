@@ -8,6 +8,7 @@ defmodule Data.Resumes.Resume do
   alias Data.Resumes.Experience
   alias Data.Resumes.PersonalInfo
   alias Data.Resumes.Rated
+  alias Data.Resumes.SpokenLanguage
 
   schema "resumes" do
     field(:title, :string)
@@ -23,6 +24,7 @@ defmodule Data.Resumes.Resume do
     has_many(:education, Education)
     has_many(:skills, Skill)
     has_many(:experiences, Experience)
+    has_many(:spoken_languages, SpokenLanguage)
 
     timestamps(type: :utc_datetime)
   end

@@ -1,4 +1,4 @@
-defmodule Data.FactoryRegistration do
+defmodule Data.RegistrationFactory do
   use Data.Factory
 
   alias Data.Accounts

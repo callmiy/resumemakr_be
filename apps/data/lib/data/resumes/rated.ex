@@ -15,7 +15,6 @@ defmodule Data.Resumes.Rated do
   def changeset(%__MODULE__{} = schema, attrs) do
     schema
     |> cast(attrs, [:description, :level, :index])
-    # |> validate_required([:description])
     |> Resumes.maybe_mark_for_deletion()
   end
 end

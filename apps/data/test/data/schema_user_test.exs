@@ -6,7 +6,7 @@ defmodule Data.SchemaUserTest do
 
   alias Data.Schema
   alias Data.QueryRegistration, as: RegQuery
-  alias Data.FactoryRegistration, as: RegFactory
+  alias Data.RegistrationFactory, as: RegFactory
   alias Data.QueryUser, as: Query
   alias Data.FactoryUser, as: Factory
   alias Data.Guardian

@@ -1,4 +1,3 @@
-alias Data.Resumes
 alias Data.Resumes.Education
 alias Data.Resumes.Experience
 alias Data.Resumes.PersonalInfo
@@ -10,8 +9,8 @@ alias Data.Accounts.User
 alias Data.Accounts.Credential
 alias Data.Repo
 alias Data.Uploaders.ResumePhoto
-
-alias Data.FactoryResume
+alias Data.SpokenLanguageFactory
+alias Data.ResumeFactory
 alias Data.FactoryUser
 alias Data.Factory
-alias Data.FactoryRegistration
+alias Data.RegistrationFactory

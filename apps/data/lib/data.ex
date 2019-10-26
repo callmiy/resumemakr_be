@@ -9,17 +9,17 @@ defmodule Data do
   if it comes from the database, an external API or others.
   """
 
-  @umbrella_base System.get_env("APP_ROOT") || "be"
+  @app_path_ending "apps/data"
 
   def umbrella_root do
     path = Path.expand(".")
 
-    case Path.basename(path) do
-      @umbrella_base ->
-        path
+    case String.ends_with?(path, @app_path_ending) do
+      true ->
+        Path.join(path, "../..") |> Path.expand()
 
       _ ->
-        Path.join(path, "../..") |> Path.expand()
+        path
     end
   end
 
@@ -27,6 +27,8 @@ defmodule Data do
     Since this is an umbrella app, accessing the filesystem can be tricky
     depending on from where we are making the access.  Generally, we could be
     accessing from the root of the umbrella project or from the data app.
+    If we are accessing fom app root (instead of umbrella root), then
+    Path.expand(.) should end with the string: "apps/data"
   """
   @spec app_root() :: binary()
   def app_root do

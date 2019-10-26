@@ -4,8 +4,8 @@ defmodule Data.SchemaResumeTest do
   import Absinthe.Relay.Node, only: [to_global_id: 3]
 
   alias Data.Schema
-  alias Data.FactoryResume, as: Factory
-  alias Data.FactoryRegistration, as: RegFactory
+  alias Data.ResumeFactory, as: Factory
+  alias Data.RegistrationFactory, as: RegFactory
   alias Data.QueryResume, as: Query
   alias Data.Resumes
   alias Data.Uploaders.ResumePhoto
@@ -673,7 +673,7 @@ defmodule Data.SchemaResumeTest do
                   "updateResume" => %{
                     "resume" => %{
                       "_id" => ^id_str,
-                      "education" => ed_gqls
+                      "education" => ed_gql
                     }
                   }
                 }
@@ -687,7 +687,7 @@ defmodule Data.SchemaResumeTest do
 
       assert [ed_gql_for_update, ed_gql_for_insert] =
                Enum.sort_by(
-                 ed_gqls,
+                 ed_gql,
                  & &1["id"]
                )
 
@@ -761,7 +761,7 @@ defmodule Data.SchemaResumeTest do
                   "updateResume" => %{
                     "resume" => %{
                       "_id" => ^id_str,
-                      "education" => ed_gqls
+                      "education" => ed_gql
                     }
                   }
                 }
@@ -775,7 +775,7 @@ defmodule Data.SchemaResumeTest do
 
       assert [ed_gql_for_update, ed_gql_for_insert] =
                Enum.sort_by(
-                 ed_gqls,
+                 ed_gql,
                  & &1["id"]
                )
 
@@ -875,7 +875,7 @@ defmodule Data.SchemaResumeTest do
                   "updateResume" => %{
                     "resume" => %{
                       "_id" => ^id_str,
-                      "experiences" => ed_gqls
+                      "experiences" => ed_gql
                     }
                   }
                 }
@@ -889,7 +889,7 @@ defmodule Data.SchemaResumeTest do
 
       assert [ed_gql_for_update, ed_gql_for_insert] =
                Enum.sort_by(
-                 ed_gqls,
+                 ed_gql,
                  & &1["id"]
                )
 
@@ -973,7 +973,7 @@ defmodule Data.SchemaResumeTest do
                   "updateResume" => %{
                     "resume" => %{
                       "_id" => ^id_str,
-                      "experiences" => exp_gqls
+                      "experiences" => experiences_graphql
                     }
                   }
                 }
@@ -987,7 +987,7 @@ defmodule Data.SchemaResumeTest do
 
       assert [exp_gql_for_update, exp_gql_for_insert] =
                Enum.sort_by(
-                 exp_gqls,
+                 experiences_graphql,
                  & &1["id"]
                )
 
@@ -1085,7 +1085,7 @@ defmodule Data.SchemaResumeTest do
                   "updateResume" => %{
                     "resume" => %{
                       "_id" => ^id_str,
-                      "skills" => skills_gqls
+                      "skills" => skills_graphql
                     }
                   }
                 }
@@ -1099,7 +1099,7 @@ defmodule Data.SchemaResumeTest do
 
       assert [skills_gql_for_update, skill_gql_inserted] =
                Enum.sort_by(
-                 skills_gqls,
+                 skills_graphql,
                  & &1["id"]
                )
 
@@ -1166,7 +1166,7 @@ defmodule Data.SchemaResumeTest do
                   "updateResume" => %{
                     "resume" => %{
                       "_id" => ^id_str,
-                      "skills" => exp_gqls
+                      "skills" => experiences_graphql
                     }
                   }
                 }
@@ -1180,7 +1180,7 @@ defmodule Data.SchemaResumeTest do
 
       assert [exp_gql_for_update, exp_gql_for_insert] =
                Enum.sort_by(
-                 exp_gqls,
+                 experiences_graphql,
                  & &1["id"]
                )
 

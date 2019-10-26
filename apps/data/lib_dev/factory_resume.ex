@@ -1,4 +1,4 @@
-defmodule Data.FactoryResume do
+defmodule Data.ResumeFactory do
   use Data.Factory
 
   alias Data.Factory
@@ -9,12 +9,17 @@ defmodule Data.FactoryResume do
   @dog_img_file_upload Path.join(Data.app_root(), "priv/test-files/dog.jpeg")
                        |> Data.file_to_data_uri("image/jpeg")
 
-  @doc false
   def insert(attrs) do
     attrs = params(attrs)
 
     attrs = parse_photo(attrs)
 
+    {:ok, resume} = Resumes.create_resume(attrs)
+    resume
+  end
+
+  def insert_minimal(attrs) do
+    attrs = params_minimal(attrs)
     {:ok, resume} = Resumes.create_resume(attrs)
     resume
   end
@@ -35,6 +40,19 @@ defmodule Data.FactoryResume do
     }
     |> Map.merge(attrs)
     |> Factory.reject_attrs()
+  end
+
+  def params_minimal(%{user_id: _} = attrs) do
+    %{
+      title: Sequence.next("Resume ")
+    }
+    |> Map.merge(attrs)
+  end
+
+  def params_minimal(attrs) when is_list(attrs) do
+    attrs
+    |> Map.new()
+    |> params_minimal()
   end
 
   def experiences(nil, _) do
