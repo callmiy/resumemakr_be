@@ -244,14 +244,6 @@ defmodule EbnisData.Repo.Migrations.ConvertToUlid do
     |> index([:user_id, :title])
     |> drop()
 
-    table
-    |> index([:additional_skills], name: "resumes_additional_skills")
-    |> drop()
-
-    table
-    |> index([:languages], name: "resumes_languages")
-    |> drop()
-
     drop_pkey_constraint(table)
     rename_column(table, :id, :old_id)
     rename_column(table, :user_id, :old_user_id)
@@ -348,14 +340,6 @@ defmodule EbnisData.Repo.Migrations.ConvertToUlid do
 
     table
     |> index([:user_id, :title])
-    |> create()
-
-    table
-    |> index([:additional_skills], name: "resumes_additional_skills")
-    |> create()
-
-    table
-    |> index([:languages], name: "resumes_languages")
     |> create()
 
     create_id_pk(table)

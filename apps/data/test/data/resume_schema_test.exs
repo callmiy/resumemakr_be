@@ -43,7 +43,6 @@ defmodule Data.SchemaResumeTest do
                       "experiences" => _,
                       "education" => _,
                       "skills" => _,
-                      "additionalSkills" => _,
                       "hobbies" => _hobbies
                     }
                   }
@@ -59,9 +58,13 @@ defmodule Data.SchemaResumeTest do
 
     test "update resume succeeds" do
       user = RegFactory.insert()
+
       attrs = Factory.params(user_id: user.id)
 
-      {:ok, %{title: title, id: id_} = resume} = Resumes.create_resume(attrs)
+      {:ok, %{title: title, id: id_} = resume} =
+        attrs
+        |> Factory.parse_photo()
+        |> Resumes.create_resume()
 
       update_attrs =
         Factory.params(
@@ -88,7 +91,6 @@ defmodule Data.SchemaResumeTest do
                       "experiences" => _,
                       "education" => _,
                       "skills" => _,
-                      "additionalSkills" => _,
                       "hobbies" => _
                     }
                   }
@@ -1177,44 +1179,6 @@ defmodule Data.SchemaResumeTest do
 
       assert exp_gql_for_update["id"] == db_skill_for_update_id_str
       assert exp_gql_for_insert["id"] > db_skill_for_delete.id
-    end
-  end
-
-  describe "mutation rated" do
-    test "delete additional_skills succeeds" do
-      user = RegFactory.insert()
-      [add_skill] = Factory.additional_skills(:ok, Sequence.next(""))
-
-      resume =
-        Factory.insert(
-          user_id: user.id,
-          additional_skills: [add_skill]
-        )
-
-      assert List.first(resume.additional_skills).description == add_skill.description
-
-      variables = %{
-        "input" => %{
-          "id" => to_global_id(:resume, resume.id, Schema)
-        }
-      }
-
-      assert {:ok,
-              %{
-                data: %{
-                  "updateResume" => %{
-                    "resume" => %{
-                      "additionalSkills" => []
-                    }
-                  }
-                }
-              }} =
-               Absinthe.run(
-                 Query.update(),
-                 Schema,
-                 context: context(user),
-                 variables: variables
-               )
     end
   end
 

@@ -1,4 +1,4 @@
-defmodule Data.Resumes.SpokenLanguage do
+defmodule Data.Resumes.SupplementarySkill do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -6,7 +6,7 @@ defmodule Data.Resumes.SpokenLanguage do
 
   @primary_key {:id, Ecto.ULID, autogenerate: true}
   @foreign_key_type Ecto.ULID
-  schema "spoken_languages" do
+  schema "supplementary_skills" do
     field :description, :string
     field :level, :string
     belongs_to :resume, Resume
@@ -19,7 +19,7 @@ defmodule Data.Resumes.SpokenLanguage do
     |> cast(attrs, [:description, :level, :resume_id])
     |> unique_constraint(
       :description,
-      name: :languages_description_resume_id_index
+      name: :supplementary_skills_description_resume_id_index
     )
   end
 end

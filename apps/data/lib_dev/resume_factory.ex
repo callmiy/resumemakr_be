@@ -33,7 +33,6 @@ defmodule Data.ResumeFactory do
       experiences: experiences(Enum.random(@one_nil), seq),
       personal_info: personal_info(Enum.random(@one_nil), seq),
       education: education(Enum.random(@one_nil), seq),
-      additional_skills: additional_skills(Enum.random(@one_nil), seq),
       skills: skills(Enum.random(@one_nil), seq),
       hobbies: Enum.random([nil, ["Hobby " <> seq]])
     }
@@ -114,18 +113,6 @@ defmodule Data.ResumeFactory do
     ]
   end
 
-  def additional_skills(nil, _), do: nil
-
-  def additional_skills(_, seq) do
-    [
-      %{
-        description: "Additional Skill " <> seq,
-        level: Enum.random(1..5) |> to_string(),
-        index: 1
-      }
-    ]
-  end
-
   def skills(nil, _) do
     nil
   end
@@ -162,7 +149,7 @@ defmodule Data.ResumeFactory do
 
   def stringify(val), do: val
 
-  defp parse_photo(%{personal_info: %{photo: photo}} = attrs) do
+  def parse_photo(%{personal_info: %{photo: photo}} = attrs) do
     case Data.plug_from_base64(photo) do
       {:ok, plug} ->
         update_in(attrs.personal_info.photo, fn _ -> plug end)
@@ -172,5 +159,5 @@ defmodule Data.ResumeFactory do
     end
   end
 
-  defp parse_photo(attrs), do: attrs
+  def parse_photo(attrs), do: attrs
 end

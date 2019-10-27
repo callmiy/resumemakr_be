@@ -8,7 +8,7 @@ defmodule Data.Schema do
   import_types(Data.SchemaTypes)
   import_types(Data.SchemaUser)
   import_types(Data.ResumeGraphqlSchema)
-  import_types(Data.Schema.SpokenLanguageGraphqlSchema)
+  import_types(Data.Schema.RatableGraphqlSchema)
 
   query do
     node field do
@@ -25,7 +25,7 @@ defmodule Data.Schema do
   mutation do
     import_fields(:user_mutation)
     import_fields(:resume_mutation)
-    import_fields(:spoken_language_mutation)
+    import_fields(:ratable_mutations)
   end
 
   def context(ctx) do

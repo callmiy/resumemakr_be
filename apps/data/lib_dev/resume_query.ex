@@ -1,7 +1,6 @@
 defmodule Data.QueryResume do
   @all_fields_frag_name "ResumeAllFieldsFrag"
   @frag_name "ResumeFrag"
-  @frag_name_rated "RatedFrag"
   @frag_name_education "ResumeEducationFrag"
   @frag_name_experience "ExperienceFrag"
   @frag_name_personal_info "PersonalInfoFrag"
@@ -16,15 +15,6 @@ defmodule Data.QueryResume do
       hobbies
       insertedAt
       updatedAt
-    }
-  """
-
-  @frag_rated """
-    fragment #{@frag_name_rated} on Rated {
-      id
-      description
-      level
-      index
     }
   """
 
@@ -80,10 +70,6 @@ defmodule Data.QueryResume do
       fragment #{@all_fields_frag_name} on Resume {
             ...#{@frag_name}
 
-            additionalSkills {
-              ...#{@frag_name_rated}
-            }
-
             education {
               ...#{@frag_name_education}
             }
@@ -102,7 +88,6 @@ defmodule Data.QueryResume do
       }
 
       #{@frag}
-      #{@frag_rated}
       #{@frag_education}
       #{@frag_experience}
       #{@frag_personal_info}

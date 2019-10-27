@@ -74,8 +74,8 @@ defmodule Data.Resumes.ResumeLogic do
     where(query, [r], r.user_id == ^user_id)
   end
 
-  defp get_resume_by_reducer_fn(_, query) do
-    query
+  defp get_resume_by_reducer_fn({:title, title}, query) do
+    where(query, [r], r.title == ^title)
   end
 
   @doc """

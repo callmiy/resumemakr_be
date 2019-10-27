@@ -10,7 +10,7 @@ defmodule Data.Resumes do
   alias Data.Resumes.Education
   alias Ecto.Changeset
   alias Data.Resumes.ResumeLogic
-  alias Data.Resumes.SpokenLanguageLogic
+  alias Data.Resumes.RatableLogic
 
   @already_uploaded "___ALREADY_UPLOADED___"
 
@@ -377,5 +377,5 @@ defmodule Data.Resumes do
   defdelegate update_resume(resume, attrs), to: ResumeLogic
   defdelegate delete_resume(resume), to: ResumeLogic
   defdelegate clone_resume(resume, attrs), to: ResumeLogic
-  defdelegate create_spoken_language(attrs), to: SpokenLanguageLogic
+  defdelegate create_ratable(ratable_type, attrs), to: RatableLogic
 end
