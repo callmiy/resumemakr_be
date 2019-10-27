@@ -7,8 +7,8 @@ defmodule Data.Schema do
   import_types(Absinthe.Type.Custom)
   import_types(Data.SchemaTypes)
   import_types(Data.SchemaUser)
-  import_types(Data.SchemaResume)
-  import_types(Data.Schema.SpokenLanguage)
+  import_types(Data.ResumeGraphqlSchema)
+  import_types(Data.Schema.SpokenLanguageGraphqlSchema)
 
   query do
     node field do

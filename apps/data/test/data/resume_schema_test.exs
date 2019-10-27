@@ -44,7 +44,6 @@ defmodule Data.SchemaResumeTest do
                       "education" => _,
                       "skills" => _,
                       "additionalSkills" => _,
-                      "languages" => _,
                       "hobbies" => _hobbies
                     }
                   }
@@ -90,7 +89,6 @@ defmodule Data.SchemaResumeTest do
                       "education" => _,
                       "skills" => _,
                       "additionalSkills" => _,
-                      "languages" => _,
                       "hobbies" => _
                     }
                   }
@@ -1183,42 +1181,6 @@ defmodule Data.SchemaResumeTest do
   end
 
   describe "mutation rated" do
-    test "delete languages succeeds" do
-      user = RegFactory.insert()
-      [lang] = Factory.languages(:ok, Sequence.next(""))
-
-      resume =
-        Factory.insert(
-          user_id: user.id,
-          languages: [lang]
-        )
-
-      assert List.first(resume.languages).description == lang.description
-
-      variables = %{
-        "input" => %{
-          "id" => to_global_id(:resume, resume.id, Schema)
-        }
-      }
-
-      assert {:ok,
-              %{
-                data: %{
-                  "updateResume" => %{
-                    "resume" => %{
-                      "languages" => []
-                    }
-                  }
-                }
-              }} =
-               Absinthe.run(
-                 Query.update(),
-                 Schema,
-                 context: context(user),
-                 variables: variables
-               )
-    end
-
     test "delete additional_skills succeeds" do
       user = RegFactory.insert()
       [add_skill] = Factory.additional_skills(:ok, Sequence.next(""))

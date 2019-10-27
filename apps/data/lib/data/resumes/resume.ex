@@ -17,7 +17,6 @@ defmodule Data.Resumes.Resume do
     field(:description, :string)
     field(:hobbies, {:array, :string})
 
-    embeds_many(:languages, Rated, on_replace: :delete)
     embeds_many(:additional_skills, Rated, on_replace: :delete)
 
     belongs_to(:user, User)
@@ -37,7 +36,6 @@ defmodule Data.Resumes.Resume do
   def changeset(%__MODULE__{} = schema, attrs) do
     schema
     |> cast(attrs, [:title, :user_id, :description, :hobbies])
-    |> cast_embed(:languages, required: false)
     |> cast_embed(:additional_skills, required: false)
     |> cast_assoc(:personal_info, with: &PersonalInfo.changeset/2)
     |> cast_assoc(:experiences, with: &Experience.changeset/2)

@@ -34,7 +34,6 @@ defmodule Data.ResumeFactory do
       personal_info: personal_info(Enum.random(@one_nil), seq),
       education: education(Enum.random(@one_nil), seq),
       additional_skills: additional_skills(Enum.random(@one_nil), seq),
-      languages: languages(Enum.random(@one_nil), seq),
       skills: skills(Enum.random(@one_nil), seq),
       hobbies: Enum.random([nil, ["Hobby " <> seq]])
     }
@@ -121,18 +120,6 @@ defmodule Data.ResumeFactory do
     [
       %{
         description: "Additional Skill " <> seq,
-        level: Enum.random(1..5) |> to_string(),
-        index: 1
-      }
-    ]
-  end
-
-  def languages(nil, _), do: nil
-
-  def languages(_, seq) do
-    [
-      %{
-        description: "Language " <> seq,
         level: Enum.random(1..5) |> to_string(),
         index: 1
       }

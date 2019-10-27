@@ -1,4 +1,4 @@
-defmodule Data.Schema.SpokenLanguage do
+defmodule Data.Schema.SpokenLanguageGraphqlSchema do
   use Absinthe.Schema.Notation
   use Absinthe.Relay.Schema.Notation, :modern
 

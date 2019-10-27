@@ -1,4 +1,4 @@
-defmodule Data.SchemaResume do
+defmodule Data.ResumeGraphqlSchema do
   use Absinthe.Schema.Notation
   use Absinthe.Relay.Schema.Notation, :modern
 
@@ -60,7 +60,6 @@ defmodule Data.SchemaResume do
     field :_id, non_null(:id), resolve: fn %{id: id}, _, _ -> {:ok, id} end
     field :title, non_null(:string)
     field :description, :string
-    field :languages, list_of(:rated)
     field :additional_skills, list_of(:rated)
     field :hobbies, list_of(:string)
 
@@ -153,7 +152,6 @@ defmodule Data.SchemaResume do
         field :personal_info, :personal_info_input
         field :education, list_of(:education_input)
         field :experiences, list_of(:create_experience_input)
-        field :languages, list_of(:rated_input)
         field :additional_skills, list_of(:rated_input)
         field :skills, list_of(:create_skill_input)
         field :hobbies, list_of(:string)
@@ -175,7 +173,6 @@ defmodule Data.SchemaResume do
         field :personal_info, :personal_info_input
         field :education, list_of(:education_input)
         field :experiences, list_of(:create_experience_input)
-        field :languages, list_of(:rated_input)
         field :additional_skills, list_of(:rated_input)
         field :skills, list_of(:create_skill_input)
         field :hobbies, list_of(:string)

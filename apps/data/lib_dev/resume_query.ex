@@ -84,10 +84,6 @@ defmodule Data.QueryResume do
               ...#{@frag_name_rated}
             }
 
-            languages {
-              ...#{@frag_name_rated}
-            }
-
             education {
               ...#{@frag_name_education}
             }
