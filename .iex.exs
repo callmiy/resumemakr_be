@@ -17,3 +17,5 @@ alias Data.FactoryUser
 alias Data.Factory
 alias Data.RegistrationFactory
 alias Data.UserFactory
+alias Data.TextOnlyFactory
+alias Data.Resumes.TextOnly

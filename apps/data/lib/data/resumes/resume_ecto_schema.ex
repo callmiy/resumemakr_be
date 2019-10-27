@@ -9,15 +9,15 @@ defmodule Data.Resumes.Resume do
   alias Data.Resumes.PersonalInfo
   alias Data.Resumes.SpokenLanguage
   alias Data.Resumes.SupplementarySkill
+  alias Data.Resumes.TextOnly
 
   @primary_key {:id, Ecto.ULID, autogenerate: true}
   @foreign_key_type Ecto.ULID
   schema "resumes" do
+    belongs_to(:user, User)
+
     field(:title, :string)
     field(:description, :string)
-    field(:hobbies, {:array, :string})
-
-    belongs_to(:user, User)
 
     has_one(:personal_info, PersonalInfo)
     has_many(:education, Education)
@@ -25,6 +25,12 @@ defmodule Data.Resumes.Resume do
     has_many(:experiences, Experience)
     has_many(:spoken_languages, SpokenLanguage)
     has_many(:supplementary_skills, SupplementarySkill)
+
+    has_many(
+      :hobbies,
+      {"resumes_hobbies", TextOnly},
+      foreign_key: :owner_id
+    )
 
     timestamps(type: :utc_datetime)
   end
@@ -34,7 +40,7 @@ defmodule Data.Resumes.Resume do
 
   def changeset(%__MODULE__{} = schema, attrs) do
     schema
-    |> cast(attrs, [:title, :user_id, :description, :hobbies])
+    |> cast(attrs, [:title, :user_id, :description])
     |> cast_assoc(:personal_info, with: &PersonalInfo.changeset/2)
     |> cast_assoc(:experiences, with: &Experience.changeset/2)
     |> cast_assoc(:education, with: &Education.changeset/2)

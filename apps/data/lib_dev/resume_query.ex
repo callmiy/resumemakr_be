@@ -12,7 +12,6 @@ defmodule Data.QueryResume do
       _id
       title
       description
-      hobbies
       insertedAt
       updatedAt
     }
@@ -26,14 +25,12 @@ defmodule Data.QueryResume do
       fromDate
       toDate
       school
-      achievements
     }
   """
 
   @frag_experience """
     fragment #{@frag_name_experience} on Experience {
       id
-      achievements
       companyName
       fromDate
       position
@@ -61,7 +58,6 @@ defmodule Data.QueryResume do
       id
       index
       description
-      achievements
     }
   """
 

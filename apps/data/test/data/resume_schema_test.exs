@@ -42,8 +42,7 @@ defmodule Data.SchemaResumeTest do
                       "personalInfo" => _,
                       "experiences" => _,
                       "education" => _,
-                      "skills" => _,
-                      "hobbies" => _hobbies
+                      "skills" => _
                     }
                   }
                 }
@@ -90,8 +89,7 @@ defmodule Data.SchemaResumeTest do
                       "personalInfo" => _,
                       "experiences" => _,
                       "education" => _,
-                      "skills" => _,
-                      "hobbies" => _
+                      "skills" => _
                     }
                   }
                 }
@@ -685,8 +683,8 @@ defmodule Data.SchemaResumeTest do
                  & &1["id"]
                )
 
-      ed_keys_atom = [:achievements, :course, :from_date, :school]
-      ed_keys_str = ["achievements", "course", "fromDate", "school"]
+      ed_keys_atom = [:course, :from_date, :school]
+      ed_keys_str = ["course", "fromDate", "school"]
 
       assert Map.take(ed_gql_for_insert, ed_keys_str) ==
                ed_for_insert
@@ -697,8 +695,6 @@ defmodule Data.SchemaResumeTest do
                updated_ed
                |> Map.take([:id, :course, :school, :from_date])
                |> Factory.stringify()
-
-      assert db_ed.achievements == ed_gql_for_update["achievements"]
     end
 
     test "one to insert, one to be deleted, one for update" do
@@ -786,7 +782,8 @@ defmodule Data.SchemaResumeTest do
         Factory.params(
           user_id: user.id,
           experiences:
-            Factory.experiences(1, Sequence.next("")) ++ Factory.experiences(1, Sequence.next(""))
+            Factory.experiences(1, Sequence.next(""))
+            |> Kernel.++(Factory.experiences(1, Sequence.next("")))
         )
 
       resume = Factory.insert(attrs)
@@ -908,8 +905,6 @@ defmodule Data.SchemaResumeTest do
                updated_exp
                |> Map.take([:id, :company_name, :position, :from_date])
                |> Factory.stringify()
-
-      assert db_exp_for_update.achievements == ed_gql_for_update["achievements"]
     end
 
     test "one insert, one delete, one update" do
@@ -1052,7 +1047,6 @@ defmodule Data.SchemaResumeTest do
       updated_skill = %{
         id: to_string(db_skill_for_update.id),
         description: "updated description",
-        achievements: ["updated achievements"],
         index: 2
       }
 
@@ -1097,12 +1091,11 @@ defmodule Data.SchemaResumeTest do
                )
 
       assert skill_gql_inserted["description"] == skill_for_insert[:description]
-      assert skill_gql_inserted["achievements"] == skill_for_insert[:achievements]
 
       assert skills_gql_for_update
-             |> Map.take(["id", "description", "achievements"]) ==
+             |> Map.take(["id", "description"]) ==
                updated_skill
-               |> Map.take([:id, :description, :achievements])
+               |> Map.take([:id, :description])
                |> Factory.stringify()
     end
 
@@ -1133,7 +1126,6 @@ defmodule Data.SchemaResumeTest do
       updated_skill = %{
         id: db_skill_for_update_id_str,
         description: "updated description",
-        achievements: ["updated achievements"],
         index: 2
       }
 

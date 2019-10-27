@@ -1,40 +1,41 @@
-defmodule Data.Resumes.Experience do
+defmodule Data.Resumes.Education do
   use Ecto.Schema
   import Ecto.Changeset
 
   alias Data.Resumes.Resume
   alias Data.Resumes
+  alias Data.Resumes.TextOnly
 
   @primary_key {:id, Ecto.ULID, autogenerate: true}
   @foreign_key_type Ecto.ULID
-  schema "experiences" do
+  schema "education" do
     belongs_to(:resume, Resume)
-    field :achievements, {:array, :string}
-    field :company_name, :string
+    field :course, :string
     field :from_date, :string
-    field :position, :string
+    field :school, :string
     field :to_date, :string
     field :index, :integer
     field :delete, :boolean, virtual: true
+
+    has_many(
+      :achievements,
+      {"education_achievements", TextOnly},
+      foreign_key: :owner_id
+    )
   end
 
-  def changeset(%__MODULE__{} = schema, attrs \\ %{}) do
-    schema
+  @doc false
+  def changeset(education, attrs) do
+    education
     |> cast(attrs, [
       :resume_id,
-      :position,
-      :company_name,
+      :school,
+      :course,
       :from_date,
       :to_date,
-      :achievements,
       :delete,
       :index
     ])
-    # |> validate_required([
-    #   :position,
-    #   :company_name,
-    #   :from_date
-    # ])
     |> assoc_constraint(:resume)
     |> Resumes.maybe_mark_for_deletion()
   end

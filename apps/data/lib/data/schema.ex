@@ -9,6 +9,7 @@ defmodule Data.Schema do
   import_types(Data.SchemaUser)
   import_types(Data.ResumeGraphqlSchema)
   import_types(Data.Schema.RatableGraphqlSchema)
+  import_types(Data.Schema.TextOnlyGraphqlSchema)
 
   query do
     node field do
@@ -26,6 +27,7 @@ defmodule Data.Schema do
     import_fields(:user_mutation)
     import_fields(:resume_mutation)
     import_fields(:ratable_mutations)
+    import_fields(:text_only_mutations)
   end
 
   def context(ctx) do

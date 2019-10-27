@@ -33,8 +33,7 @@ defmodule Data.ResumeFactory do
       experiences: experiences(Enum.random(@one_nil), seq),
       personal_info: personal_info(Enum.random(@one_nil), seq),
       education: education(Enum.random(@one_nil), seq),
-      skills: skills(Enum.random(@one_nil), seq),
-      hobbies: Enum.random([nil, ["Hobby " <> seq]])
+      skills: skills(Enum.random(@one_nil), seq)
     }
     |> Map.merge(attrs)
     |> Factory.reject_attrs()
@@ -64,12 +63,7 @@ defmodule Data.ResumeFactory do
         company_name: "Company " <> seq,
         from_date: "03/2015",
         position: "Position " <> seq,
-        to_date: Enum.random([nil, "04/2016"]),
-        achievements:
-          Enum.random([
-            nil,
-            ["Experience achievement " <> seq <> Faker.Lorem.sentence()]
-          ])
+        to_date: Enum.random([nil, "04/2016"])
       }
     ]
   end
@@ -104,7 +98,6 @@ defmodule Data.ResumeFactory do
     [
       %{
         index: 1,
-        achievements: ["Education achievement " <> seq],
         course: "Course " <> seq,
         from_date: "03/2000",
         school: "School " <> seq,
@@ -121,12 +114,7 @@ defmodule Data.ResumeFactory do
     [
       %{
         index: 1,
-        description: "Skill " <> seq,
-        achievements:
-          Enum.random([
-            nil,
-            ["Skill achievement " <> seq <> Faker.Lorem.sentence()]
-          ])
+        description: "Skill " <> seq
       }
     ]
   end

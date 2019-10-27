@@ -4,15 +4,21 @@ defmodule Data.Resumes.Skill do
 
   alias Data.Resumes.Resume
   alias Data.Resumes
+  alias Data.Resumes.TextOnly
 
   @primary_key {:id, Ecto.ULID, autogenerate: true}
   @foreign_key_type Ecto.ULID
   schema "skills" do
     belongs_to(:resume, Resume)
-    field :achievements, {:array, :string}
     field :description, :string
     field :index, :integer
     field :delete, :boolean, virtual: true
+
+    has_many(
+      :achievements,
+      {"skills_achievements", TextOnly},
+      foreign_key: :owner_id
+    )
   end
 
   @doc false
@@ -20,12 +26,10 @@ defmodule Data.Resumes.Skill do
     skill
     |> cast(attrs, [
       :description,
-      :achievements,
       :resume_id,
       :delete,
       :index
     ])
-    # |> validate_required([:description])
     |> assoc_constraint(:resume)
     |> Resumes.maybe_mark_for_deletion()
   end

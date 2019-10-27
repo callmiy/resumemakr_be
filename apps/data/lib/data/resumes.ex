@@ -11,6 +11,7 @@ defmodule Data.Resumes do
   alias Ecto.Changeset
   alias Data.Resumes.ResumeLogic
   alias Data.Resumes.RatableLogic
+  alias Data.Resumes.TextOnlyLogic
 
   @already_uploaded "___ALREADY_UPLOADED___"
 
@@ -378,4 +379,5 @@ defmodule Data.Resumes do
   defdelegate delete_resume(resume), to: ResumeLogic
   defdelegate clone_resume(resume, attrs), to: ResumeLogic
   defdelegate create_ratable(ratable_type, attrs), to: RatableLogic
+  defdelegate create_text_only(tag, attrs), to: TextOnlyLogic
 end
