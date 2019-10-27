@@ -5,6 +5,8 @@ defmodule Data.Resumes.Education do
   alias Data.Resumes.Resume
   alias Data.Resumes
 
+  @primary_key {:id, Ecto.ULID, autogenerate: true}
+  @foreign_key_type Ecto.ULID
   schema "education" do
     belongs_to(:resume, Resume)
     field :course, :string

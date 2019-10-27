@@ -10,6 +10,8 @@ defmodule Data.Resumes.Resume do
   alias Data.Resumes.Rated
   alias Data.Resumes.SpokenLanguage
 
+  @primary_key {:id, Ecto.ULID, autogenerate: true}
+  @foreign_key_type Ecto.ULID
   schema "resumes" do
     field(:title, :string)
     field(:description, :string)

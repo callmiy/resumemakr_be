@@ -11,6 +11,8 @@ defmodule Data.Resumes.PersonalInfo do
   alias Data.Resumes
   alias Data.Uploaders.ResumePhoto
 
+  @primary_key {:id, Ecto.ULID, autogenerate: true}
+  @foreign_key_type Ecto.ULID
   schema "personal_info" do
     belongs_to(:resume, Resume)
     field :first_name, :string

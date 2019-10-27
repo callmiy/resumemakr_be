@@ -4,6 +4,8 @@ defmodule Data.Resumes.SpokenLanguage do
 
   alias Data.Resumes.Resume
 
+  @primary_key {:id, Ecto.ULID, autogenerate: true}
+  @foreign_key_type Ecto.ULID
   schema "spoken_languages" do
     field :description, :string
     field :level, :string

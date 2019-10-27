@@ -2,7 +2,7 @@ defmodule Data.RegistrationFactory do
   use Data.Factory
 
   alias Data.Accounts
-  alias Data.FactoryUser, as: UserFactory
+  alias Data.UserFactory
   alias Data.Factory
 
   @simple_attrs [

@@ -1,8 +1,9 @@
-defmodule Data.Repo.Migrations.CreateTableRated do
+defmodule Data.Repo.Migrations.CreateRated do
   use Ecto.Migration
 
   def change do
-    create table(:rated) do
+    create table(:rated, primary_key: false) do
+      add(:id, :binary_id, primary_key: true)
       add :description, :citext, null: false
       add :level, :string
 

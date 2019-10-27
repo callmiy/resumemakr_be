@@ -5,6 +5,8 @@ defmodule Data.Resumes.Experience do
   alias Data.Resumes.Resume
   alias Data.Resumes
 
+  @primary_key {:id, Ecto.ULID, autogenerate: true}
+  @foreign_key_type Ecto.ULID
   schema "experiences" do
     belongs_to(:resume, Resume)
     field :achievements, {:array, :string}

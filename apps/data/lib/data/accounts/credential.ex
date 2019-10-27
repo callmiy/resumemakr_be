@@ -15,6 +15,8 @@ defmodule Data.Accounts.Credential do
     :recovery_token_expires
   ]
 
+  @primary_key {:id, Ecto.ULID, autogenerate: true}
+  @foreign_key_type Ecto.ULID
   schema "credentials" do
     field(:source, :string)
     # the encrypted password or token from auth source e.g. google

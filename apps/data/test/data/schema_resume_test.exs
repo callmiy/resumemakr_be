@@ -13,6 +13,7 @@ defmodule Data.SchemaResumeTest do
   @moduletag :db
 
   @already_uploaded Resumes.already_uploaded()
+  @bogus_id Ecto.ULID.bingenerate()
 
   describe "mutation resume" do
     test "create resume succeeds" do
@@ -62,7 +63,6 @@ defmodule Data.SchemaResumeTest do
       attrs = Factory.params(user_id: user.id)
 
       {:ok, %{title: title, id: id_} = resume} = Resumes.create_resume(attrs)
-      id_ = Integer.to_string(id_)
 
       update_attrs =
         Factory.params(
@@ -115,14 +115,13 @@ defmodule Data.SchemaResumeTest do
     test "update resume fails for unknown user" do
       user = RegFactory.insert()
       Factory.insert(user_id: user.id)
-      bogus_user_id = 0
 
       update_attrs =
         Factory.params(
           id:
             to_global_id(
               :resume,
-              bogus_user_id,
+              @bogus_id,
               Schema
             )
         )
@@ -229,7 +228,6 @@ defmodule Data.SchemaResumeTest do
     test "delete resume succeeds" do
       user = RegFactory.insert()
       %{id: id_} = Factory.insert(user_id: user.id)
-      id_ = Integer.to_string(id_)
 
       variables = %{
         "input" => %{"id" => to_global_id(:resume, id_, Schema)}
@@ -257,10 +255,9 @@ defmodule Data.SchemaResumeTest do
     test "delete resume fails for unknown user" do
       user = RegFactory.insert()
       Factory.insert(user_id: user.id)
-      bogus_user_id = 0
 
       variables = %{
-        "input" => %{"id" => to_global_id(:resume, bogus_user_id, Schema)}
+        "input" => %{"id" => to_global_id(:resume, @bogus_id, Schema)}
       }
 
       assert {:ok,
@@ -291,8 +288,7 @@ defmodule Data.SchemaResumeTest do
         |> Map.put(:photo, Factory.photo_plug())
 
       resume = Factory.insert(user_id: user.id, personal_info: personal_info)
-
-      id_str = Integer.to_string(resume.id)
+      id_str = resume.id
 
       # since we uploaded a photo before, we pass the flag to signify so
       updated_personal_info =
@@ -350,19 +346,20 @@ defmodule Data.SchemaResumeTest do
         |> Map.put(:photo, Factory.photo_plug())
 
       resume = Factory.insert(user_id: user.id, personal_info: personal_info)
-      id_str = Integer.to_string(resume.id)
 
       # since we uploaded a photo before, we pass the flag to signify so,
       # but we use the wrong file to get an error response
+      bogus_photo = "woops"
+
       updated_personal_info =
         Factory.personal_info(1, Sequence.next(""))
         |> Map.merge(%{
-          photo: "woops",
+          photo: bogus_photo,
           email: personal_info.email
         })
 
       update_attrs = %{
-        id: to_global_id(:resume, id_str, Schema),
+        id: to_global_id(:resume, resume.id, Schema),
         personal_info: updated_personal_info
       }
 
@@ -388,7 +385,7 @@ defmodule Data.SchemaResumeTest do
                  variables: variables
                )
 
-      assert message =~ "woops"
+      assert message =~ bogus_photo
     end
 
     test "deleting" do
@@ -402,7 +399,7 @@ defmodule Data.SchemaResumeTest do
         )
 
       resume = Factory.insert(attrs)
-      id_str = Integer.to_string(resume.id)
+      id_str = resume.id
 
       update_attrs = %{
         personal_info: nil,
@@ -476,7 +473,6 @@ defmodule Data.SchemaResumeTest do
     test "get a resume for user succeeds for valid user id and title" do
       user = RegFactory.insert()
       %{id: id, title: title} = Factory.insert(user_id: user.id)
-      sid = Integer.to_string(id)
       gid = to_global_id(:resume, id, Schema)
 
       variables = %{
@@ -491,7 +487,7 @@ defmodule Data.SchemaResumeTest do
                 data: %{
                   "getResume" => %{
                     "id" => ^gid,
-                    "_id" => ^sid,
+                    "_id" => ^id,
                     "title" => ^title
                   }
                 }
@@ -507,7 +503,6 @@ defmodule Data.SchemaResumeTest do
     test "get a resume for user succeeds for valid title" do
       user = RegFactory.insert()
       %{id: id, title: title} = Factory.insert(user_id: user.id)
-      sid = Integer.to_string(id)
 
       variables = %{
         "input" => %{
@@ -519,7 +514,7 @@ defmodule Data.SchemaResumeTest do
               %{
                 data: %{
                   "getResume" => %{
-                    "_id" => ^sid,
+                    "_id" => ^id,
                     "title" => ^title
                   }
                 }
@@ -535,7 +530,7 @@ defmodule Data.SchemaResumeTest do
     test "get a resume for user fails for invalid query argument(s)" do
       user = RegFactory.insert()
       %{title: title} = Factory.insert(user_id: user.id)
-      bogus_gid = to_global_id(:resume, "0", Schema)
+      bogus_gid = to_global_id(:resume, @bogus_id, Schema)
 
       input =
         Enum.random([
@@ -599,8 +594,7 @@ defmodule Data.SchemaResumeTest do
         )
 
       resume = Factory.insert(attrs)
-
-      id_str = Integer.to_string(resume.id)
+      id_str = resume.id
 
       update_attrs = %{
         education: "nil",
@@ -639,7 +633,7 @@ defmodule Data.SchemaResumeTest do
       education = Factory.education(1, Sequence.next(""))
       attrs = Factory.params(user_id: user.id, education: education)
       %{education: [db_ed]} = resume = Factory.insert(attrs)
-      id_str = Integer.to_string(resume.id)
+      id_str = resume.id
 
       [ed_for_insert] = Factory.education(1, Sequence.next(""))
 
@@ -707,7 +701,7 @@ defmodule Data.SchemaResumeTest do
       assert db_ed.achievements == ed_gql_for_update["achievements"]
     end
 
-    test "one insert, one delete, one update" do
+    test "one to insert, one to be deleted, one for update" do
       user = RegFactory.insert()
       ed_for_update = Factory.education(1, Sequence.next(""))
       ed_for_delete = Factory.education(1, Sequence.next(""))
@@ -719,7 +713,7 @@ defmodule Data.SchemaResumeTest do
         )
 
       resume = Factory.insert(attrs)
-      id_str = Integer.to_string(resume.id)
+      id_str = resume.id
 
       [db_ed_for_update, db_ed_for_delete] =
         Enum.sort_by(
@@ -727,7 +721,7 @@ defmodule Data.SchemaResumeTest do
           & &1.id
         )
 
-      db_ed_for_update_id_str = to_string(db_ed_for_update.id)
+      db_ed_for_update_id_str = db_ed_for_update.id
 
       [ed_for_insert] = Factory.education(1, Sequence.next(""))
 
@@ -780,7 +774,7 @@ defmodule Data.SchemaResumeTest do
                )
 
       assert ed_gql_for_update["id"] == db_ed_for_update_id_str
-      assert String.to_integer(ed_gql_for_insert["id"]) > db_ed_for_delete.id
+      assert ed_gql_for_insert["id"] > db_ed_for_delete.id
     end
   end
 
@@ -796,8 +790,7 @@ defmodule Data.SchemaResumeTest do
         )
 
       resume = Factory.insert(attrs)
-
-      id_str = Integer.to_string(resume.id)
+      id_str = resume.id
 
       update_attrs = %{
         experiences: "nil",
@@ -841,7 +834,7 @@ defmodule Data.SchemaResumeTest do
         )
 
       %{experiences: [db_exp_for_update]} = resume = Factory.insert(attrs)
-      id_str = Integer.to_string(resume.id)
+      id_str = resume.id
 
       [exp_for_insert] = Factory.experiences(1, Sequence.next(""))
 
@@ -931,7 +924,7 @@ defmodule Data.SchemaResumeTest do
         )
 
       resume = Factory.insert(attrs)
-      id_str = Integer.to_string(resume.id)
+      id_str = resume.id
 
       [db_exp_for_update, db_exp_for_delete] =
         Enum.sort_by(
@@ -939,7 +932,7 @@ defmodule Data.SchemaResumeTest do
           & &1.id
         )
 
-      db_exp_for_update_id_str = to_string(db_exp_for_update.id)
+      db_exp_for_update_id_str = db_exp_for_update.id
 
       [exp_for_insert] = Factory.experiences(1, Sequence.next(""))
 
@@ -992,7 +985,7 @@ defmodule Data.SchemaResumeTest do
                )
 
       assert exp_gql_for_update["id"] == db_exp_for_update_id_str
-      assert String.to_integer(exp_gql_for_insert["id"]) > db_exp_for_delete.id
+      assert exp_gql_for_insert["id"] > db_exp_for_delete.id
     end
   end
 
@@ -1008,7 +1001,7 @@ defmodule Data.SchemaResumeTest do
         )
 
       resume = Factory.insert(attrs)
-      id_str = Integer.to_string(resume.id)
+      id_str = resume.id
 
       update_attrs = %{
         skills: "nil",
@@ -1052,7 +1045,7 @@ defmodule Data.SchemaResumeTest do
         )
 
       %{skills: [db_skill_for_update]} = resume = Factory.insert(attrs)
-      id_str = Integer.to_string(resume.id)
+      id_str = resume.id
 
       [skill_for_insert] = Factory.skills(1, Sequence.next(""))
 
@@ -1125,7 +1118,7 @@ defmodule Data.SchemaResumeTest do
         )
 
       resume = Factory.insert(attrs)
-      id_str = Integer.to_string(resume.id)
+      id_str = resume.id
 
       [db_skill_for_update, db_skill_for_delete] =
         Enum.sort_by(
@@ -1133,7 +1126,7 @@ defmodule Data.SchemaResumeTest do
           & &1.id
         )
 
-      db_skill_for_update_id_str = to_string(db_skill_for_update.id)
+      db_skill_for_update_id_str = db_skill_for_update.id
 
       [skill_for_insert] = Factory.skills(1, Sequence.next(""))
 
@@ -1185,7 +1178,7 @@ defmodule Data.SchemaResumeTest do
                )
 
       assert exp_gql_for_update["id"] == db_skill_for_update_id_str
-      assert String.to_integer(exp_gql_for_insert["id"]) > db_skill_for_delete.id
+      assert exp_gql_for_insert["id"] > db_skill_for_delete.id
     end
   end
 
@@ -1293,19 +1286,18 @@ defmodule Data.SchemaResumeTest do
                  variables: variables
                )
 
-      assert id < String.to_integer(new_id)
+      assert id < new_id
       assert new_resume_title =~ resume.title
     end
 
     test "clone with different title succeeds" do
       user = RegFactory.insert()
       resume = Factory.insert(user_id: user.id)
-      id_str = Integer.to_string(resume.id)
       new_title = Faker.String.base64()
 
       variables = %{
         "input" => %{
-          "id" => to_global_id(:resume, id_str, Schema),
+          "id" => to_global_id(:resume, resume.id, Schema),
           "title" => new_title
         }
       }
@@ -1329,11 +1321,10 @@ defmodule Data.SchemaResumeTest do
 
     test "clone fails if resume does not exist" do
       user = RegFactory.insert()
-      bogus_id = "0"
 
       variables = %{
         "input" => %{
-          "id" => to_global_id(:resume, bogus_id, Schema)
+          "id" => to_global_id(:resume, @bogus_id, Schema)
         }
       }
 

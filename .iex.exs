@@ -1,3 +1,5 @@
+import Ecto.Query
+alias Data.Resumes
 alias Data.Resumes.Education
 alias Data.Resumes.Experience
 alias Data.Resumes.PersonalInfo
@@ -14,3 +16,4 @@ alias Data.ResumeFactory
 alias Data.FactoryUser
 alias Data.Factory
 alias Data.RegistrationFactory
+alias Data.UserFactory

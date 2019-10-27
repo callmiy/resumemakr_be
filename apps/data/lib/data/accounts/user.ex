@@ -6,6 +6,7 @@ defmodule Data.Accounts.User do
   alias Ecto.Changeset
   alias Data.Accounts.Credential
 
+  @primary_key {:id, Ecto.ULID, autogenerate: true}
   schema "users" do
     field(:email, :string)
     field(:name, :string)

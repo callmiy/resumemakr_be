@@ -1,4 +1,4 @@
-defmodule Data.ResolverResume do
+defmodule Data.ResumeResolver do
   import Absinthe.Relay.Node, only: [from_global_id: 2]
   import Absinthe.Resolution.Helpers, only: [on_load: 2]
 

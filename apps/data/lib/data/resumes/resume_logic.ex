@@ -42,9 +42,40 @@ defmodule Data.Resumes.ResumeLogic do
     end
   end
 
-  @spec get_resume_by(Map.t()) :: Resume.t()
+  @spec get_resume_by(Map.t() | Keyword.t()) :: Resume.t()
   def get_resume_by(attrs) do
-    Repo.get_by(Resume, attrs)
+    attrs
+    |> Enum.reduce(Resume, &get_resume_by_reducer_fn/2)
+    |> Repo.all()
+    |> case do
+      [resume] ->
+        resume
+
+      _ ->
+        nil
+    end
+  end
+
+  defp get_resume_by_reducer_fn({k, <<_time::48, _random::80>> = v}, query) do
+    case Ecto.ULID.load(v) do
+      {:ok, string} ->
+        get_resume_by_reducer_fn({k, string}, query)
+
+      _ ->
+        query
+    end
+  end
+
+  defp get_resume_by_reducer_fn({:id, id}, query) do
+    where(query, [r], r.id == ^id)
+  end
+
+  defp get_resume_by_reducer_fn({:user_id, user_id}, query) do
+    where(query, [r], r.user_id == ^user_id)
+  end
+
+  defp get_resume_by_reducer_fn(_, query) do
+    query
   end
 
   @doc """
@@ -112,9 +143,13 @@ defmodule Data.Resumes.ResumeLogic do
   end
 
   defp maybe_error_unique_title(
-         {:error,
-          %Ecto.Changeset{changes: %{title: title}, errors: [title: {_, error}]} = changeset} =
-           result
+         {
+           :error,
+           %Ecto.Changeset{
+             changes: %{title: title},
+             errors: [title: {_, error}]
+           } = changeset
+         } = result
        ) do
     case Keyword.get(error, :constraint) do
       :unique ->

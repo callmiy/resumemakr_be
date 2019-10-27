@@ -1,4 +1,4 @@
-defmodule Data.FactoryUser do
+defmodule Data.UserFactory do
   use Data.Factory
 
   alias Data.Factory

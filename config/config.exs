@@ -11,6 +11,8 @@ use Mix.Config
 
 config :pbkdf2_elixir, :rounds, 1
 
+# config :data, Data.Repo, migration_primary_key: [name: :id, type: :binary_id]
+
 # Configure Mix tasks and generators
 config :data,
   ecto_repos: [Data.Repo]
