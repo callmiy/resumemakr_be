@@ -53,10 +53,10 @@ defmodule Data.Repo.Migrations.CreateTextOnlyTables do
     flush()
 
     Enum.each(@achieving_tables, fn assoc_table ->
-      DataMigrateEmbeddedTextOnly.down(assoc_table, "achievements")
+      DataMigrateEmbeddedTextOnly.down(assoc_table, :achievements)
     end)
 
-    DataMigrateEmbeddedTextOnly.down("resumes", "hobbies")
+    DataMigrateEmbeddedTextOnly.down("resumes", :hobbies)
 
     Enum.each(@achieving_tables, fn assoc_table ->
       drop_text_only_table(assoc_table, "achievements")

@@ -3,7 +3,7 @@ defmodule Data.RatableFactory do
 
   def params(
         %{
-          resume_id: _resume_id,
+          owner_id: _,
           ratable_type: _
         } = attrs
       ) do

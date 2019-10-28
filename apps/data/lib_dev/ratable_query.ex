@@ -6,7 +6,7 @@ defmodule Data.RatableQuery do
       id
       description
       level
-      resumeId
+      ownerId
     }
   """
 

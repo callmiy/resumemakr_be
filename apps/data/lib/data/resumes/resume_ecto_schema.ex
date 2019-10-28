@@ -23,8 +23,8 @@ defmodule Data.Resumes.Resume do
     has_many(:education, Education)
     has_many(:skills, Skill)
     has_many(:experiences, Experience)
-    has_many(:spoken_languages, SpokenLanguage)
-    has_many(:supplementary_skills, SupplementarySkill)
+    has_many(:spoken_languages, SpokenLanguage, foreign_key: :owner_id)
+    has_many(:supplementary_skills, SupplementarySkill, foreign_key: :owner_id)
 
     has_many(
       :hobbies,

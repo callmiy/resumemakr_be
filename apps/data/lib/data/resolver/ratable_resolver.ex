@@ -18,14 +18,14 @@ defmodule Data.Resolver.RatableResolver do
         %{
           input:
             %{
-              resume_id: resume_id,
+              owner_id: owner_id,
               ratable_type: ratable_type
             } = args
         },
         %{context: %{current_user: %{id: user_id}}}
       ) do
     case Resumes.get_resume_by(%{
-           id: resume_id,
+           id: owner_id,
            user_id: user_id
          }) do
       %Resume{} ->

@@ -9,17 +9,17 @@ defmodule Data.Resumes.SpokenLanguage do
   schema "spoken_languages" do
     field :description, :string
     field :level, :string
-    belongs_to :resume, Resume
+    belongs_to :resume, Resume, foreign_key: :owner_id
 
     timestamps(type: :utc_datetime)
   end
 
   def changeset(%__MODULE__{} = schema, attrs) do
     schema
-    |> cast(attrs, [:description, :level, :resume_id])
+    |> cast(attrs, [:description, :level, :owner_id])
     |> unique_constraint(
       :description,
-      name: :spoken_languages_description_resume_id_index
+      name: :spoken_languages_description_owner_id_index
     )
   end
 end

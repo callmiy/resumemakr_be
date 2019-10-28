@@ -60,9 +60,9 @@ defmodule Data.Repo.Migrations.DataMigrateEmbeddedTextOnly do
     )
     |> Repo.all()
     |> Enum.group_by(& &1.owner_id)
-    |> Enum.each(fn {owner_id, data} ->
+    |> Enum.each(fn {owner_id, data_list} ->
       update_values = [
-        {suffix, data.text}
+        {suffix, Enum.map(data_list, & &1.text)}
       ]
 
       from(

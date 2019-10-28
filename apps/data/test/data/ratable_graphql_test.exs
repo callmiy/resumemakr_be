@@ -11,12 +11,12 @@ defmodule Data.RatableGraphqlTest do
     test "succeeds - graphql" do
       user = RegistrationFactory.insert()
       resume = ResumeFactory.insert_minimal(user_id: user.id)
-      resume_id = resume.id |> to_string()
+      owner_id = resume.id
 
       variables = %{
         "input" =>
           RatableFactory.params(
-            resume_id: resume_id,
+            owner_id: owner_id,
             ratable_type: :spoken_language
           )
           |> RatableFactory.stringify()
@@ -28,7 +28,7 @@ defmodule Data.RatableGraphqlTest do
                  data: %{
                    "createRatable" => %{
                      "id" => _,
-                     "resumeId" => ^resume_id
+                     "ownerId" => ^owner_id
                    }
                  }
                }
@@ -46,12 +46,12 @@ defmodule Data.RatableGraphqlTest do
     test "succeeds - graphql" do
       user = RegistrationFactory.insert()
       resume = ResumeFactory.insert_minimal(user_id: user.id)
-      resume_id = resume.id |> to_string()
+      owner_id = resume.id
 
       variables = %{
         "input" =>
           RatableFactory.params(
-            resume_id: resume_id,
+            owner_id: owner_id,
             ratable_type: :supplementary_skill
           )
           |> RatableFactory.stringify()
@@ -63,7 +63,7 @@ defmodule Data.RatableGraphqlTest do
                  data: %{
                    "createRatable" => %{
                      "id" => _,
-                     "resumeId" => ^resume_id
+                     "ownerId" => ^owner_id
                    }
                  }
                }

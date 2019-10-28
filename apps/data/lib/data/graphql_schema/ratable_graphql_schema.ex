@@ -19,14 +19,14 @@ defmodule Data.Schema.RatableGraphqlSchema do
     field :id, non_null(:id)
     field :description, :string
     field :level, :string
-    field :resume_id, :id |> non_null()
+    field :owner_id, :id |> non_null()
   end
 
   @desc "Variables for creating a ratable"
   input_object :create_ratable_input do
     field :description, :string |> non_null()
     field :level, :string
-    field :resume_id, :id |> non_null()
+    field :owner_id, :id |> non_null()
     field :ratable_type, non_null(:ratable_type)
   end
 

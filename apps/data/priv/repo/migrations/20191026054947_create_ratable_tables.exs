@@ -2,7 +2,7 @@ defmodule Data.Repo.Migrations.CreateSpokenLanguages do
   use Ecto.Migration
 
   @start_path Path.expand("")
-  @relative_path "priv/repo/20191027091600_data_migrate_embedded_to_tables.exs"
+  @relative_path "priv/repo/20191027091600_data_migrate_ratables.exs"
   @app_path "apps/data"
 
   case String.ends_with?(@start_path, @app_path) do
@@ -17,8 +17,8 @@ defmodule Data.Repo.Migrations.CreateSpokenLanguages do
   alias Data.Repo.Migrations.DataMigrateLanguagesToSpoken
 
   def up do
-    up_spoken_language_schema()
-    up_supplementary_skill_schema()
+    create_ratable_table(:spoken_languages)
+    create_ratable_table(:supplementary_skills)
 
     flush()
 
@@ -69,51 +69,31 @@ defmodule Data.Repo.Migrations.CreateSpokenLanguages do
     |> drop()
   end
 
-  defp up_spoken_language_schema do
-    create table(
-             :spoken_languages,
-             options: "INHERITS (ratable)",
-             primary_key: false
-           ) do
-      add :resume_id,
-          references(
-            :resumes,
-            on_delete: :delete_all,
-            type: :binary_id
-          ),
-          null: false
+  defp create_ratable_table(table_name) do
+    create table(table_name, primary_key: false) do
+      add(:id, :binary_id, primary_key: true)
+      add :description, :citext, null: false
+      add :level, :string
+
+      add(
+        :owner_id,
+        references(
+          :resumes,
+          on_delete: :delete_all,
+          type: :binary_id
+        ),
+        null: false
+      )
+
+      timestamps(type: :utc_datetime)
     end
 
-    :spoken_languages
-    |> index([:resume_id])
+    table_name
+    |> index([:owner_id])
     |> create()
 
-    :spoken_languages
-    |> unique_index([:description, :resume_id])
-    |> create()
-  end
-
-  defp up_supplementary_skill_schema do
-    create table(
-             :supplementary_skills,
-             options: "INHERITS (ratable)",
-             primary_key: false
-           ) do
-      add :resume_id,
-          references(
-            :resumes,
-            on_delete: :delete_all,
-            type: :binary_id
-          ),
-          null: false
-    end
-
-    :supplementary_skills
-    |> index([:resume_id])
-    |> create()
-
-    :supplementary_skills
-    |> unique_index([:description, :resume_id])
+    table_name
+    |> unique_index([:description, :owner_id])
     |> create()
   end
 end

@@ -40,7 +40,7 @@ defmodule Data.Repo.Migrations.DataMigrateLanguagesToSpoken do
       |> Enum.map(fn ratable ->
         Map.take(ratable, ["description", "level"])
         |> Map.merge(%{
-          "resume_id" => resume.id,
+          "owner_id" => resume.id,
           "inserted_at" => resume.inserted_at,
           "updated_at" => resume.updated_at,
           "id" => Ecto.ULID.bingenerate()
@@ -56,7 +56,7 @@ defmodule Data.Repo.Migrations.DataMigrateLanguagesToSpoken do
         id: s.id,
         description: s.description,
         level: s.level,
-        resume_id: s.resume_id
+        resume_id: s.owner_id
       }
     )
     |> Repo.all()
