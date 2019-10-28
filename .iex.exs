@@ -19,3 +19,4 @@ alias Data.RegistrationFactory
 alias Data.UserFactory
 alias Data.TextOnlyFactory
 alias Data.Resumes.TextOnly
+alias Data.EducationFactory

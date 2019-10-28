@@ -12,6 +12,7 @@ defmodule Data.Resumes do
   alias Data.Resumes.ResumeLogic
   alias Data.Resumes.RatableLogic
   alias Data.Resumes.TextOnlyLogic
+  alias Data.Resumes.EducationLgic
 
   @already_uploaded "___ALREADY_UPLOADED___"
 
@@ -183,40 +184,6 @@ defmodule Data.Resumes do
   end
 
   @doc """
-  Gets a single education.
-
-  Raises `Ecto.NoResultsError` if the Education does not exist.
-
-  ## Examples
-
-      iex> get_education!(123)
-      %Education{}
-
-      iex> get_education!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_education!(id), do: Repo.get!(Education, id)
-
-  @doc """
-  Creates a education.
-
-  ## Examples
-
-      iex> create_education(%{field: value})
-      {:ok, %Education{}}
-
-      iex> create_education(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_education(attrs \\ %{}) do
-    %Education{}
-    |> Education.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
   Updates a education.
 
   ## Examples
@@ -379,5 +346,7 @@ defmodule Data.Resumes do
   defdelegate delete_resume(resume), to: ResumeLogic
   defdelegate clone_resume(resume, attrs), to: ResumeLogic
   defdelegate create_ratable(ratable_type, attrs), to: RatableLogic
-  defdelegate create_text_only(tag, attrs), to: TextOnlyLogic
+  defdelegate create_text_only(attrs), to: TextOnlyLogic
+  defdelegate get_education(attrs), to: EducationLgic
+  defdelegate create_education(attrs), to: EducationLgic
 end
