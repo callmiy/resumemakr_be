@@ -186,7 +186,7 @@ defmodule Data.SchemaUserTest do
     end
 
     # @tag :skip
-    test "login fails" do
+    test "login fails: invalid password" do
       %{email: email, password: password} = params = RegFactory.params()
       RegFactory.insert(params)
 

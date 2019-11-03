@@ -1,4 +1,4 @@
-defmodule Data.Repo.Migrations.DataMigrateLanguagesToSpoken do
+defmodule Data.Repo.Migrations.DataMigrateRatables do
   import Ecto.Query
   alias Data.Repo
 
@@ -41,8 +41,8 @@ defmodule Data.Repo.Migrations.DataMigrateLanguagesToSpoken do
         Map.take(ratable, ["description", "level"])
         |> Map.merge(%{
           "owner_id" => resume.id,
-          "inserted_at" => resume.inserted_at,
-          "updated_at" => resume.updated_at,
+          "inserted_at" => to_datetime(resume.inserted_at),
+          "updated_at" => to_datetime(resume.updated_at),
           "id" => Ecto.ULID.bingenerate()
         })
       end)
@@ -88,8 +88,17 @@ defmodule Data.Repo.Migrations.DataMigrateLanguagesToSpoken do
     end)
   end
 
-  def migrate_to_tables do
+  def migrate_to_ratables do
     Repo.insert_all("spoken_languages", get_languages_from_resumes())
     Repo.insert_all("supplementary_skills", get_additional_skills_from_resumes())
+  end
+
+  defp to_datetime(%NaiveDateTime{} = n) do
+    {:ok, d} = DateTime.from_naive(n, "Etc/UTC")
+    d
+  end
+
+  defp to_datetime(d) do
+    d
   end
 end

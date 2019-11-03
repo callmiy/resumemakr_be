@@ -1,4 +1,4 @@
-defmodule Data.Repo.Migrations.CreateSpokenLanguages do
+defmodule Data.Repo.Migrations.CreateRatableTables do
   use Ecto.Migration
 
   @start_path Path.expand("")
@@ -14,7 +14,7 @@ defmodule Data.Repo.Migrations.CreateSpokenLanguages do
   end
   |> Code.compile_file()
 
-  alias Data.Repo.Migrations.DataMigrateLanguagesToSpoken
+  alias Data.Repo.Migrations.DataMigrateRatables
 
   def up do
     create_ratable_table(:spoken_languages)
@@ -22,7 +22,7 @@ defmodule Data.Repo.Migrations.CreateSpokenLanguages do
 
     flush()
 
-    DataMigrateLanguagesToSpoken.migrate_to_tables()
+    DataMigrateRatables.migrate_to_ratables()
 
     :resumes
     |> index([:languages], name: "resumes_languages")
@@ -50,12 +50,12 @@ defmodule Data.Repo.Migrations.CreateSpokenLanguages do
 
     flush()
 
-    DataMigrateLanguagesToSpoken.migrate_to_embedded(
+    DataMigrateRatables.migrate_to_embedded(
       "spoken_languages",
       :languages
     )
 
-    DataMigrateLanguagesToSpoken.migrate_to_embedded(
+    DataMigrateRatables.migrate_to_embedded(
       "supplementary_skills",
       :additional_skills
     )
@@ -85,7 +85,7 @@ defmodule Data.Repo.Migrations.CreateSpokenLanguages do
         null: false
       )
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :timestamptz)
     end
 
     table_name

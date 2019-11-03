@@ -8,7 +8,7 @@ defmodule Data.Resumes.RatableLogic do
   alias Data.Resumes.SupplementarySkill
 
   @spec create_ratable(
-          ratabale_type :: Atom.t(),
+          ratable_type :: Atom.t(),
           attrs :: map
         ) ::
           {:error, Ecto.Changeset.t()}

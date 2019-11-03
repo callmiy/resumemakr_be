@@ -89,7 +89,7 @@ defmodule Data.SchemaTypes do
     end)
 
     serialize(fn _ ->
-      raise "The `:file_upload` scalar cannot be returned!"
+      raise "The `:file_upload` scalar cannot be serialized"
     end)
   end
 end
