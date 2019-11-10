@@ -250,7 +250,7 @@ defmodule Data.SchemaResumeTest do
                )
     end
 
-    test "delete resume fails for unknown user" do
+    test "delete resume fails if resume not found" do
       user = RegFactory.insert()
       Factory.insert(user_id: user.id)
 

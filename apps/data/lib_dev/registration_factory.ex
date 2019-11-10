@@ -43,7 +43,7 @@ defmodule Data.RegistrationFactory do
   end
 
   defp all do
-    password = Faker.String.base64()
+    password = "123456"
 
     %{
       source: "password",

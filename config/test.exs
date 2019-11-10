@@ -1,5 +1,7 @@
 use Mix.Config
 
+config :pbkdf2_elixir, :rounds, 1
+
 # Configure your database
 config :data, Data.Repo,
   username: "postgres",

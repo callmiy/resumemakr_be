@@ -9,7 +9,13 @@
 # move said applications out of the umbrella.
 use Mix.Config
 
-config :pbkdf2_elixir, :rounds, 1
+
+secret_key_base = "KdtW92Do6AK1YoulA1y7/CGvrGiJ6L+IlLN9G7FBroVpgH/KG9X9Sg39A62xbkzE"
+
+config :pbkdf2_elixir,
+  digest: :sha256,
+  rounds: 150_000,
+  format: :django
 
 # config :data, Data.Repo, migration_primary_key: [name: :id, type: :binary_id]
 
@@ -24,7 +30,7 @@ config :web,
 # Configures the endpoint
 config :web, Web.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "iRHXBhBVYfypgsBljwSPa1AMFn+M2be+XOZR9OgVsamKMv5KTYRRlYV1WgvzcJDS",
+  secret_key_base: secret_key_base,
   render_errors: [view: Web.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Web.PubSub, adapter: Phoenix.PubSub.PG2]
 
@@ -59,7 +65,11 @@ config :emails, Emails.DefaultImpl.Mailer,
 
 config :data, Data.Guardian,
   issuer: "resumemakr",
-  secret_key: "DfAHXB4gq6YbApF5c5NgBP0kKpaaobjhFodpDzmceiaXfcPMZKDN1sBCTDHQ2RBy"
+  secret_key:  secret_key_base
+
+config :web, Web.Plug.Guardian.Pipeline,
+  module: Data.Guardian,
+  error_handler: Web.Plug.Guardian.Pipeline
 
 config :arc,
   storage: Arc.Storage.Local

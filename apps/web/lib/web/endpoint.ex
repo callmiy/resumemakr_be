@@ -13,16 +13,6 @@ defmodule Web.Endpoint do
     from: @upload_dir,
     gzip: false
 
-  # Serve at "/" the static files from "priv/static" directory.
-  #
-  # You should set gzip to true if you are running phx.digest
-  # when deploying your static files in production.
-  plug Plug.Static,
-    at: "/",
-    from: :web,
-    gzip: false,
-    only: ~w(css fonts images js favicon.ico robots.txt)
-
   plug Plug.RequestId
   plug Plug.Logger
 

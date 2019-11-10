@@ -6,6 +6,8 @@ defmodule Data.Accounts.Credential do
   alias Ecto.Changeset
   alias Data.Accounts.User
 
+  @pbkdf2_elixir_opts Application.get_all_env(:pbkdf2_elixir)
+
   @cast_attrs [
     :source,
     :token,
@@ -58,7 +60,13 @@ defmodule Data.Accounts.Credential do
            }
          } = changes
        ) do
-    put_change(changes, :token, Pbkdf2.hash_pwd_salt(password))
+    salt = Pbkdf2.Base.django_salt(12)
+
+    put_change(
+      changes,
+      :token,
+      Pbkdf2.Base.hash_password(password, salt, @pbkdf2_elixir_opts)
+    )
   end
 
   defp hash_password(changes), do: changes

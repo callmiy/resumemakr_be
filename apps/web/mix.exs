@@ -47,7 +47,6 @@ defmodule Web.MixProject do
       {:absinthe_phoenix, "~> 1.4.0"},
       {:corsica, "~> 1.1"},
       {:mox, "~> 0.5.1", only: :test},
-      {:guardian, "~> 1.1"}
     ]
   end
 
