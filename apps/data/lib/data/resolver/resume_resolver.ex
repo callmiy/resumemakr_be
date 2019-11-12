@@ -146,25 +146,23 @@ defmodule Data.ResumeResolver do
     end
   end
 
-  defp to_string_photo(%PersonalInfo{} = personal_info) do
-    case personal_info.photo do
-      nil ->
-        personal_info
-
-      %{file_name: file_name} ->
-        Map.put(
-          personal_info,
-          :photo,
-          ResumePhoto.url({file_name, personal_info})
-        )
-
-      _ ->
-        personal_info
-    end
-  end
-
   defp to_string_photo(nil) do
     nil
+  end
+
+  defp to_string_photo(%PersonalInfo{photo: nil} = personal_info) do
+    personal_info
+  end
+
+  defp to_string_photo(
+         %PersonalInfo{
+           photo: %{file_name: file_name}
+         } = personal_info
+       ) do
+    %PersonalInfo{
+      personal_info
+      | photo: ResumePhoto.url({file_name, personal_info})
+    }
   end
 
   defp to_string_photo(personal_info) do
