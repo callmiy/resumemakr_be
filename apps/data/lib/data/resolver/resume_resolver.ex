@@ -146,10 +146,6 @@ defmodule Data.ResumeResolver do
     end
   end
 
-  defp to_string_photo(nil) do
-    nil
-  end
-
   defp to_string_photo(%PersonalInfo{photo: nil} = personal_info) do
     personal_info
   end
@@ -175,8 +171,8 @@ defmodule Data.ResumeResolver do
         %Ecto.Association.NotLoaded{} ->
           loader
           |> Dataloader.load(:data, key, root)
-          |> on_load(fn data_source ->
-            assoc = Dataloader.get(data_source, :data, key, root)
+          |> on_load(fn loader ->
+            assoc = Dataloader.get(loader, :data, key, root)
             {:ok, sanitize_child(key, assoc)}
           end)
 

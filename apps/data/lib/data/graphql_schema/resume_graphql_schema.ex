@@ -12,15 +12,11 @@ defmodule Data.ResumeGraphqlSchema do
     field :index, :integer |> non_null()
   end
 
-  @desc "A resume experience"
-  object :experience do
+  @desc "A text only object"
+  object :text_only do
     field :id, non_null(:id)
-    field :achievements, list_of(:string)
-    field :company_name, :string
-    field :from_date, :string
-    field :position, :string
-    field :to_date, :string
-    field :index, :integer |> non_null()
+    field :text, non_null(:string)
+    field :owner_id, non_null(:id)
   end
 
   @desc "A Personal Info"
@@ -36,6 +32,17 @@ defmodule Data.ResumeGraphqlSchema do
     field :photo, :string
   end
 
+  @desc "A resume experience"
+  object :experience do
+    field :id, non_null(:id)
+    field :achievements, list_of(:text_only)
+    field :company_name, :string
+    field :from_date, :string
+    field :position, :string
+    field :to_date, :string
+    field :index, :integer |> non_null()
+  end
+
   @desc "A resume education"
   object :education do
     field :id, non_null(:id)
@@ -43,7 +50,7 @@ defmodule Data.ResumeGraphqlSchema do
     field :from_date, :string
     field :school, :string
     field :to_date, :string
-    field :achievements, list_of(:string)
+    field :achievements, list_of(:text_only)
     field :index, :integer |> non_null()
   end
 
@@ -51,7 +58,7 @@ defmodule Data.ResumeGraphqlSchema do
   object :skill do
     field :id, non_null(:id)
     field :description, :string
-    field :achievements, list_of(:string)
+    field :achievements, list_of(:text_only)
     field :index, :integer |> non_null()
   end
 
@@ -60,7 +67,7 @@ defmodule Data.ResumeGraphqlSchema do
     field :_id, non_null(:id), resolve: fn %{id: id}, _, _ -> {:ok, id} end
     field :title, non_null(:string)
     field :description, :string
-    field :hobbies, list_of(:string)
+    field :hobbies, list_of(:text_only)
 
     field :personal_info, :personal_info do
       resolve(Resolver.get_assoc(:personal_info))
@@ -148,11 +155,6 @@ defmodule Data.ResumeGraphqlSchema do
       input do
         field :title, non_null(:string)
         field :description, :string
-        field :personal_info, :personal_info_input
-        field :education, list_of(:education_input)
-        field :experiences, list_of(:create_experience_input)
-        field :skills, list_of(:create_skill_input)
-        field :hobbies, list_of(:string)
       end
 
       output do
@@ -168,11 +170,6 @@ defmodule Data.ResumeGraphqlSchema do
         field :id, :id |> non_null()
         field :title, :string
         field :description, :string
-        field :personal_info, :personal_info_input
-        field :education, list_of(:education_input)
-        field :experiences, list_of(:create_experience_input)
-        field :skills, list_of(:create_skill_input)
-        field :hobbies, list_of(:string)
       end
 
       output do
@@ -195,7 +192,7 @@ defmodule Data.ResumeGraphqlSchema do
       parsing_node_ids(&Resolver.delete/2, id: :resume) |> resolve()
     end
 
-    @doc "Create a by copying data from an existing resume"
+    @doc "Create a resume by copying data from an existing resume"
     payload field :clone_resume do
       input do
         field :id, :id |> non_null()
