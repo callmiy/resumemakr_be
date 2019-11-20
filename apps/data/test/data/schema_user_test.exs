@@ -16,7 +16,7 @@ defmodule Data.SchemaUserTest do
 
   @moduletag capture_log: true
 
-  @stunden_pzs_token_ablaufen Accounts.stunden_pzs_token_ablaufen()
+  @get_password_reset_token_expiry_in_hours Accounts.get_password_reset_token_expiry_in_hours()
 
   describe "mutation" do
     # @tag :skip
@@ -296,7 +296,7 @@ defmodule Data.SchemaUserTest do
               }} = Absinthe.run(query, Schema, variables: %{"jwt" => jwt <> "9"})
     end
 
-    test "aktualisieren benutzer fehler für unsinn-Token" do
+    test "aktualisieren benutzer fehler für bogus-Token" do
       query_map = Query.refresh()
 
       query = """
@@ -307,7 +307,7 @@ defmodule Data.SchemaUserTest do
         #{query_map.fragments}
       """
 
-      token = "unsinn-token"
+      token = "bogus-token"
 
       assert {:ok,
               %{
@@ -330,14 +330,14 @@ defmodule Data.SchemaUserTest do
       assert {:ok,
               %{
                 data: %{
-                  "anfordernPasswortZuruckSetzen" => %{
+                  "requestPasswordResetToken" => %{
                     "email" => ^email
                   }
                 }
               }} = Absinthe.run(Query.password_recovery(email), Schema)
     end
 
-    test "anfordern password recovery fails if user not found" do
+    test "anfordern password recovery fails: user not found" do
       bogus_email = "me@bogus.com"
 
       error = "Unknown user email: #{bogus_email}"
@@ -352,7 +352,7 @@ defmodule Data.SchemaUserTest do
               }} = Absinthe.run(Query.password_recovery(bogus_email), Schema)
     end
 
-    test "veranderung passwortzurücksetzen erfolgreich" do
+    test "Password reset succeeds" do
       alte_passwort = "alte passwort"
       neue_passwort = "neue passwort"
 
@@ -367,7 +367,7 @@ defmodule Data.SchemaUserTest do
       {:ok, _anmelden_info} =
         Accounts.update_credential(user.credential, %{
           recovery_token: jwt,
-          recovery_token_expires: Timex.now() |> Timex.shift(hours: @stunden_pzs_token_ablaufen)
+          recovery_token_expires: Timex.now() |> Timex.shift(hours: @get_password_reset_token_expiry_in_hours)
         })
 
       id = to_global_id(:user, user.id, Schema)
@@ -383,7 +383,7 @@ defmodule Data.SchemaUserTest do
       assert {:ok,
               %{
                 data: %{
-                  "veranderungPasswortZuruckSetzen" => %{
+                  "resetPassword" => %{
                     "user" => %{
                       "id" => ^id,
                       "jwt" => _
@@ -392,7 +392,7 @@ defmodule Data.SchemaUserTest do
                 }
               }} =
                Absinthe.run(
-                 Query.veranderung_passwort_zuruck_setzen(),
+                 Query.reset_password(),
                  Schema,
                  variables: variables
                )
@@ -407,7 +407,7 @@ defmodule Data.SchemaUserTest do
         #{query_map.fragments}
       """
 
-      falsch_einloggen_variables = %{
+      incorrect_login_variables = %{
         "input" => %{
           "email" => user.email,
           "password" => alte_passwort
@@ -421,10 +421,10 @@ defmodule Data.SchemaUserTest do
                Absinthe.run(
                  query,
                  Schema,
-                 variables: falsch_einloggen_variables
+                 variables: incorrect_login_variables
                )
 
-      richtige_einloggen_variables = %{
+      correct_login_variables = %{
         "input" => %{
           "email" => user.email,
           "password" => neue_passwort
@@ -445,11 +445,11 @@ defmodule Data.SchemaUserTest do
                Absinthe.run(
                  query,
                  Schema,
-                 variables: richtige_einloggen_variables
+                 variables: correct_login_variables
                )
     end
 
-    test "veranderung passwortzurücksetzen scheitert wenn Token ist wiederbenutzt" do
+    test "Password reset fails: token already used." do
       alte_passwort = "alte passwort"
       neue_passwort = "neue passwort"
 
@@ -464,7 +464,7 @@ defmodule Data.SchemaUserTest do
       {:ok, %Credential{} = _anmelden_info} =
         Accounts.update_credential(user.credential, %{
           recovery_token: jwt,
-          recovery_token_expires: Timex.now() |> Timex.shift(hours: @stunden_pzs_token_ablaufen)
+          recovery_token_expires: Timex.now() |> Timex.shift(hours: @get_password_reset_token_expiry_in_hours)
         })
 
       {:ok, %Credential{} = _anmelden_info} =
@@ -488,13 +488,13 @@ defmodule Data.SchemaUserTest do
                 errors: [%{message: ^nachricht}]
               }} =
                Absinthe.run(
-                 Query.veranderung_passwort_zuruck_setzen(),
+                 Query.reset_password(),
                  Schema,
                  variables: variables
                )
     end
 
-    test "veranderung passwortzurücksetzen scheitert wenn Token ist abgelaufen" do
+    test "Password reset fails: token expired" do
       alte_passwort = "alte passwort"
       neue_passwort = "neue passwort"
 
@@ -527,13 +527,13 @@ defmodule Data.SchemaUserTest do
                 errors: [%{message: ^nachricht}]
               }} =
                Absinthe.run(
-                 Query.veranderung_passwort_zuruck_setzen(),
+                 Query.reset_password(),
                  Schema,
                  variables: variables
                )
     end
 
-    test "veranderung passwortzurücksetzen scheitert wenn Token ist falsch" do
+    test "Password reset fails: invalid token" do
       alte_passwort = "alte passwort"
       neue_passwort = "neue passwort"
 
@@ -567,32 +567,32 @@ defmodule Data.SchemaUserTest do
                 errors: [%{message: ^nachricht}]
               }} =
                Absinthe.run(
-                 Query.veranderung_passwort_zuruck_setzen(),
+                 Query.reset_password(),
                  Schema,
                  variables: variables
                )
     end
 
-    test "Pzs Token kontrollieren erfolgreich" do
+    test "Password token confirmation succeeds" do
       user = RegFactory.insert()
       {:ok, jwt, _claim} = Data.Guardian.encode_and_sign(user)
-      {:ok, _} = Accounts.anfordern_pzs(user.credential, jwt)
+      {:ok, _} = Accounts.get_password_token(user.credential, jwt)
 
       assert {:ok,
               %{
                 data: %{
-                  "pzsTokenKontrollieren" => %{
+                  "confirmPasswordResetToken" => %{
                     "token" => ^jwt
                   }
                 }
               }} =
                Absinthe.run(
-                 Query.pzs_token_kontrollieren(jwt),
+                 Query.validate_password_reset_token(jwt),
                  Schema
                )
     end
 
-    test "Pzs Token kontrollieren scheitert wenn Token ist abgelaufen" do
+    test "Password reset token confirmation fails: token expires" do
       user = RegFactory.insert()
       {:ok, jwt, _claim} = Data.Guardian.encode_and_sign(user)
 
@@ -613,13 +613,13 @@ defmodule Data.SchemaUserTest do
                 ]
               }} =
                Absinthe.run(
-                 Query.pzs_token_kontrollieren(jwt),
+                 Query.validate_password_reset_token(jwt),
                  Schema
                )
     end
 
-    test "Pzs Token kontrollieren scheitert wenn Token kann nicht gefunden" do
-      falsch_token = "falsch token"
+    test "Password reset token confirmation fails if token not found" do
+      falsch_token = "wrong token"
       nachricht = Resolver.nicht_berechtigung()
 
       assert {:ok,
@@ -631,7 +631,7 @@ defmodule Data.SchemaUserTest do
                 ]
               }} =
                Absinthe.run(
-                 Query.pzs_token_kontrollieren(falsch_token),
+                 Query.validate_password_reset_token(falsch_token),
                  Schema
                )
     end

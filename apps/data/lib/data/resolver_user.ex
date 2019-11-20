@@ -70,12 +70,12 @@ defmodule Data.ResolverUser do
     end
   end
 
-  def anfordern_pzs(_root, %{email: email} = args, _) do
+  def get_password_token(_root, %{email: email} = args, _) do
     with %Credential{
            user: user
          } = credential <- Accounts.get_credential_by(args),
          {:ok, jwt, _claim} <- Guardian.encode_and_sign(user),
-         {:ok, result} <- Accounts.anfordern_pzs(credential, jwt) do
+         {:ok, result} <- Accounts.get_password_token(credential, jwt) do
       {:ok, result}
     else
       nil ->
@@ -86,10 +86,10 @@ defmodule Data.ResolverUser do
     end
   end
 
-  def veranderung_pzs(_source, params, _) do
-    {token, aktualisieren_params} = Map.pop(params, :token)
+  def reset_password(_source, params, _) do
+    {token, password_update_token} = Map.pop(params, :token)
 
-    with {:ok, %{user: user}} <- Accounts.bekommt_anmelden_info_pzs(token, aktualisieren_params),
+    with {:ok, %{user: user}} <- Accounts.bekommt_anmelden_info_pzs(token, password_update_token),
          {:ok, jwt, _claim} <- Guardian.encode_and_sign(user) do
       {:ok, %{user: %User{user | jwt: jwt}}}
     else
@@ -106,8 +106,8 @@ defmodule Data.ResolverUser do
     end
   end
 
-  def pzs_token_kontrollieren(_, %{token: token}, _) do
-    case Accounts.pzs_token_nicht_ablaufen(token, true) do
+  def password_reset_token_valid?(_, %{token: token}, _) do
+    case Accounts.password_reset_token_not_expired(token, true) do
       %{} ->
         {:ok, %{token: token}}
 

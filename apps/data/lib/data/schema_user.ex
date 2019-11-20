@@ -27,12 +27,12 @@ defmodule Data.SchemaUser do
   end
 
   @desc "Create password recovery success response"
-  object :anfordern_passwort_zuruck_setzen do
+  object :request_password_reset_token do
     field(:email, :string |> non_null)
   end
 
   @desc "PZS Token Kontrollieren Erfolgeich Nachricht"
-  object :pzs_token_kontrollieren_nachricht do
+  object :password_token_validity_message do
     field(:token, :string |> non_null)
   end
 
@@ -84,13 +84,13 @@ defmodule Data.SchemaUser do
       resolve(&Resolver.update/3)
     end
 
-    field :anfordern_passwort_zuruck_setzen, :anfordern_passwort_zuruck_setzen do
+    field :request_password_reset_token, :request_password_reset_token do
       arg(:email, :string |> non_null())
-      resolve(&Resolver.anfordern_pzs/3)
+      resolve(&Resolver.get_password_token/3)
     end
 
     @doc "Reset user password"
-    payload field(:veranderung_passwort_zuruck_setzen) do
+    payload field(:reset_password) do
       input do
         field(:token, non_null(:string))
         field(:password, non_null(:string))
@@ -101,7 +101,7 @@ defmodule Data.SchemaUser do
         field(:user, :user)
       end
 
-      resolve(&Resolver.veranderung_pzs/3)
+      resolve(&Resolver.reset_password/3)
     end
   end
 
@@ -113,10 +113,10 @@ defmodule Data.SchemaUser do
       resolve(&Resolver.refresh/3)
     end
 
-    @desc "Kontrollieren dass Passwortzurücksetzen Token is nicht falsch"
-    field :pzs_token_kontrollieren, :pzs_token_kontrollieren_nachricht do
+    @desc "Confirm that password token is valid"
+    field :confirm_password_reset_token, :password_token_validity_message do
       arg(:token, non_null(:string))
-      resolve(&Resolver.pzs_token_kontrollieren/3)
+      resolve(&Resolver.password_reset_token_valid?/3)
     end
   end
 end

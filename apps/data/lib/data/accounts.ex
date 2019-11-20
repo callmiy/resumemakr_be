@@ -7,7 +7,7 @@ defmodule Data.Accounts do
   alias Data.Accounts.Credential
   alias Data.Accounts.User
 
-  @stunden_pzs_token_ablaufen 24
+  @password_reset_token_expires_in_hours 24
 
   @authenticate_user_exception_header "\n\nException while getting experience with:"
   @stacktrace "\n\n---------------STACKTRACE---------\n\n"
@@ -168,7 +168,7 @@ defmodule Data.Accounts do
 
   """
 
-  def pzs_token_nicht_ablaufen(token, exec \\ false) do
+  def password_reset_token_not_expired(token, exec \\ false) do
     query =
       where(
         Credential,
@@ -183,20 +183,20 @@ defmodule Data.Accounts do
 
   def bekommt_anmelden_info_pzs(token, params) do
     case token
-         |> pzs_token_nicht_ablaufen()
+         |> password_reset_token_not_expired()
          |> join(:inner, [c], u in assoc(c, :user))
          |> preload([c, u], user: u)
          |> Repo.one() do
       nil ->
         nil
 
-      anmelden_info ->
-        case hash_passwort(params) do
+      login_info ->
+        case hash_password(params) do
           nil ->
             nil
 
           hash ->
-            update_credential(anmelden_info, %{
+            update_credential(login_info, %{
               recovery_token: nil,
               recovery_token_expires: nil,
               token: hash
@@ -205,11 +205,11 @@ defmodule Data.Accounts do
     end
   end
 
-  defp hash_passwort(%{password: password, password_confirmation: password}) do
+  defp hash_password(%{password: password, password_confirmation: password}) do
     Pbkdf2.hash_pwd_salt(password)
   end
 
-  defp hash_passwort(_), do: nil
+  defp hash_password(_), do: nil
 
   ################################## USERS ##################################
 
@@ -291,17 +291,17 @@ defmodule Data.Accounts do
 
   def get_user_by(attrs), do: Repo.get_by(User, attrs)
 
-  def anfordern_pzs(%Credential{} = credential, jwt) do
+  def get_password_token(%Credential{} = credential, jwt) do
     with {:ok, %{user: %{email: email}}} <-
            update_credential(credential, %{
              recovery_token: jwt,
              recovery_token_expires:
-               Timex.now() |> Timex.shift(hours: @stunden_pzs_token_ablaufen)
+               Timex.now() |> Timex.shift(hours: @password_reset_token_expires_in_hours)
            }),
          :ok <- Emails.send_password_recovery(email, jwt) do
       {:ok, %{email: email}}
     end
   end
 
-  def stunden_pzs_token_ablaufen, do: @stunden_pzs_token_ablaufen
+  def get_password_reset_token_expiry_in_hours, do: @password_reset_token_expires_in_hours
 end

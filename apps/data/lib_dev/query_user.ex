@@ -74,21 +74,21 @@ defmodule Data.QueryUser do
   @doc "password_recovery"
   def password_recovery(email) do
     """
-      mutation AnfordernBenutzerPasswortZuruckSetzen {
-        anfordernPasswortZuruckSetzen(email: "#{email}") {
+      mutation RequestPasswordResetToken{
+        requestPasswordResetToken(email: "#{email}") {
           email
         }
       }
     """
   end
 
-  @doc "veranderung_passwort_zuruck_setzen"
-  def veranderung_passwort_zuruck_setzen do
+  @doc "reset_password"
+  def reset_password do
     {_, user_frag} = all_fields_fragment()
 
     """
-      mutation VeranderungPasswortZuruckSetzen($input: VeranderungPasswortZuruckSetzenInput!) {
-        veranderungPasswortZuruckSetzen(input: $input) {
+      mutation ResetPassword($input: ResetPasswordInput!) {
+        resetPassword(input: $input) {
           user {
             ...#{@frag_name}
           }
@@ -99,11 +99,10 @@ defmodule Data.QueryUser do
     """
   end
 
-  @doc "pzs_token_kontrollieren"
-  def pzs_token_kontrollieren(token) do
+  def validate_password_reset_token(token) do
     """
-      query PzsTokenKontrollieren {
-        pzsTokenKontrollieren(token: "#{token}") {
+      query ConfirmPasswordResetToken {
+        confirmPasswordResetToken(token: "#{token}") {
           token
         }
       }
