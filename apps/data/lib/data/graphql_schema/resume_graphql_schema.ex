@@ -12,13 +12,6 @@ defmodule Data.ResumeGraphqlSchema do
     field :index, :integer |> non_null()
   end
 
-  @desc "A text only object"
-  object :text_only do
-    field :id, non_null(:id)
-    field :text, non_null(:string)
-    field :owner_id, non_null(:id)
-  end
-
   @desc "A Personal Info"
   object :personal_info do
     field :id, non_null(:id)
