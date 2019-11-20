@@ -1,34 +1,53 @@
 defmodule Data.Repo.Migrations.AddResumeRatedIndex do
   use Ecto.Migration
+  import Ecto.Query
+  alias Data.Repo
 
   def change do
-    Data.Resumes.Resume
-    |> Data.Repo.all()
-    |> Enum.map(fn r ->
-      case r
-           |> Map.take([:additional_skills, :languages])
-           |> Enum.reduce(%{}, fn
-             {_, []}, acc ->
-               acc
+    from(
+      r in "resumes",
+      select: {
+        r.id,
+        [
+          {:additional_skills, r.additional_skills},
+          {:languages, r.languages}
+        ]
+      }
+    )
+    |> Repo.all()
+    |> Enum.each(fn {resume_id, attrs_for_update} ->
+      attrs_for_update_with_indices =
+        Enum.reduce(attrs_for_update, [], fn
+          {_, []}, acc ->
+            acc
 
-             {k, v}, acc ->
-               updated_with_index =
-                 v
-                 |> Enum.with_index(1)
-                 |> Enum.map(fn {d, index} ->
-                   d
-                   |> Map.from_struct()
-                   |> Map.put(:index, index)
-                 end)
+          {k, v}, acc ->
+            values_with_indices =
+              v
+              |> Enum.with_index(1)
+              |> Enum.map(fn
+                {v, index} ->
+                  Map.put(v, :index, index)
+              end)
 
-               Map.put(acc, k, updated_with_index)
-           end) do
-        update when update == %{} ->
-          :ok
+            [
+              {k, values_with_indices} | acc
+            ]
+        end)
+        |> case do
+          [] ->
+            :ok
 
-        update ->
-          Data.Resumes.update_resume(r, update)
-      end
+          attrs_for_update_with_indices ->
+            from(
+              r in "resumes",
+              where: r.id == ^resume_id,
+              update: [
+                set: ^attrs_for_update_with_indices
+              ]
+            )
+            |> Repo.update_all([])
+        end
     end)
   end
 end
