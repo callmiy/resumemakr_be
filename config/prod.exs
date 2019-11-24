@@ -12,8 +12,6 @@ config :pbkdf2_elixir, :rounds, 100_000
 # which you should run after static files are built and
 # before starting your production server.
 
-front_end_url = "https://resumemakr.netlify.com"
-
 database_url =
   System.get_env("DATABASE_URL") ||
     raise """
@@ -36,39 +34,40 @@ config :data, Data.Repo,
     |> String.to_integer()
     |> Kernel.||(18)
 
+port =
+  System.get_env("PORT")
+  |> Kernel.||(raise "environment variable PORT is missing")
+  |> String.to_integer()
+
 config :web, Web.Endpoint,
-  url: [
-    scheme: "https",
-    host: "resumemakr.herokuapp.com",
-    port: 443
-  ],
-  force_ssl: [rewrite_on: [:x_forwarded_proto]],
+  http: [:inet6, port: port],
+  url: [scheme: "https", host: "resumemakr.herokuapp.com", port: port],
   secret_key_base: secret_key_base,
+  force_ssl: [rewrite_on: [:x_forwarded_proto]],
   check_origin: [
-    "https://resumemakr.herokuapp.com",
-    front_end_url
+    "//localhost",
+    "//resumemakr.netlify.com",
+    "//resumemakr-staging.netlify.com"
   ]
 
-config :web, front_end_url: front_end_url
+config :web, front_end_url: "https://resumemakr.netlify.com"
 
 config :data, Data.Guardian,
   issuer: "resumemakr",
   secret_key: secret_key_base
-
 config :arc,
   storage: Arc.Storage.GCS,
   storage_dir: "resumemakr",
   bucket: System.get_env("BUCKET")
 
-config :goth,
-  json: System.get_env("GOTH_CONFIG")
-
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key
-# to the previous section and set your `:url` port to 443:
+# to the prev
+i   ous section and set y(ur `:url` port to 443:
 #
-#     config :web, Web.Endpoint,
+    #         config :web, Web.Endpoint,
+    )
 #       ...
 #       url: [host: "example.com", port: 443],
 #       https: [
