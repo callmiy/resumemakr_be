@@ -108,4 +108,20 @@ defmodule Data.QueryUser do
       }
     """
   end
+
+  def reset_password_simple do
+    {_, user_frag} = all_fields_fragment()
+
+    """
+      mutation ResetPasswordSimple($input: ResetPasswordSimpleInput!) {
+        resetPasswordSimple(input: $input) {
+          user {
+            ...#{@frag_name}
+          }
+        }
+      }
+
+      #{user_frag}
+    """
+  end
 end

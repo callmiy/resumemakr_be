@@ -367,7 +367,8 @@ defmodule Data.SchemaUserTest do
       {:ok, _anmelden_info} =
         Accounts.update_credential(user.credential, %{
           recovery_token: jwt,
-          recovery_token_expires: Timex.now() |> Timex.shift(hours: @get_password_reset_token_expiry_in_hours)
+          recovery_token_expires:
+            Timex.now() |> Timex.shift(hours: @get_password_reset_token_expiry_in_hours)
         })
 
       id = to_global_id(:user, user.id, Schema)
@@ -464,11 +465,12 @@ defmodule Data.SchemaUserTest do
       {:ok, %Credential{} = _anmelden_info} =
         Accounts.update_credential(user.credential, %{
           recovery_token: jwt,
-          recovery_token_expires: Timex.now() |> Timex.shift(hours: @get_password_reset_token_expiry_in_hours)
+          recovery_token_expires:
+            Timex.now() |> Timex.shift(hours: @get_password_reset_token_expiry_in_hours)
         })
 
       {:ok, %Credential{} = _anmelden_info} =
-        Accounts.bekommt_anmelden_info_pzs(jwt, %{
+        Accounts.reset_password(jwt, %{
           password: neue_passwort,
           password_confirmation: neue_passwort
         })
@@ -634,6 +636,76 @@ defmodule Data.SchemaUserTest do
                  Query.validate_password_reset_token(falsch_token),
                  Schema
                )
+    end
+  end
+
+  describe "reset password simple" do
+    test "succeeds" do
+      user = RegFactory.insert()
+      email = user.email
+      password = "ilovemummy1234"
+
+      variables = %{
+        "input" =>
+          %{
+            email: email,
+            password: password,
+            password_confirmation: password
+          }
+          |> RegFactory.stringify()
+      }
+
+      assert {
+               :ok,
+               %{
+                 data: %{
+                   "resetPasswordSimple" => %{
+                     "user" => %{
+                       "email" => ^email
+                     }
+                   }
+                 }
+               }
+             } =
+               Absinthe.run(
+                 Query.reset_password_simple(),
+                 Schema,
+                 variables: variables
+               )
+    end
+
+    test "fails: passwords don't match" do
+      user = RegFactory.insert()
+      email = user.email
+      password = "ilovemummy123"
+
+      variables = %{
+        "input" =>
+          %{
+            email: email,
+            password: password,
+            password_confirmation: password <> "4"
+          }
+          |> RegFactory.stringify()
+      }
+
+      assert {
+               :ok,
+               %{
+                 errors: [
+                   %{
+                     message: error
+                   }
+                 ]
+               }
+             } =
+               Absinthe.run(
+                 Query.reset_password_simple(),
+                 Schema,
+                 variables: variables
+               )
+
+      assert error =~ "password"
     end
   end
 

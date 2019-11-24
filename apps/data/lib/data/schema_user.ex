@@ -89,7 +89,7 @@ defmodule Data.SchemaUser do
       resolve(&Resolver.get_password_token/3)
     end
 
-    @doc "Reset user password"
+    @doc "Reset user password for user with token"
     payload field(:reset_password) do
       input do
         field(:token, non_null(:string))
@@ -101,7 +101,23 @@ defmodule Data.SchemaUser do
         field(:user, :user)
       end
 
-      resolve(&Resolver.reset_password/3)
+      resolve(&Resolver.reset_password/2)
+    end
+
+
+    @doc "Reset user password for user using email"
+    payload field(:reset_password_simple) do
+      input do
+        field(:email, non_null(:string))
+        field(:password, non_null(:string))
+        field(:password_confirmation, non_null(:string))
+      end
+
+      output do
+        field(:user, :user)
+      end
+
+      resolve(&Resolver.reset_password_simple/2)
     end
   end
 

@@ -157,13 +157,13 @@ defmodule Data.Accounts do
   Aktualisiert ein anmelden info
 
   ## Beispiele
-      iex> bekommt_anmelden_info_pzs(nil, %{field: new_value})
+      iex> reset_password(nil, %{field: new_value})
       nil
 
-      iex> bekommt_anmelden_info_pzs(token, %{password: x, confirm_password: x})
+      iex> reset_password(token, %{password: x, confirm_password: x})
       {:ok, %Credential{}}
 
-      iex> bekommt_anmelden_info_pzs(token, %{field: bad_value})
+      iex> reset_password(token, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
@@ -179,9 +179,9 @@ defmodule Data.Accounts do
     if exec, do: Repo.one(query), else: query
   end
 
-  def bekommt_anmelden_info_pzs(nil, _), do: nil
+  def reset_password(nil, _), do: nil
 
-  def bekommt_anmelden_info_pzs(token, params) do
+  def reset_password(token, params) do
     case token
          |> password_reset_token_not_expired()
          |> join(:inner, [c], u in assoc(c, :user))
@@ -202,6 +202,18 @@ defmodule Data.Accounts do
               token: hash
             })
         end
+    end
+  end
+
+  def reset_password_simple(%Credential{} = credential, params) do
+    case hash_password(params) do
+      nil ->
+        nil
+
+      hash ->
+        update_credential(credential, %{
+          token: hash
+        })
     end
   end
 
@@ -289,7 +301,32 @@ defmodule Data.Accounts do
     User.changeset(user, attrs)
   end
 
-  def get_user_by(attrs), do: Repo.get_by(User, attrs)
+  def get_user_by(attrs) do
+    attrs
+    |> Enum.reduce(User, &get_user_by_p(&2, &1))
+    |> join(:inner, [u], u in assoc(u, :credential))
+    |> preload([u, c], credential: c)
+    |> Repo.all()
+    |> case do
+      [user] ->
+        user
+
+      _ ->
+        nil
+    end
+  end
+
+  defp get_user_by_p(query, {:id, id}) do
+    where(query, [u], u.id == ^id)
+  end
+
+  defp get_user_by_p(query, {:email, email}) do
+    where(query, [u], u.email == ^email)
+  end
+
+  defp get_user_by_p(query, _) do
+    query
+  end
 
   def get_password_token(%Credential{} = credential, jwt) do
     with {:ok, %{user: %{email: email}}} <-

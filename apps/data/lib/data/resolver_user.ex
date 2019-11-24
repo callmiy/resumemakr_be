@@ -86,10 +86,10 @@ defmodule Data.ResolverUser do
     end
   end
 
-  def reset_password(_source, params, _) do
+  def reset_password(params, _) do
     {token, password_update_token} = Map.pop(params, :token)
 
-    with {:ok, %{user: user}} <- Accounts.bekommt_anmelden_info_pzs(token, password_update_token),
+    with {:ok, %{user: user}} <- Accounts.reset_password(token, password_update_token),
          {:ok, jwt, _claim} <- Guardian.encode_and_sign(user) do
       {:ok, %{user: %User{user | jwt: jwt}}}
     else
@@ -113,6 +113,28 @@ defmodule Data.ResolverUser do
 
       _ ->
         Resolver.unauthorized()
+    end
+  end
+
+  def reset_password_simple(params, _) do
+    with %User{} = user <- Accounts.get_user_by(%{email: params.email}),
+         {
+           :ok,
+           %Credential{}
+         } <- Accounts.reset_password_simple(user.credential, params),
+         {:ok, jwt, _claim} <- Guardian.encode_and_sign(user) do
+      {:ok, %{user: %User{user | jwt: jwt}}}
+    else
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {
+          :error,
+          changeset.errors
+          |> Resolver.errors_to_map()
+          |> Jason.encode!()
+        }
+
+      nil ->
+        {:error, "user not found or passwords don't match"}
     end
   end
 end
