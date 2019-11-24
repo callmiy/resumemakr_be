@@ -41,9 +41,13 @@ port =
 
 config :web, Web.Endpoint,
   http: [:inet6, port: port],
-  url: [scheme: "https", host: "resumemakr.herokuapp.com", port: port],
-  secret_key_base: secret_key_base,
+  url: [
+    scheme: "https",
+    host: "resumemakr.herokuapp.com",
+    port: port
+  ],
   force_ssl: [rewrite_on: [:x_forwarded_proto]],
+  secret_key_base: secret_key_base,
   check_origin: [
     "//localhost",
     "//resumemakr.netlify.com",
@@ -55,19 +59,21 @@ config :web, front_end_url: "https://resumemakr.netlify.com"
 config :data, Data.Guardian,
   issuer: "resumemakr",
   secret_key: secret_key_base
+
 config :arc,
   storage: Arc.Storage.GCS,
   storage_dir: "resumemakr",
   bucket: System.get_env("BUCKET")
 
+config :goth,
+  json: System.get_env("GOTH_CONFIG")
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key
-# to the prev
-i   ous section and set y(ur `:url` port to 443:
+# to the previous section and set your `:url` port to 443:
 #
-    #         config :web, Web.Endpoint,
-    )
+#     config :web, Web.Endpoint,
 #       ...
 #       url: [host: "example.com", port: 443],
 #       https: [
