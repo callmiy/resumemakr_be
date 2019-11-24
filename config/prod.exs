@@ -14,21 +14,54 @@ config :pbkdf2_elixir, :rounds, 100_000
 
 front_end_url = "https://resumemakr.netlify.com"
 
+database_url =
+  System.get_env("DATABASE_URL") ||
+    raise """
+    environment variable DATABASE_URL is missing.
+    For example: ecto://USER:PASS@HOST/DATABASE
+    """
+
+secret_key_base =
+  System.get_env("SECRET_KEY_BASE") ||
+    raise """
+    environment variable SECRET_KEY_BASE is missing.
+    You can generate one by calling: mix phx.gen.secret
+    """
+
+config :data, Data.Repo,
+  # ssl: true,
+  url: database_url,
+  pool_size:
+    System.get_env("POOL_SIZE")
+    |> String.to_integer()
+    |> Kernel.||(18)
+
 config :web, Web.Endpoint,
-  load_from_system_env: true,
   url: [
     scheme: "https",
     host: "resumemakr.herokuapp.com",
     port: 443
   ],
   force_ssl: [rewrite_on: [:x_forwarded_proto]],
-  secret_key_base: System.get_env("SECRET_KEY_BASE"),
+  secret_key_base: secret_key_base,
   check_origin: [
     "https://resumemakr.herokuapp.com",
     front_end_url
   ]
 
 config :web, front_end_url: front_end_url
+
+config :data, Data.Guardian,
+  issuer: "resumemakr",
+  secret_key: secret_key_base
+
+config :arc,
+  storage: Arc.Storage.GCS,
+  storage_dir: "resumemakr",
+  bucket: System.get_env("BUCKET")
+
+config :goth,
+  json: System.get_env("GOTH_CONFIG")
 
 # ## SSL Support
 #
