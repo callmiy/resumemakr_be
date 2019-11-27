@@ -3,7 +3,7 @@ defmodule Data.Repo do
     otp_app: :data,
     adapter: Ecto.Adapters.Postgres
 
-  if Mix.env() != :prod do
+  if Application.get_env(:resumemakr, :is_e2e) do
     def truncate_all do
       """
         TRUNCATE TABLE

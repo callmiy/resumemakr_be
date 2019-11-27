@@ -7,16 +7,8 @@ defmodule Web.Router do
     plug(Web.Plug.AbsintheContext)
   end
 
-  if Mix.env() != :prod do
-    pipeline :util do
-      plug(:accepts, ["json"])
-    end
-
-    scope "/iennc67hx1" do
-      pipe_through(:util)
-
-      post("/", Web.UtilController, :start)
-    end
+  if Application.get_env(:resumemakr, :is_e2e) do
+    post("/iennc67hx1", Web.UtilController, :start)
   end
 
   scope "/" do
@@ -30,14 +22,27 @@ defmodule Web.Router do
       json_codec: Jason
     )
 
-    if Mix.env() == :dev do
+    if Application.get_env(:web, :use_graphiql) do
       forward(
-        "/graphql",
+        "/___graphiql",
         Absinthe.Plug.GraphiQL,
         schema: Data.Schema,
         context: %{pubsub: Web.Endpoint},
         json_codec: Jason
       )
+    end
+  end
+end
+
+if Application.get_env(:resumemakr, :is_e2e) do
+  defmodule Web.UtilController do
+    use Web, :controller
+
+    alias Data.Repo
+
+    def start(conn, _) do
+      Repo.truncate_all()
+      json(conn, %{ok: "ok"})
     end
   end
 end

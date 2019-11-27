@@ -27,3 +27,6 @@ config :web, front_end_url: "http://localhost:" <> front_end_port
 config :web, Web.Endpoint,
   http: [port: server_port],
   server: true
+
+config :resumemakr,
+  is_e2e: true
