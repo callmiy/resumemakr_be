@@ -220,4 +220,49 @@ defmodule Data.ResolverResume do
   end
 
   defp convert_from_global(attrs), do: attrs
+
+  def resolve_update_resume_payload(%{resume: _}, _) do
+    :resume_success
+  end
+
+  def resolve_update_resume_payload(_, _) do
+    :update_resume_error
+  end
+
+  def update_resume_minimal(
+        %{
+          input: args
+        },
+        %{context: %{current_user: user}}
+      ) do
+    {id, new_args} = Map.pop(args, :id)
+
+    {:ok, %{id: id}} = from_global_id(id, Data.Schema)
+
+    case Resumes.get_resume_by(id: id, user_id: user.id) do
+      nil ->
+        {
+          :ok,
+          %{
+            error: "Resume you are updating does not exist"
+          }
+        }
+
+      resume ->
+        case Resumes.update_resume(resume, new_args) do
+          {:ok, updated_resume} ->
+            {
+              :ok,
+              wrapped(updated_resume)
+            }
+
+          {:error, changeset} ->
+            {
+              :ok,
+              changeset.errors
+              |> Resolver.errors_to_map()
+            }
+        end
+    end
+  end
 end

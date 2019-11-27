@@ -6,7 +6,7 @@ defmodule Data.SchemaResumeTest do
   alias Data.Schema
   alias Data.FactoryResume, as: Factory
   alias Data.FactoryRegistration, as: RegFactory
-  alias Data.QueryResume, as: Query
+  alias Data.ResumeQuery, as: Query
   alias Data.Resumes
   alias Data.Uploaders.ResumePhoto
 
@@ -1386,6 +1386,42 @@ defmodule Data.SchemaResumeTest do
                )
 
       assert photo =~ resume.personal_info.photo.file_name
+    end
+  end
+
+  describe "update resume minimal" do
+    test "succeeds" do
+      user = RegFactory.insert()
+      resume = Factory.insert(user_id: user.id)
+      updated_title = resume.title <> "1"
+      id = to_global_id(:resume, resume.id, Schema)
+
+      variables = %{
+        "input" => %{
+          "id" => id,
+          "title" => updated_title
+        }
+      }
+
+      assert {
+               :ok,
+               %{
+                 data: %{
+                   "updateResumeMinimal" => %{
+                     "resume" => %{
+                       "id" => _,
+                       "title" => ^updated_title
+                     }
+                   }
+                 }
+               }
+             } =
+               Absinthe.run(
+                 Query.update_minimal(),
+                 Schema,
+                 variables: variables,
+                 context: context(user)
+               )
     end
   end
 

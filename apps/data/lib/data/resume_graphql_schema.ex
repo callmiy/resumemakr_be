@@ -84,6 +84,27 @@ defmodule Data.SchemaResume do
     field :updated_at, non_null(:iso_datetime)
   end
 
+  object :resume_success do
+    field :resume, :resume
+  end
+
+  object :update_resume_error_fields do
+    field :title, :string
+    field :description, :string
+    field :error, :string
+  end
+
+  object :update_resume_error do
+    field :error, :update_resume_error_fields
+  end
+
+  union :update_resume_minimal_payload do
+    types([:resume_success, :update_resume_error])
+    resolve_type(&Resolver.resolve_update_resume_payload/2)
+  end
+
+  ###################### START INPUT OBJECTS ###############################
+
   @desc "Variables for creating an object with a rating"
   input_object :rated_input do
     field :id, :id
@@ -143,6 +164,19 @@ defmodule Data.SchemaResume do
     field :title, :string
   end
 
+  @desc ~S"""
+    variables for updating minimal attributes of resume.
+  """
+  input_object :update_resume_minimal_input do
+    field :id, non_null(:id)
+    field :title, :string
+    field :description, :string
+  end
+
+  ###################### END INPUT OBJECTS ###############################
+
+  ###################### MUTATIONS ###############################
+
   @desc "Mutations allowed on Resume object"
   object :resume_mutation do
     @doc "Create a resume"
@@ -188,7 +222,7 @@ defmodule Data.SchemaResume do
       parsing_node_ids(&Resolver.update/2, id: :resume) |> resolve()
     end
 
-    @doc "Delete a resume"
+    @desc "Delete a resume"
     payload field :delete_resume do
       input do
         field :id, :id |> non_null()
@@ -201,7 +235,7 @@ defmodule Data.SchemaResume do
       parsing_node_ids(&Resolver.delete/2, id: :resume) |> resolve()
     end
 
-    @doc "Create a by copying data from an existing resume"
+    @desc "Create a resume by copying data from an existing resume"
     payload field :clone_resume do
       input do
         field :id, :id |> non_null()
@@ -215,7 +249,17 @@ defmodule Data.SchemaResume do
 
       parsing_node_ids(&Resolver.clone/2, id: :resume) |> resolve()
     end
+
+    @desc ~S"""
+      mutation - minimally update a resume
+    """
+    field :update_resume_minimal, :update_resume_minimal_payload do
+      arg(:input, non_null(:update_resume_minimal_input))
+      resolve(&Resolver.update_resume_minimal/2)
+    end
   end
+
+  ###################### END MUTATIONS ###############################
 
   @desc "Queries allowed on Resume object"
   object :resume_query do

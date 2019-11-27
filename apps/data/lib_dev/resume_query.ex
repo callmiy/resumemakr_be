@@ -1,4 +1,4 @@
-defmodule Data.QueryResume do
+defmodule Data.ResumeQuery do
   @all_fields_frag_name "ResumeAllFieldsFrag"
   @frag_name "ResumeFrag"
   @frag_name_rated "RatedFrag"
@@ -200,6 +200,32 @@ defmodule Data.QueryResume do
       }
 
       #{all_fields_frag()}
+    """
+  end
+
+  def update_minimal do
+    """
+      mutation ($input: UpdateResumeMinimalInput!) {
+        updateResumeMinimal(input: $input) {
+          __typename
+
+          ... on ResumeSuccess {
+            resume {
+              id
+              title
+              description
+            }
+          }
+
+          ... on UpdateResumeError {
+            error {
+              error
+              title
+              description
+            }
+          }
+        }
+      }
     """
   end
 end
