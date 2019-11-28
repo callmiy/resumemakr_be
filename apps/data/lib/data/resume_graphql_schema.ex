@@ -88,18 +88,18 @@ defmodule Data.SchemaResume do
     field :resume, :resume
   end
 
-  object :update_resume_error_fields do
+  object :update_resume_errors_fields do
     field :title, :string
     field :description, :string
     field :error, :string
   end
 
-  object :update_resume_error do
-    field :error, :update_resume_error_fields
+  object :update_resume_errors do
+    field :errors, :update_resume_errors_fields
   end
 
   union :update_resume_minimal_payload do
-    types([:resume_success, :update_resume_error])
+    types([:resume_success, :update_resume_errors])
     resolve_type(&Resolver.resolve_update_resume_payload/2)
   end
 

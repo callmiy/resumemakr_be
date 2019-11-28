@@ -217,8 +217,8 @@ defmodule Data.ResumeQuery do
             }
           }
 
-          ... on UpdateResumeError {
-            error {
+          ... on UpdateResumeErrors {
+            errors {
               error
               title
               description

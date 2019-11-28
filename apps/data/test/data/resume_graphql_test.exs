@@ -1423,6 +1423,131 @@ defmodule Data.SchemaResumeTest do
                  context: context(user)
                )
     end
+
+    test "fails: no authenticated user" do
+      variables = %{
+        "input" => %{
+          "id" => "x",
+          "title" => "t"
+        }
+      }
+
+      assert {
+               :ok,
+               %{
+                 data: %{
+                   "updateResumeMinimal" => %{
+                     "errors" => %{
+                       "error" => error
+                     }
+                   }
+                 }
+               }
+             } =
+               Absinthe.run(
+                 Query.update_minimal(),
+                 Schema,
+                 variables: variables
+               )
+
+      assert is_binary(error)
+    end
+
+    test "fails: resume does not exist" do
+      variables = %{
+        "input" => %{
+          "id" => to_global_id(:resume, 0, Schema),
+          "description" => "t"
+        }
+      }
+
+      assert {
+               :ok,
+               %{
+                 data: %{
+                   "updateResumeMinimal" => %{
+                     "errors" => %{
+                       "error" => error
+                     }
+                   }
+                 }
+               }
+             } =
+               Absinthe.run(
+                 Query.update_minimal(),
+                 Schema,
+                 variables: variables,
+                 context: context(%{id: 0})
+               )
+
+      assert is_binary(error)
+    end
+
+    test "fails: update with invalid title" do
+      user = RegFactory.insert()
+      resume = Factory.insert(user_id: user.id)
+
+      variables = %{
+        "input" => %{
+          "id" => to_global_id(:resume, resume.id, Schema),
+          "title" => ""
+        }
+      }
+
+      assert {
+               :ok,
+               %{
+                 data: %{
+                   "updateResumeMinimal" => %{
+                     "errors" => %{
+                       "title" => error
+                     }
+                   }
+                 }
+               }
+             } =
+               Absinthe.run(
+                 Query.update_minimal(),
+                 Schema,
+                 variables: variables,
+                 context: context(user)
+               )
+
+      assert is_binary(error)
+    end
+
+    test "fails: unable to convert from global ID" do
+      bogus_global_id = "0"
+      bogus_user_id = 0
+
+      variables = %{
+        "input" => %{
+          "id" => bogus_global_id,
+          "description" => "t"
+        }
+      }
+
+      assert {
+               :ok,
+               %{
+                 data: %{
+                   "updateResumeMinimal" => %{
+                     "errors" => %{
+                       "error" => error
+                     }
+                   }
+                 }
+               }
+             } =
+               Absinthe.run(
+                 Query.update_minimal(),
+                 Schema,
+                 variables: variables,
+                 context: context(%{id: bogus_user_id})
+               )
+
+      assert is_binary(error)
+    end
   end
 
   defp context(user), do: %{current_user: user}

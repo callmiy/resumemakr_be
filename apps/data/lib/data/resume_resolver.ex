@@ -7,6 +7,7 @@ defmodule Data.ResolverResume do
   alias Data.Resumes.Resume
   alias Data.Resumes.PersonalInfo
   alias Data.Uploaders.ResumePhoto
+  alias Ecto.Changeset
 
   @fields_to_sanitize Resume.assoc_fields() ++ [:languages, :additional_skills]
 
@@ -226,43 +227,35 @@ defmodule Data.ResolverResume do
   end
 
   def resolve_update_resume_payload(_, _) do
-    :update_resume_error
+    :update_resume_errors
   end
 
   def update_resume_minimal(
         %{
-          input: args
+          input: %{id: _id} = args
         },
-        %{context: %{current_user: user}}
+        %{context: %{current_user: %{id: user_id} = _user}}
       ) do
     {id, new_args} = Map.pop(args, :id)
 
-    {:ok, %{id: id}} = from_global_id(id, Data.Schema)
-
-    case Resumes.get_resume_by(id: id, user_id: user.id) do
+    with {:ok, %{id: id}} <- from_global_id(id, Data.Schema),
+         %Resume{} = resume <- Resumes.get_resume_by(id: id, user_id: user_id),
+         {:ok, updated_resume} <- Resumes.update_resume(resume, new_args) do
+      {:ok, wrapped(updated_resume)}
+    else
       nil ->
-        {
-          :ok,
-          %{
-            error: "Resume you are updating does not exist"
-          }
-        }
+        errors = %{error: "Resume does not exist"}
+        {:ok, %{errors: errors}}
 
-      resume ->
-        case Resumes.update_resume(resume, new_args) do
-          {:ok, updated_resume} ->
-            {
-              :ok,
-              wrapped(updated_resume)
-            }
+      {:error, %Changeset{} = changeset} ->
+        {:ok, %{errors: Resolver.errors_to_map(changeset.errors)}}
 
-          {:error, changeset} ->
-            {
-              :ok,
-              changeset.errors
-              |> Resolver.errors_to_map()
-            }
-        end
+      _ ->
+        {:ok, %{errors: %{error: "Unauthorized"}}}
     end
+  end
+
+  def update_resume_minimal(_, _) do
+    {:ok, %{errors: %{error: "Unauthorized"}}}
   end
 end
