@@ -95,7 +95,7 @@ defmodule Data.SchemaResume do
   end
 
   object :update_resume_errors do
-    field :errors, :update_resume_errors_fields
+    field :errors, :update_resume_errors_fields |> non_null()
   end
 
   union :update_resume_minimal_payload do
