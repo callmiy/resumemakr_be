@@ -51,7 +51,9 @@ config :web, Web.Endpoint,
   check_origin: [
     "//localhost",
     "//resumemakr.netlify.com",
-    "//resumemakr-staging.netlify.com"
+    "//resumemakr.netlify.app",
+    "//resumemakr-staging.netlify.com",
+    "//resumemakr-staging.netlify.app"
   ]
 
 config :web, front_end_url: "https://resumemakr.netlify.com"
